@@ -4,16 +4,17 @@ import Editor from "@monaco-editor/react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Shield, ShieldAlert, ShieldCheck, UploadCloud, FileCode,
-  Play, Trash2, Download, ExternalLink, RefreshCw, Layers,
-  AlertTriangle, KeyboardIcon, ChevronRight
+  Play, Trash2, Download, ExternalLink, Layers,
+  AlertTriangle, KeyboardIcon, ChevronRight, RefreshCw,
+  Cpu, CheckCircle2, Clock, BarChart3
 } from "lucide-react";
-import { useScanner } from "@/hooks/use-scanner";
+import { useStreamScanner } from "@/hooks/use-stream-scanner";
 import { EXAMPLE_CONTRACTS } from "@/lib/constants";
 import { formatBytes, cn } from "@/lib/utils";
 import { VulnerabilityCard } from "@/components/VulnerabilityCard";
 import { SeverityChart } from "@/components/SeverityChart";
 
-const MAX_BYTES = 50 * 1024; // 50 KB
+const MAX_BYTES = 50 * 1024;
 
 const EXAMPLE_META: Record<string, { label: string; color: string; badge: string; desc: string }> = {
   VulnerableBank: {
@@ -36,21 +37,30 @@ const EXAMPLE_META: Record<string, { label: string; color: string; badge: string
   },
 };
 
+const SEV_COLORS: Record<string, string> = {
+  CRITICAL: "text-[#ff4444]",
+  HIGH: "text-[#ff8c00]",
+  MEDIUM: "text-[#ffd700]",
+  LOW: "text-[#3b82f6]",
+};
+
 export default function Home() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
-    code,
-    setCode,
-    contractName,
-    setContractName,
-    currentResult,
+    code, setCode,
+    contractName, setContractName,
+    phase, stage,
+    partialVulns,
+    foundCount,
+    riskScore,
+    result,
     isScanning,
     isGeneratingFix,
     handleScan,
     handleDownloadReport,
     handleGenerateFix,
-  } = useScanner();
+  } = useStreamScanner();
 
   // Ctrl+Enter to scan
   useEffect(() => {
@@ -98,9 +108,17 @@ export default function Home() {
   const isSizeWarning = bytePercent > 80;
   const isSizeError = bytePercent >= 100;
 
+  // Severity counts from partial (streaming) vulns
+  const sevCounts = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
+  for (const v of partialVulns) {
+    if (v.severity in sevCounts) sevCounts[v.severity as keyof typeof sevCounts]++;
+  }
+
+  const isShowingResults = phase === "streaming" || phase === "done" || phase === "error";
+
   return (
     <div className="min-h-screen flex flex-col relative pb-20">
-      {/* Background texture */}
+      {/* Background */}
       <div
         className="fixed inset-0 z-[-1] opacity-30 mix-blend-screen pointer-events-none"
         style={{
@@ -110,7 +128,7 @@ export default function Home() {
         }}
       />
 
-      {/* Header */}
+      {/* ── Header ── */}
       <header className="border-b border-white/5 glass-panel sticky top-0 z-50">
         <div className="max-w-[1600px] mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -129,8 +147,7 @@ export default function Home() {
           <div className="flex items-center gap-4">
             <a
               href="https://github.com/IamHammadDevX/VulnGaurd-AI"
-              target="_blank"
-              rel="noreferrer"
+              target="_blank" rel="noreferrer"
               className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
             >
               <ExternalLink className="w-4 h-4" />
@@ -140,11 +157,11 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Main Layout */}
+      {/* ── Main Layout ── */}
       <main className="flex-1 max-w-[1600px] w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 relative z-10">
 
-        {/* ── LEFT PANEL — Editor ───────────────────────────────── */}
-        <div className="flex flex-col gap-4 h-[calc(100vh-8rem)] min-h-[600px]">
+        {/* ── LEFT PANEL — Editor ── */}
+        <div className="flex flex-col gap-4 lg:h-[calc(100vh-8rem)] min-h-[520px]">
           <div className="glass-panel rounded-2xl flex flex-col h-full overflow-hidden border-white/10">
 
             {/* ── TOP TOOLBAR ── */}
@@ -164,17 +181,9 @@ export default function Home() {
                     <span className="text-xs text-muted-foreground/60 font-mono shrink-0">.sol</span>
                   )}
                 </div>
-                {/* File upload button */}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".sol"
-                  className="hidden"
-                  onChange={handleFileInputChange}
-                />
+                <input ref={fileInputRef} type="file" accept=".sol" className="hidden" onChange={handleFileInputChange} />
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  title="Upload .sol file"
                   className="flex items-center gap-2 px-3 py-2 rounded-xl border border-white/10 bg-white/5 hover:bg-primary/10 hover:border-primary/30 text-muted-foreground hover:text-primary transition-all text-sm font-medium shrink-0"
                 >
                   <UploadCloud className="w-4 h-4" />
@@ -182,21 +191,16 @@ export default function Home() {
                 </button>
               </div>
 
-              {/* Row 2: example contracts */}
+              {/* Row 2: examples */}
               <div>
-                <p className="text-[10px] text-muted-foreground/60 font-bold uppercase tracking-widest mb-2">
-                  Example Contracts
-                </p>
+                <p className="text-[10px] text-muted-foreground/60 font-bold uppercase tracking-widest mb-2">Example Contracts</p>
                 <div className="flex flex-col sm:flex-row gap-2">
                   {Object.entries(EXAMPLE_CONTRACTS).map(([key, contract]) => {
                     const meta = EXAMPLE_META[key];
                     return (
                       <button
                         key={key}
-                        onClick={() => {
-                          setContractName(contract.name);
-                          setCode(contract.code);
-                        }}
+                        onClick={() => { setContractName(contract.name); setCode(contract.code); }}
                         className={cn(
                           "flex-1 flex items-start gap-2 p-2.5 rounded-xl border text-left transition-all",
                           meta?.color ?? "text-muted-foreground border-white/10 bg-white/5 hover:bg-white/10"
@@ -206,10 +210,7 @@ export default function Home() {
                           <div className="flex items-center gap-1.5 mb-0.5">
                             <span className="text-xs font-bold truncate">{meta?.label ?? contract.name}</span>
                             {meta?.badge && (
-                              <span className={cn(
-                                "text-[9px] font-black px-1 rounded leading-tight",
-                                meta.badge === "VULN" ? "bg-red-500/20 text-red-400" : "bg-green-500/20 text-green-400"
-                              )}>
+                              <span className={cn("text-[9px] font-black px-1 rounded leading-tight", meta.badge === "VULN" ? "bg-red-500/20 text-red-400" : "bg-green-500/20 text-green-400")}>
                                 {meta.badge}
                               </span>
                             )}
@@ -227,19 +228,13 @@ export default function Home() {
             {/* ── MONACO EDITOR ── */}
             <div
               {...getRootProps()}
-              className={cn(
-                "flex-1 relative transition-colors duration-300",
-                isDragActive ? "bg-primary/5" : "bg-[#080d14]"
-              )}
+              className={cn("flex-1 relative transition-colors duration-300 min-h-[200px]", isDragActive ? "bg-primary/5" : "bg-[#080d14]")}
             >
-              {/* Drag overlay */}
               <AnimatePresence>
                 {isDragActive && (
                   <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-primary/10 backdrop-blur-sm border-2 border-dashed border-primary rounded-none pointer-events-none"
+                    initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                    className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-primary/10 backdrop-blur-sm border-2 border-dashed border-primary pointer-events-none"
                   >
                     <UploadCloud className="w-14 h-14 text-primary mb-3 animate-bounce" />
                     <p className="text-lg font-bold text-white">Drop your .sol file here</p>
@@ -247,7 +242,6 @@ export default function Home() {
                   </motion.div>
                 )}
               </AnimatePresence>
-
               <Editor
                 height="100%"
                 language="sol"
@@ -274,23 +268,15 @@ export default function Home() {
 
             {/* ── FOOTER ── */}
             <div className="p-3 border-t border-white/5 bg-black/30 flex flex-col gap-2">
-              {/* Size progress bar */}
               <div className="flex items-center gap-3">
                 <div className="flex-1 h-1.5 rounded-full bg-white/5 overflow-hidden">
                   <motion.div
-                    className={cn(
-                      "h-full rounded-full transition-colors",
-                      isSizeError ? "bg-red-500" : isSizeWarning ? "bg-yellow-500" : "bg-primary"
-                    )}
-                    initial={{ width: 0 }}
+                    className={cn("h-full rounded-full transition-colors", isSizeError ? "bg-red-500" : isSizeWarning ? "bg-yellow-500" : "bg-primary")}
                     animate={{ width: `${bytePercent}%` }}
                     transition={{ type: "spring", stiffness: 120, damping: 20 }}
                   />
                 </div>
-                <div className={cn(
-                  "text-[11px] font-mono shrink-0",
-                  isSizeError ? "text-red-400" : isSizeWarning ? "text-yellow-400" : "text-muted-foreground"
-                )}>
+                <div className={cn("text-[11px] font-mono shrink-0", isSizeError ? "text-red-400" : isSizeWarning ? "text-yellow-400" : "text-muted-foreground")}>
                   {isSizeError && <AlertTriangle className="w-3 h-3 inline mr-1 -mt-0.5" />}
                   {formatBytes(byteSize)} / 50 KB
                 </div>
@@ -298,17 +284,11 @@ export default function Home() {
                   {lineCount.toLocaleString()} lines
                 </div>
               </div>
-
-              {/* Actions row */}
               <div className="flex items-center justify-between gap-3">
-                {/* Keyboard hint */}
                 <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/40">
                   <KeyboardIcon className="w-3 h-3" />
-                  <span className="hidden sm:inline">
-                    <kbd className="font-mono">Ctrl</kbd>+<kbd className="font-mono">Enter</kbd> to scan
-                  </span>
+                  <span className="hidden sm:inline"><kbd className="font-mono">Ctrl</kbd>+<kbd className="font-mono">Enter</kbd> to scan</span>
                 </div>
-
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => { setCode(""); setContractName(""); }}
@@ -318,20 +298,15 @@ export default function Home() {
                     <Trash2 className="w-3.5 h-3.5" />
                     Clear
                   </button>
-
                   <button
                     onClick={handleScan}
                     disabled={isScanning || !code.trim() || isSizeError}
-                    className="px-5 py-2 rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/90 active:scale-95 transition-all flex items-center gap-2 text-sm disabled:opacity-40 disabled:cursor-not-allowed glow-border relative overflow-hidden group"
+                    className="px-5 py-2 rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/90 active:scale-95 transition-all flex items-center gap-2 text-sm disabled:opacity-40 disabled:cursor-not-allowed glow-border relative overflow-hidden"
                   >
-                    {isScanning && (
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full animate-[shimmer_1.5s_infinite]" />
-                    )}
                     {isScanning
-                      ? <RefreshCw className="w-4 h-4 animate-spin" />
-                      : <Play className="w-4 h-4 fill-current" />
+                      ? <><RefreshCw className="w-4 h-4 animate-spin" />Scanning...</>
+                      : <><Play className="w-4 h-4 fill-current" />Scan Contract</>
                     }
-                    {isScanning ? "Scanning..." : "Scan Contract"}
                   </button>
                 </div>
               </div>
@@ -340,17 +315,15 @@ export default function Home() {
           </div>
         </div>
 
-        {/* ── RIGHT PANEL — Results ─────────────────────────────── */}
-        <div className="h-[calc(100vh-8rem)] min-h-[600px] flex flex-col">
+        {/* ── RIGHT PANEL — Results ── */}
+        <div className="flex flex-col gap-4 min-h-[400px] lg:h-[calc(100vh-8rem)]">
           <AnimatePresence mode="wait">
 
-            {/* Empty State */}
-            {!currentResult && !isScanning && (
+            {/* ── IDLE: Empty State ── */}
+            {phase === "idle" && (
               <motion.div
                 key="empty"
-                initial={{ opacity: 0, scale: 0.97 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.97 }}
+                initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.97 }}
                 className="flex-1 glass-panel rounded-2xl flex flex-col items-center justify-center p-8 text-center border-dashed border-white/10"
               >
                 <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mb-6 ring-1 ring-primary/20">
@@ -358,8 +331,8 @@ export default function Home() {
                 </div>
                 <h2 className="text-2xl font-display font-bold mb-3">Ready for Analysis</h2>
                 <p className="text-muted-foreground max-w-sm mx-auto leading-relaxed text-sm">
-                  Paste your Solidity code or drag a .sol file into the editor, then click{" "}
-                  <span className="text-primary font-semibold">Scan Contract</span> to begin the AI-powered vulnerability audit.
+                  Paste your Solidity code or drag a .sol file, then click{" "}
+                  <span className="text-primary font-semibold">Scan Contract</span> to begin the audit.
                 </p>
                 <div className="mt-8 grid grid-cols-3 gap-3 w-full max-w-sm">
                   {[
@@ -379,151 +352,249 @@ export default function Home() {
               </motion.div>
             )}
 
-            {/* Scanning State */}
-            {isScanning && (
-              <motion.div
-                key="scanning"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="flex-1 glass-panel rounded-2xl flex flex-col items-center justify-center p-8"
-              >
-                <div className="relative w-24 h-24 mb-8">
-                  <div className="absolute inset-0 border-4 border-primary/20 rounded-full" />
-                  <div className="absolute inset-0 border-4 border-primary rounded-full border-t-transparent animate-spin" />
-                  <Shield className="absolute inset-0 m-auto w-8 h-8 text-primary animate-pulse" />
-                </div>
-                <h2 className="text-xl font-display font-bold mb-2">Analyzing Smart Contract...</h2>
-                <p className="text-muted-foreground text-sm">
-                  Checking for reentrancy, overflows, and 15+ vulnerability vectors.
-                </p>
-                <div className="w-64 h-1.5 bg-white/5 rounded-full mt-8 overflow-hidden">
-                  <div
-                    className="h-full bg-primary rounded-full animate-[progress_2s_ease-in-out_infinite]"
-                    style={{ width: "50%" }}
-                  />
-                </div>
-              </motion.div>
-            )}
-
-            {/* Results State */}
-            {currentResult && !isScanning && (
+            {/* ── STREAMING / DONE / ERROR: Live Results Panel ── */}
+            {isShowingResults && (
               <motion.div
                 key="results"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="flex-1 flex flex-col gap-4 overflow-hidden"
+                initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
+                className="flex flex-col gap-4 flex-1 overflow-hidden"
               >
-                {/* Summary Bar */}
-                <div className="glass-panel p-4 rounded-2xl flex flex-wrap items-center justify-between gap-4 shrink-0">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={cn(
-                        "w-12 h-12 rounded-xl flex items-center justify-center",
-                        currentResult.total_vulnerabilities > 0
-                          ? "bg-red-500/10 text-red-500"
-                          : "bg-green-500/10 text-green-500"
-                      )}
-                    >
-                      {currentResult.total_vulnerabilities > 0
-                        ? <ShieldAlert className="w-6 h-6" />
-                        : <ShieldCheck className="w-6 h-6" />
-                      }
-                    </div>
-                    <div>
-                      <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
-                        Risk Score
-                      </div>
-                      <div className="text-2xl font-display font-bold">
-                        {currentResult.risk_score}/100
-                      </div>
-                    </div>
-                  </div>
+                {/* ── Live Status Bar ── */}
+                <div className="glass-panel p-4 rounded-2xl shrink-0">
+                  <div className="flex flex-wrap items-center gap-4">
 
-                  <div className="flex gap-2">
-                    {(["CRITICAL", "HIGH", "MEDIUM", "LOW"] as const).map((sev) => {
-                      const count = currentResult.vulnerabilities.filter(
-                        (v) => v.severity === sev
-                      ).length;
-                      const colors: Record<string, string> = {
-                        CRITICAL: "text-severity-critical",
-                        HIGH: "text-severity-high",
-                        MEDIUM: "text-severity-medium",
-                        LOW: "text-severity-low",
-                      };
-                      return (
-                        <div
-                          key={sev}
-                          className="flex flex-col items-center p-2 rounded-lg bg-white/5 min-w-[50px]"
+                    {/* Status indicator */}
+                    <div className={cn(
+                      "flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-bold border",
+                      phase === "streaming" ? "bg-primary/10 border-primary/30 text-primary animate-pulse" :
+                      phase === "done" ? "bg-green-500/10 border-green-500/30 text-green-400" :
+                      "bg-red-500/10 border-red-500/30 text-red-400"
+                    )}>
+                      {phase === "streaming" && <Cpu className="w-3.5 h-3.5 animate-spin" />}
+                      {phase === "done" && <CheckCircle2 className="w-3.5 h-3.5" />}
+                      {phase === "error" && <AlertTriangle className="w-3.5 h-3.5" />}
+                      {phase === "streaming" ? "Analyzing" : phase === "done" ? "Complete" : "Error"}
+                    </div>
+
+                    {/* Stage message */}
+                    <div className="flex-1 min-w-0">
+                      <AnimatePresence mode="wait">
+                        <motion.p
+                          key={stage}
+                          initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
+                          className="text-xs text-muted-foreground truncate"
                         >
-                          <span className={cn("font-bold text-lg leading-none", colors[sev])}>
-                            {count}
-                          </span>
-                          <span className="text-[9px] text-muted-foreground uppercase mt-1">
-                            {sev.slice(0, 4)}
-                          </span>
-                        </div>
-                      );
-                    })}
+                          {stage}
+                        </motion.p>
+                      </AnimatePresence>
+                    </div>
+
+                    {/* Live found counter */}
+                    {(phase === "streaming" || phase === "done") && (
+                      <div className="flex items-center gap-3 shrink-0">
+                        <motion.div
+                          key={foundCount}
+                          initial={{ scale: 1.3, color: "#ff4444" }}
+                          animate={{ scale: 1, color: "#94a3b8" }}
+                          className="text-sm font-mono font-bold text-muted-foreground"
+                        >
+                          <span className="text-white text-lg">{foundCount}</span> found
+                        </motion.div>
+                        {riskScore !== null && (
+                          <div className={cn(
+                            "flex items-center gap-1 text-sm font-bold",
+                            riskScore >= 80 ? "text-[#ff4444]" :
+                            riskScore >= 50 ? "text-[#ff8c00]" :
+                            riskScore >= 20 ? "text-[#ffd700]" : "text-green-400"
+                          )}>
+                            <BarChart3 className="w-4 h-4" />
+                            {riskScore}/100
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
-                  <button
-                    onClick={handleDownloadReport}
-                    className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors flex items-center gap-2 text-sm font-bold ml-auto"
-                  >
-                    <Download className="w-4 h-4" />
-                    <span className="hidden sm:inline">Download PDF</span>
-                  </button>
-                </div>
-
-                {/* Scrollable Results */}
-                <div className="flex-1 overflow-y-auto scrollbar-custom rounded-2xl glass-panel p-4 lg:p-6 flex flex-col gap-6">
-                  {/* Summary text */}
-                  <div className="p-4 rounded-xl bg-primary/5 border border-primary/20">
-                    <div className="flex items-start gap-3">
-                      <Layers className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                      <p className="text-sm leading-relaxed text-slate-300">{currentResult.summary}</p>
-                    </div>
-                  </div>
-
-                  {currentResult.vulnerabilities.length > 0 ? (
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-                      <div className="lg:col-span-1 glass-panel rounded-xl p-4">
-                        <h3 className="text-xs font-bold text-center mb-2 uppercase tracking-wider text-muted-foreground">
-                          Distribution
-                        </h3>
-                        <SeverityChart vulnerabilities={currentResult.vulnerabilities} />
-                      </div>
-                      <div className="lg:col-span-2 space-y-4">
-                        <h3 className="text-lg font-display font-bold flex items-center gap-2">
-                          Detected Issues{" "}
-                          <span className="bg-white/10 px-2 py-0.5 rounded text-sm">
-                            {currentResult.total_vulnerabilities}
-                          </span>
-                        </h3>
-                        {currentResult.vulnerabilities.map((vuln) => (
-                          <VulnerabilityCard
-                            key={vuln.id}
-                            vulnerability={vuln}
-                            onGenerateFix={handleGenerateFix}
-                            isGeneratingFix={isGeneratingFix}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
-                      <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mb-4">
-                        <ShieldCheck className="w-10 h-10 text-green-500" />
-                      </div>
-                      <h3 className="text-2xl font-display font-bold text-green-500 mb-2">
-                        Secure Contract
-                      </h3>
-                      <p className="text-muted-foreground max-w-md text-sm">
-                        No standard vulnerabilities detected. Always conduct a manual audit before mainnet deployment.
-                      </p>
+                  {/* Progress bar for streaming */}
+                  {phase === "streaming" && (
+                    <div className="mt-3 h-0.5 bg-white/5 rounded-full overflow-hidden">
+                      <div className="h-full bg-primary rounded-full animate-[progress_2s_ease-in-out_infinite]" style={{ width: "60%" }} />
                     </div>
                   )}
+                </div>
+
+                {/* ── Summary Bar (once meta arrives) ── */}
+                {(result || (riskScore !== null && partialVulns.length > 0)) && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                    className="glass-panel p-4 rounded-2xl flex flex-wrap items-center justify-between gap-4 shrink-0"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center",
+                        foundCount > 0 ? "bg-red-500/10 text-red-500" : "bg-green-500/10 text-green-500"
+                      )}>
+                        {foundCount > 0 ? <ShieldAlert className="w-6 h-6" /> : <ShieldCheck className="w-6 h-6" />}
+                      </div>
+                      <div>
+                        <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Risk Score</div>
+                        <div className="text-2xl font-display font-bold">{riskScore ?? "…"}/100</div>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2">
+                      {(["CRITICAL", "HIGH", "MEDIUM", "LOW"] as const).map((sev) => (
+                        <motion.div
+                          key={sev}
+                          animate={{ scale: sevCounts[sev] > 0 ? [1, 1.15, 1] : 1 }}
+                          transition={{ duration: 0.3 }}
+                          className="flex flex-col items-center p-2 rounded-lg bg-white/5 min-w-[50px]"
+                        >
+                          <span className={cn("font-bold text-lg leading-none", SEV_COLORS[sev])}>
+                            {sevCounts[sev]}
+                          </span>
+                          <span className="text-[9px] text-muted-foreground uppercase mt-1">{sev.slice(0, 4)}</span>
+                        </motion.div>
+                      ))}
+                    </div>
+
+                    {result && (
+                      <button
+                        onClick={handleDownloadReport}
+                        className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors flex items-center gap-2 text-sm font-bold"
+                      >
+                        <Download className="w-4 h-4" />
+                        <span className="hidden sm:inline">Download PDF</span>
+                      </button>
+                    )}
+                  </motion.div>
+                )}
+
+                {/* ── Scrollable Content ── */}
+                <div className="flex-1 overflow-y-auto scrollbar-custom rounded-2xl glass-panel flex flex-col min-h-0">
+                  <div className="p-4 lg:p-5 flex flex-col gap-5">
+
+                    {/* Summary text */}
+                    {result?.summary && (
+                      <motion.div
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                        className="p-4 rounded-xl bg-primary/5 border border-primary/20"
+                      >
+                        <div className="flex items-start gap-3">
+                          <Layers className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                          <p className="text-sm leading-relaxed text-slate-300">{result.summary}</p>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* Streaming: vulnerabilities appear progressively */}
+                    {partialVulns.length > 0 && (
+                      <div>
+                        {phase === "done" && result && (
+                          <div className="flex items-start gap-5 mb-4">
+                            <div className="glass-panel rounded-xl p-4 w-full lg:w-auto lg:min-w-[200px]">
+                              <h3 className="text-xs font-bold text-center mb-2 uppercase tracking-wider text-muted-foreground">Distribution</h3>
+                              <SeverityChart vulnerabilities={partialVulns} />
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="flex items-center gap-2 mb-3">
+                          <h3 className="text-lg font-display font-bold">
+                            {phase === "streaming" ? "Discovering Issues" : "Detected Issues"}
+                          </h3>
+                          <motion.span
+                            key={partialVulns.length}
+                            initial={{ scale: 1.3 }} animate={{ scale: 1 }}
+                            className="bg-white/10 px-2 py-0.5 rounded text-sm font-bold"
+                          >
+                            {partialVulns.length}
+                          </motion.span>
+                          {phase === "streaming" && (
+                            <div className="flex gap-0.5 items-center ml-1">
+                              {[0, 1, 2].map((i) => (
+                                <motion.div
+                                  key={i}
+                                  className="w-1.5 h-1.5 rounded-full bg-primary"
+                                  animate={{ opacity: [0.3, 1, 0.3] }}
+                                  transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2 }}
+                                />
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="space-y-3">
+                          <AnimatePresence initial={false}>
+                            {partialVulns.map((vuln) => (
+                              <VulnerabilityCard
+                                key={vuln.id}
+                                vulnerability={vuln}
+                                onGenerateFix={handleGenerateFix}
+                                isGeneratingFix={isGeneratingFix}
+                              />
+                            ))}
+                          </AnimatePresence>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Empty scanning state while streaming with no vulns yet */}
+                    {phase === "streaming" && partialVulns.length === 0 && (
+                      <div className="flex flex-col items-center justify-center py-16 text-center">
+                        <div className="relative w-20 h-20 mb-6">
+                          <div className="absolute inset-0 border-4 border-primary/20 rounded-full" />
+                          <div className="absolute inset-0 border-4 border-primary rounded-full border-t-transparent animate-spin" />
+                          <Shield className="absolute inset-0 m-auto w-7 h-7 text-primary animate-pulse" />
+                        </div>
+                        <p className="text-muted-foreground text-sm max-w-xs">
+                          Claude is auditing your smart contract across 15+ vulnerability categories…
+                        </p>
+                        <div className="mt-6 flex items-center gap-2 text-xs text-muted-foreground/50">
+                          <Clock className="w-3 h-3" />
+                          Typically takes 15–45 seconds
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Secure contract result */}
+                    {phase === "done" && partialVulns.length === 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+                        className="flex flex-col items-center justify-center py-16 text-center"
+                      >
+                        <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mb-4 ring-1 ring-green-500/20">
+                          <ShieldCheck className="w-10 h-10 text-green-500" />
+                        </div>
+                        <h3 className="text-2xl font-display font-bold text-green-500 mb-2">Secure Contract</h3>
+                        <p className="text-muted-foreground max-w-md text-sm">
+                          No standard vulnerabilities detected. Always conduct a manual audit before mainnet deployment.
+                        </p>
+                      </motion.div>
+                    )}
+
+                    {/* Error state */}
+                    {phase === "error" && (
+                      <motion.div
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                        className="flex flex-col items-center justify-center py-16 text-center"
+                      >
+                        <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mb-4">
+                          <AlertTriangle className="w-10 h-10 text-red-500" />
+                        </div>
+                        <h3 className="text-xl font-bold text-red-400 mb-2">Scan Failed</h3>
+                        <p className="text-muted-foreground text-sm max-w-sm">
+                          Something went wrong. Please try again.
+                        </p>
+                        <button
+                          onClick={handleScan}
+                          className="mt-4 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold"
+                        >
+                          Retry Scan
+                        </button>
+                      </motion.div>
+                    )}
+
+                  </div>
                 </div>
               </motion.div>
             )}
@@ -533,13 +604,10 @@ export default function Home() {
       </main>
 
       <style>{`
-        @keyframes shimmer { 100% { transform: translateX(200%); } }
         @keyframes progress {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(200%); }
+          0% { transform: translateX(-150%); }
+          100% { transform: translateX(250%); }
         }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
     </div>
   );

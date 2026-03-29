@@ -133,6 +133,7 @@ Respond ONLY with valid JSON (no markdown, no code fences, no text before or aft
       "technical_risk": "technical explanation of the attack vector and why this code pattern is dangerous",
       "attack_scenario": "step-by-step concrete exploit: 1. Attacker deploys... 2. Calls... 3. Gets...",
       "impact": "what an attacker gains: fund theft, DoS, privilege escalation, data manipulation, etc.",
+      "gas_impact": "concise gas cost analysis: e.g. 'HIGH — unbounded loop causes DoS at ~500 iterations consuming all block gas', 'MEDIUM — extra SLOAD on each call costs ~2100 gas', 'LOW — no significant gas overhead', or null if not applicable",
       "vulnerable_code": "the exact vulnerable code snippet (keep concise, max ~10 lines)",
       "fixed_code": "corrected version of the same snippet with the fix applied",
       "recommendation": "specific actionable recommendation — library to use, pattern to apply, etc."

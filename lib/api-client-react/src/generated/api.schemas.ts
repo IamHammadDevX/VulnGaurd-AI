@@ -69,6 +69,11 @@ export interface Vulnerability {
    * @nullable
    */
   impact?: string | null;
+  /**
+   * Estimated gas cost impact of this vulnerability
+   * @nullable
+   */
+  gas_impact?: string | null;
   /** @nullable */
   vulnerable_code: string | null;
   /** @nullable */
