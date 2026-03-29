@@ -4,6 +4,7 @@ export interface StoredScan {
   scanId: string;
   success: boolean;
   contract_name: string;
+  code_hash: string;
   total_vulnerabilities: number;
   risk_score: number;
   vulnerabilities: unknown[];

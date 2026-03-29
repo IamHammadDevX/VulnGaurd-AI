@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { createHash } from "crypto";
 import { anthropic } from "@workspace/integrations-anthropic-ai";
 import { ScanContractBody } from "@workspace/api-zod";
 import { SYSTEM_PROMPT, buildUserPrompt } from "./prompts.js";
@@ -156,6 +157,7 @@ router.post("/scan-stream", async (req, res) => {
     const scanData = {
       success: true,
       contract_name: parsed.contract_name ?? contractName ?? "Unknown Contract",
+      code_hash: createHash("sha256").update(code).digest("hex"),
       total_vulnerabilities: parsed.total_vulnerabilities ?? vulnerabilities.length,
       risk_score: parsed.risk_score ?? 0,
       vulnerabilities,
