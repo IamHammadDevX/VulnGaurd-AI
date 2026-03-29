@@ -1,15 +1,16 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: VulnGuard AI - Smart Contract Vulnerability Scanner API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: scan
+    description: Smart contract vulnerability scanning
 paths:
   /healthz:
     get:
@@ -24,6 +25,100 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /scan:
+    post:
+      operationId: scanContract
+      tags: [scan]
+      summary: Scan a Solidity smart contract for vulnerabilities
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScanRequest"
+      responses:
+        "200":
+          description: Scan completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanResult"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /generate-fix:
+    post:
+      operationId: generateFix
+      tags: [scan]
+      summary: Generate an enhanced fix for a specific vulnerability
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateFixRequest"
+      responses:
+        "200":
+          description: Fix generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenerateFixResult"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /report/{scanId}:
+    get:
+      operationId: getReport
+      tags: [scan]
+      summary: Get a scan report as JSON
+      parameters:
+        - name: scanId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Report retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanResult"
+        "404":
+          description: Scan not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +129,125 @@ components:
       required:
         - status
 
+    ScanRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Solidity smart contract source code
+        contractName:
+          type: ["string", "null"]
+          description: Optional contract name
+      required:
+        - code
+
+    Vulnerability:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+        severity:
+          type: string
+          enum: [CRITICAL, HIGH, MEDIUM, LOW]
+        line_number:
+          type: ["integer", "null"]
+        title:
+          type: string
+        description:
+          type: string
+        technical_risk:
+          type: string
+        vulnerable_code:
+          type: ["string", "null"]
+        fixed_code:
+          type: ["string", "null"]
+        recommendation:
+          type: string
+      required:
+        - id
+        - type
+        - severity
+        - line_number
+        - title
+        - description
+        - technical_risk
+        - vulnerable_code
+        - fixed_code
+        - recommendation
+
+    ScanResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+        scanId:
+          type: string
+        contract_name:
+          type: string
+        total_vulnerabilities:
+          type: integer
+        risk_score:
+          type: integer
+        vulnerabilities:
+          type: array
+          items:
+            $ref: "#/components/schemas/Vulnerability"
+        summary:
+          type: string
+        analysis_time_ms:
+          type: integer
+        timestamp:
+          type: string
+      required:
+        - success
+        - scanId
+        - contract_name
+        - total_vulnerabilities
+        - risk_score
+        - vulnerabilities
+        - summary
+        - analysis_time_ms
+        - timestamp
+
+    GenerateFixRequest:
+      type: object
+      properties:
+        vulnerability:
+          $ref: "#/components/schemas/Vulnerability"
+        contractCode:
+          type: string
+      required:
+        - vulnerability
+        - contractCode
+
+    GenerateFixResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+        original_code:
+          type: ["string", "null"]
+        fixed_code:
+          type: string
+        explanation:
+          type: string
+        resources:
+          type: array
+          items:
+            type: string
+      required:
+        - success
+        - original_code
+        - fixed_code
+        - explanation
+        - resources
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error

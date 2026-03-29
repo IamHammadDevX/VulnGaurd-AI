@@ -1,0 +1,16 @@
+packages:
+  "framer-motion": "Animations and layout transitions for vulnerability cards"
+  "recharts": "Vulnerability distribution pie charts"
+  "@monaco-editor/react": "Code editor with Solidity syntax highlighting"
+  "react-dropzone": "Drag and drop support for .sol files"
+  "clsx": "Class merging"
+  "tailwind-merge": "Class merging"
+
+images:
+  - path: "artifacts/vulnguard/public/images/cyber-bg.png"
+    description: "Dark, sleek cybersecurity abstract background with subtle glowing cyan and purple neon grid lines, extremely minimal, vignette edges"
+    aspect_ratio: "16:9"
+
+notes:
+  - Using generated hooks from @workspace/api-client-react
+  - Simulating a file download for the report by stringifying the JSON payload

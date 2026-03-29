@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "VulnGuard AI"
+version = "1.0.0"
+id = "artifacts/vulnguard"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22518
+
+[services.development]
+run = "pnpm --filter @workspace/vulnguard run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/vulnguard", "run", "build" ]
+publicDir = "artifacts/vulnguard/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22518"
+BASE_PATH = "/"
