@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { anthropic } from "@workspace/integrations-anthropic-ai";
 import { GenerateFixBody } from "@workspace/api-zod";
+import * as zod from "zod";
 
 const router: IRouter = Router();
 
@@ -15,6 +16,19 @@ Respond ONLY with valid JSON (no markdown, no code fences):
   "explanation": "string (clear explanation of what was changed and why)",
   "resources": ["url1", "url2"] (2-3 relevant security references, e.g. OpenZeppelin docs, SWC Registry, Secureum)
 }`;
+
+const AIFixSchema = zod.object({
+  original_code: zod.string().nullable().optional(),
+  fixed_code: zod.string(),
+  explanation: zod.string(),
+  resources: zod.array(zod.string()).optional(),
+});
+
+const DEFAULT_RESOURCES = [
+  "https://docs.openzeppelin.com/contracts/",
+  "https://swcregistry.io/",
+  "https://secureum.substack.com/",
+];
 
 router.post("/generate-fix", async (req, res) => {
   const parseResult = GenerateFixBody.safeParse(req.body);
@@ -58,33 +72,33 @@ Provide the fix with explanation and resources.`,
       return;
     }
 
-    let parsed: {
-      original_code?: string | null;
-      fixed_code?: string;
-      explanation?: string;
-      resources?: string[];
-    };
+    let rawParsed: unknown;
     try {
       const text = content.text.trim();
       const jsonStart = text.indexOf("{");
       const jsonEnd = text.lastIndexOf("}");
       const jsonStr = jsonStart !== -1 && jsonEnd !== -1 ? text.slice(jsonStart, jsonEnd + 1) : text;
-      parsed = JSON.parse(jsonStr);
+      rawParsed = JSON.parse(jsonStr);
     } catch {
       res.status(500).json({ error: "Failed to parse fix response" });
       return;
     }
 
+    const aiResult = AIFixSchema.safeParse(rawParsed);
+    if (!aiResult.success) {
+      req.log.error({ issues: aiResult.error.issues }, "AI fix response did not match expected schema");
+      res.status(502).json({ error: "AI returned an unexpected format. Please try again." });
+      return;
+    }
+
+    const parsed = aiResult.data;
+
     res.json({
       success: true,
       original_code: parsed.original_code ?? vulnerability.vulnerable_code ?? null,
-      fixed_code: parsed.fixed_code ?? vulnerability.fixed_code ?? "",
-      explanation: parsed.explanation ?? vulnerability.recommendation,
-      resources: parsed.resources ?? [
-        "https://docs.openzeppelin.com/contracts/",
-        "https://swcregistry.io/",
-        "https://secureum.substack.com/",
-      ],
+      fixed_code: parsed.fixed_code,
+      explanation: parsed.explanation,
+      resources: parsed.resources?.length ? parsed.resources : DEFAULT_RESOURCES,
     });
   } catch (err) {
     req.log.error({ err }, "Error generating fix");

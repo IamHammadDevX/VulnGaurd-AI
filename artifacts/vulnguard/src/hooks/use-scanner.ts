@@ -3,6 +3,15 @@ import { useScanContract, useGenerateFix } from "@workspace/api-client-react";
 import type { ScanResult, Vulnerability } from "@workspace/api-client-react";
 import { useToast } from "./use-toast";
 
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "object" && error !== null && "message" in error) {
+    const msg = (error as Record<string, unknown>)["message"];
+    if (typeof msg === "string") return msg;
+  }
+  return "An unexpected error occurred.";
+}
+
 export function useScanner() {
   const [code, setCode] = useState("");
   const [contractName, setContractName] = useState("");
@@ -20,10 +29,10 @@ export function useScanner() {
           variant: data.total_vulnerabilities > 0 ? "destructive" : "default",
         });
       },
-      onError: (error: any) => {
+      onError: (error: unknown) => {
         toast({
           title: "Scan Failed",
-          description: error?.message || "An error occurred during analysis.",
+          description: getErrorMessage(error),
           variant: "destructive",
         });
       }
@@ -35,7 +44,6 @@ export function useScanner() {
       onSuccess: (data, variables) => {
         if (!currentResult) return;
         
-        // Update the specific vulnerability with the enhanced fix
         const updatedVulnerabilities = currentResult.vulnerabilities.map(v => {
           if (v.id === variables.data.vulnerability.id) {
             return {
@@ -57,10 +65,10 @@ export function useScanner() {
           description: "Enhanced fix and explanation have been generated.",
         });
       },
-      onError: (error: any) => {
+      onError: (error: unknown) => {
         toast({
           title: "Generation Failed",
-          description: error?.message || "Could not generate an enhanced fix.",
+          description: getErrorMessage(error),
           variant: "destructive",
         });
       }
@@ -77,7 +85,6 @@ export function useScanner() {
       return;
     }
     
-    // Clear previous results while loading
     setCurrentResult(null);
     scanMutation.mutate({ data: { code, contractName: contractName || null } });
   };
