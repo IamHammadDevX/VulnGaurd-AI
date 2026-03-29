@@ -270,7 +270,7 @@ export default function Home() {
                     className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors flex items-center gap-2 text-sm font-bold ml-auto"
                   >
                     <Download className="w-4 h-4" />
-                    <span className="hidden sm:inline">Export JSON</span>
+                    <span className="hidden sm:inline">Download PDF</span>
                   </button>
                 </div>
 

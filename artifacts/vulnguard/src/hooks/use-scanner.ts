@@ -82,18 +82,25 @@ export function useScanner() {
     scanMutation.mutate({ data: { code, contractName: contractName || null } });
   };
 
-  const handleDownloadReport = () => {
+  const handleDownloadReport = async () => {
     if (!currentResult) return;
-    
-    const dataStr = JSON.stringify(currentResult, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    
-    const exportFileDefaultName = `${currentResult.contract_name || 'vulnguard'}-audit-report.json`;
-    
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
+    try {
+      const response = await fetch(`${import.meta.env.BASE_URL}api/report/${currentResult.scanId}`);
+      if (!response.ok) throw new Error("Failed to generate report");
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${currentResult.contract_name || 'vulnguard'}-audit-report.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      toast({
+        title: "Download Failed",
+        description: "Could not generate PDF report. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleGenerateFix = (vulnerability: Vulnerability) => {

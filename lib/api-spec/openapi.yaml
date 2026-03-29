@@ -98,7 +98,7 @@ paths:
     get:
       operationId: getReport
       tags: [scan]
-      summary: Get a scan report as JSON
+      summary: Download a PDF audit report for a completed scan
       parameters:
         - name: scanId
           in: path
@@ -107,11 +107,12 @@ paths:
             type: string
       responses:
         "200":
-          description: Report retrieved successfully
+          description: PDF audit report
           content:
-            application/json:
+            application/pdf:
               schema:
-                $ref: "#/components/schemas/ScanResult"
+                type: string
+                format: binary
         "404":
           description: Scan not found
           content:

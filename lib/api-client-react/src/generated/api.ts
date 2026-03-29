@@ -283,7 +283,7 @@ export const useGenerateFix = <
 };
 
 /**
- * @summary Get a scan report as JSON
+ * @summary Download a PDF audit report for a completed scan
  */
 export const getGetReportUrl = (scanId: string) => {
   return `/api/report/${scanId}`;
@@ -292,8 +292,8 @@ export const getGetReportUrl = (scanId: string) => {
 export const getReport = async (
   scanId: string,
   options?: RequestInit,
-): Promise<ScanResult> => {
-  return customFetch<ScanResult>(getGetReportUrl(scanId), {
+): Promise<Blob> => {
+  return customFetch<Blob>(getGetReportUrl(scanId), {
     ...options,
     method: "GET",
   });
@@ -341,7 +341,7 @@ export type GetReportQueryResult = NonNullable<
 export type GetReportQueryError = ErrorType<ErrorResponse>;
 
 /**
- * @summary Get a scan report as JSON
+ * @summary Download a PDF audit report for a completed scan
  */
 
 export function useGetReport<

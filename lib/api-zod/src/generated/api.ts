@@ -76,33 +76,8 @@ export const GenerateFixResponse = zod.object({
 });
 
 /**
- * @summary Get a scan report as JSON
+ * @summary Download a PDF audit report for a completed scan
  */
 export const GetReportParams = zod.object({
   scanId: zod.coerce.string(),
-});
-
-export const GetReportResponse = zod.object({
-  success: zod.boolean(),
-  scanId: zod.string(),
-  contract_name: zod.string(),
-  total_vulnerabilities: zod.number(),
-  risk_score: zod.number(),
-  vulnerabilities: zod.array(
-    zod.object({
-      id: zod.number(),
-      type: zod.string(),
-      severity: zod.enum(["CRITICAL", "HIGH", "MEDIUM", "LOW"]),
-      line_number: zod.number().nullable(),
-      title: zod.string(),
-      description: zod.string(),
-      technical_risk: zod.string(),
-      vulnerable_code: zod.string().nullable(),
-      fixed_code: zod.string().nullable(),
-      recommendation: zod.string(),
-    }),
-  ),
-  summary: zod.string(),
-  analysis_time_ms: zod.number(),
-  timestamp: zod.string(),
 });
