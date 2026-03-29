@@ -1,0 +1,518 @@
+================================================================================
+VULNGUARD AI - COMPLETE MVP BUILD PROMPT FOR REPLIT AGENT 4
+Copy & Paste This Entire Prompt Into Replit Agent 4
+================================================================================
+
+You are an expert full-stack Web3 security engineer. Your task is to build VulnGuard AI - a production-ready AI-powered smart contract vulnerability scanner MVP for the Agent 4 Buildathon.
+
+================================================================================
+PROJECT OVERVIEW
+================================================================================
+
+**Project Name:** VulnGuard AI
+**Description:** An AI-powered Solidity smart contract vulnerability scanner that detects security flaws in real-time and provides fix suggestions.
+**Target Users:** Web3 developers, auditors, security researchers
+**MVP Deadline:** 3 weeks
+**Tech Stack:** Next.js 14 + TypeScript, Node.js backend, Anthropic/OpenRouter LLMs, TailwindCSS
+
+**Key Features:**
+1. ✅ Paste Solidity code → Get instant vulnerability analysis
+2. ✅ Detect 15+ vulnerability types (reentrancy, overflow, access control, etc.)
+3. ✅ Plain-English explanations for each vulnerability
+4. ✅ AI-generated fix suggestions with code examples
+5. ✅ Severity scoring (Critical, High, Medium, Low)
+6. ✅ Real-time analysis with beautiful UI
+7. ✅ Downloadable audit report (PDF)
+8. ✅ GitHub integration (scan repos)
+
+================================================================================
+TECHNICAL REQUIREMENTS & ARCHITECTURE
+================================================================================
+
+**Frontend:**
+- Framework: Next.js 14 (App Router)
+- Styling: TailwindCSS + shadcn/ui components
+- UI Library: React 18
+- Code Editor: Monaco Editor or CodeMirror for Solidity syntax highlighting
+- Charts/Analytics: Recharts for vulnerability distribution
+- State Management: React Context or Zustand
+
+**Backend:**
+- Runtime: Node.js (Next.js API Routes)
+- LLM Provider: Anthropic Claude (or OpenRouter as fallback)
+- Parser: Web3.js for basic Solidity parsing
+- Database: Optional (Supabase for storing scan history)
+- Authentication: Optional (NextAuth.js for future user accounts)
+
+**Deployment:**
+- Vercel (automatic from Replit)
+- Environment: Production-ready with error handling
+
+**API Structure:**
+```
+POST /api/scan - Main vulnerability scanning endpoint
+GET /api/vulnerabilities - Get vulnerability database
+POST /api/generate-fix - Generate fix suggestions
+GET /api/report/:scanId - Generate PDF report
+```
+
+================================================================================
+PROJECT FILE STRUCTURE
+================================================================================
+
+vulnguard-ai/
+├── app/
+│   ├── page.tsx                 # Home page with scanner
+│   ├── layout.tsx               # Root layout
+│   ├── api/
+│   │   ├── scan/route.ts        # Main scanning endpoint
+│   │   ├── vulnerabilities/route.ts
+│   │   ├── generate-fix/route.ts
+│   │   └── report/route.ts
+│   ├── components/
+│   │   ├── CodeEditor.tsx       # Monaco editor for Solidity
+│   │   ├── VulnerabilityList.tsx # Results display
+│   │   ├── FixSuggestion.tsx    # Fix code display
+│   │   ├── Analytics.tsx        # Chart showing vuln distribution
+│   │   └── Header.tsx           # Navigation
+│   └── utils/
+│       ├── vulnerabilities.ts   # Vulnerability database (15+ types)
+│       ├── prompts.ts           # LLM prompts (system + examples)
+│       └── parser.ts            # Solidity parser helpers
+├── public/
+│   ├── logo.svg
+│   └── favicon.ico
+├── styles/
+│   └── globals.css
+├── .env.local                   # API keys (Anthropic)
+├── next.config.js
+├── tailwind.config.ts
+├── tsconfig.json
+└── package.json
+
+================================================================================
+FEATURE REQUIREMENTS - DETAILED
+================================================================================
+
+### FEATURE 1: CODE INPUT & EDITOR
+- Beautiful Monaco editor with Solidity syntax highlighting
+- Drag-and-drop file upload support (.sol files)
+- Example contract buttons (pre-loaded vulnerable contracts)
+- Character count display (max 50KB contracts)
+- Clear/Reset button
+
+### FEATURE 2: VULNERABILITY DETECTION ENGINE
+Detect these 15+ vulnerability types:
+1. Reentrancy (classic + variants)
+2. Integer Overflow/Underflow
+3. Access Control Flaws (missing onlyOwner, etc.)
+4. Unchecked External Calls
+5. Front-Running Vulnerabilities
+6. Timestamp Dependency
+7. Gas Limit Issues
+8. Delegatecall Risks
+9. Storage Collision (proxy patterns)
+10. Flash Loan Attacks
+11. Logic Errors in Calculations
+12. Uninitialized Variables
+13. Race Conditions
+14. Missing Require Statements
+15. Insecure Randomness
+
+**For each vulnerability, provide:**
+- Name & type
+- Line number(s) where found
+- Severity (Critical/High/Medium/Low)
+- Description (plain English)
+- Risk explanation
+- Fix suggestion with code example
+
+### FEATURE 3: REAL-TIME ANALYSIS
+- User clicks "Scan" → API call to Claude/Anthropic
+- Show "Analyzing..." spinner while processing
+- Stream results as they come in
+- Color-coded severity (Red=Critical, Orange=High, Yellow=Medium, Green=Low)
+- Total vulnerabilities count at top
+- Estimated gas cost impact (if applicable)
+
+### FEATURE 4: FIX SUGGESTIONS
+- For each vulnerability, show "View Fix" button
+- Display before/after code comparison
+- Highlight changes in green (additions) / red (removals)
+- One-click copy fix button
+- Link to security best practices (OpenZeppelin, Secureum)
+
+### FEATURE 5: AUDIT REPORT
+- Generate downloadable PDF with:
+  - Contract name & hash
+  - Scan timestamp
+  - All vulnerabilities sorted by severity
+  - Detailed explanations
+  - Fix suggestions
+  - Security recommendations
+  - Severity pie chart
+
+### FEATURE 6: UI/UX DESIGN
+- Dark theme (professional, tech-forward)
+- Responsive design (mobile + desktop)
+- Smooth animations & transitions
+- Breadcrumbs/progress indicator
+- Copy-to-clipboard buttons
+- Mobile-friendly editor
+
+================================================================================
+LLM PROMPT ARCHITECTURE (CRITICAL)
+================================================================================
+
+**System Prompt for Claude:**
+```
+You are an expert Solidity security auditor with 10+ years of experience in blockchain security.
+
+Your task: Analyze the given smart contract code and identify ALL security vulnerabilities.
+
+For EACH vulnerability found:
+1. Identify the exact type (reentrancy, overflow, etc.)
+2. Find the precise line number(s)
+3. Assign severity: CRITICAL | HIGH | MEDIUM | LOW
+4. Explain the vulnerability in simple terms (non-technical)
+5. Explain the security risk in technical terms
+6. Provide a corrected code snippet
+
+Format your response ONLY as valid JSON (no markdown, no explanations outside JSON):
+{
+  "contract_name": "string",
+  "total_vulnerabilities": number,
+  "vulnerabilities": [
+    {
+      "id": number,
+      "type": "string (e.g., 'Reentrancy')",
+      "severity": "CRITICAL|HIGH|MEDIUM|LOW",
+      "line_number": number,
+      "title": "string",
+      "description": "Plain English explanation",
+      "technical_risk": "Detailed technical explanation",
+      "vulnerable_code": "string (code snippet)",
+      "fixed_code": "string (corrected code)",
+      "recommendation": "Best practice to prevent this"
+    }
+  ],
+  "summary": "Overall security assessment",
+  "risk_score": number (0-100)
+}
+```
+
+**Examples to include in few-shot prompting:**
+- Example 1: Simple reentrancy bug (famous Ethernaut level)
+- Example 2: Integer overflow in token transfer
+- Example 3: Access control missing require statement
+- Example 4: Safe contract (0 vulnerabilities)
+
+**User Prompt Template:**
+```
+Analyze this Solidity smart contract for security vulnerabilities:
+
+\`\`\`solidity
+[USER_SUBMITTED_CODE]
+\`\`\`
+
+Return ONLY valid JSON response. Find ALL vulnerabilities. Be thorough.
+```
+
+================================================================================
+API ENDPOINT SPECIFICATIONS
+================================================================================
+
+### POST /api/scan
+**Request:**
+```json
+{
+  "code": "string (Solidity code)",
+  "contractName": "string (optional)"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "scanId": "uuid",
+  "contract_name": "string",
+  "total_vulnerabilities": number,
+  "risk_score": number,
+  "vulnerabilities": [...],
+  "analysis_time_ms": number,
+  "timestamp": "ISO string"
+}
+```
+
+**Logic:**
+1. Validate Solidity syntax (basic check)
+2. Call Anthropic Claude with system + user prompt
+3. Parse JSON response
+4. Store scan result in memory (or DB if using Supabase)
+5. Return formatted response
+
+**Error Handling:**
+- Invalid Solidity syntax → 400 with helpful error
+- API timeout → 504 with retry option
+- Rate limit → 429 with queue info
+
+### POST /api/generate-fix
+**Request:**
+```json
+{
+  "vulnerability": {...},
+  "contractCode": "string"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "original_code": "string",
+  "fixed_code": "string",
+  "explanation": "string",
+  "resources": ["url1", "url2"]
+}
+```
+
+================================================================================
+UI/UX MOCKUP SPECIFICATIONS
+================================================================================
+
+**Homepage Layout:**
+```
+┌─────────────────────────────────────────────────────┐
+│  VulnGuard AI  [GitHub] [Docs] [Twitter]           │
+├─────────────────────────────────────────────────────┤
+│                                                     │
+│  The Smart Contract Security Scanner              │
+│  Detect vulnerabilities instantly. Get fixes fast. │
+│                                                     │
+│  ┌──────────────────┬──────────────────┐          │
+│  │   CODE EDITOR    │   RESULTS PANEL  │          │
+│  │   (Monaco)       │  • Critical: 2   │          │
+│  │                  │  • High: 3       │          │
+│  │  Paste code...   │  • Medium: 1     │          │
+│  │                  │  • Low: 0        │          │
+│  │                  │                  │          │
+│  │  [Scan] [Clear]  │  [Download PDF]  │          │
+│  └──────────────────┴──────────────────┘          │
+│                                                     │
+└─────────────────────────────────────────────────────┘
+```
+
+**Results Display:**
+- Vulnerability cards with:
+  - Red/orange/yellow/green severity indicator
+  - Vulnerability name
+  - Line number
+  - Brief description
+  - "View Details" / "View Fix" buttons
+  - Collapse/expand functionality
+
+**Color Scheme:**
+- Background: #0f172a (dark slate)
+- Primary: #3b82f6 (blue)
+- Critical: #ef4444 (red)
+- High: #f97316 (orange)
+- Medium: #eab308 (yellow)
+- Low: #22c55e (green)
+- Text: #f1f5f9 (light)
+
+================================================================================
+DEVELOPMENT PHASES
+================================================================================
+
+**PHASE 1 (Days 1-3): Foundation**
+- [ ] Setup Next.js project structure
+- [ ] Install dependencies (React, TailwindCSS, Monaco, Anthropic SDK)
+- [ ] Create basic layout & header
+- [ ] Setup Monaco editor component
+- [ ] Test basic code input
+
+**PHASE 2 (Days 4-7): Core Scanning Engine**
+- [ ] Create /api/scan endpoint
+- [ ] Implement Anthropic Claude integration
+- [ ] Build vulnerability database JSON
+- [ ] Create system prompt + examples
+- [ ] Test with sample contracts (safe + vulnerable)
+- [ ] Build results display component
+
+**PHASE 3 (Days 8-10): Features & Polish**
+- [ ] Fix suggestion generation
+- [ ] Code comparison display (before/after)
+- [ ] PDF report generation
+- [ ] Analytics/charts (vulnerability distribution)
+- [ ] Example contracts (Ethernaut, known hacks)
+- [ ] Mobile responsiveness
+
+**PHASE 4 (Days 11-14): Optimization & Testing**
+- [ ] Performance optimization (caching, debouncing)
+- [ ] Error handling & edge cases
+- [ ] Security review
+- [ ] Load testing
+- [ ] SEO optimization
+- [ ] Deploy to Vercel
+
+**PHASE 5 (Days 15-21): Community & Launch**
+- [ ] Create demo video (3-5 min)
+- [ ] Write comprehensive README
+- [ ] Create landing page copy
+- [ ] Post on Twitter/Reddit/HackerNews
+- [ ] Get feedback from Web3 community
+- [ ] Final polish & bug fixes
+
+================================================================================
+ENVIRONMENT VARIABLES
+================================================================================
+
+Create .env.local with:
+```
+ANTHROPIC_API_KEY=sk-ant-xxxxx
+NEXT_PUBLIC_APP_NAME=VulnGuard AI
+NEXT_PUBLIC_API_URL=http://localhost:3000
+```
+
+Or use OpenRouter as fallback:
+```
+OPENROUTER_API_KEY=sk-or-xxxxx
+OPENROUTER_MODEL=anthropic/claude-opus
+```
+
+================================================================================
+EXAMPLE VULNERABLE CONTRACT FOR TESTING
+================================================================================
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract VulnerableBank {
+    mapping(address => uint256) public balances;
+    
+    // VULNERABILITY: Reentrancy
+    function withdraw(uint256 amount) public {
+        require(balances[msg.sender] >= amount);
+        
+        (bool success, ) = msg.sender.call{value: amount}("");
+        require(success);
+        
+        balances[msg.sender] -= amount; // WRONG ORDER!
+    }
+    
+    // VULNERABILITY: Integer Overflow (pre-0.8.0)
+    function deposit() public payable {
+        balances[msg.sender] += msg.value;
+    }
+    
+    // VULNERABILITY: Access Control
+    function emergencyWithdraw() public {
+        payable(msg.sender).transfer(address(this).balance);
+    }
+    
+    // VULNERABILITY: Logic Error
+    function transfer(address to, uint256 amount) public {
+        require(balances[msg.sender] > amount); // Should be >=
+        balances[msg.sender] -= amount;
+        balances[to] += amount;
+    }
+}
+```
+
+Expected output: Detect 4+ vulnerabilities
+
+================================================================================
+DEPLOYMENT INSTRUCTIONS
+================================================================================
+
+**To Vercel (from Replit):**
+1. Push project to GitHub
+2. Go to Vercel.com → Import GitHub Repo
+3. Add ANTHROPIC_API_KEY to environment variables
+4. Deploy
+5. Share public URL
+
+**Custom Domain (optional):**
+- Update PUBLIC_DOMAIN in .env
+- Configure DNS records
+- Update README with custom URL
+
+================================================================================
+SUCCESS CRITERIA (MVP DEFINITION)
+================================================================================
+
+**Minimum Viable Product must have:**
+✅ Working code editor (paste Solidity code)
+✅ Detect at least 10 vulnerability types
+✅ Real-time analysis (< 10 sec response time)
+✅ Severity scoring (Critical/High/Medium/Low)
+✅ Plain-English explanations
+✅ Fix suggestion code
+✅ Beautiful, responsive UI
+✅ Mobile-friendly design
+✅ Error handling & rate limits
+✅ Deployed & live URL working
+
+**Nice-to-haves (if time permits):**
+🎁 PDF report download
+🎁 Scan history (local storage)
+🎁 Example contracts
+🎁 GitHub integration
+🎁 Dark/light theme toggle
+🎁 Analytics dashboard
+
+================================================================================
+COMPETITIVE ADVANTAGES TO HIGHLIGHT
+================================================================================
+
+In your demo & marketing:
+
+1. **Speed** - Results in seconds (vs weeks for audits)
+2. **Cost** - Free (vs $5K-50K audits)
+3. **Accessibility** - Anyone can use it (not just pros)
+4. **Educational** - Learn about vulnerabilities
+5. **AI-Generated Fixes** - Don't just warn, provide solutions
+6. **Web3-Native** - Built by developers, for developers
+7. **Open & Transparent** - Clear vulnerability database
+
+================================================================================
+BUILD COMMANDS
+================================================================================
+
+```bash
+# Create project
+npx create-next-app@latest vulnguard-ai --typescript --tailwind
+
+# Install additional dependencies
+npm install @anthropic-ai/sdk @monaco-editor/react recharts zod dotenv
+
+# Development
+npm run dev
+
+# Build
+npm run build
+
+# Production
+npm start
+```
+
+================================================================================
+FINAL NOTES
+================================================================================
+
+1. **Start Simple:** MVP with 8-10 vulns is better than 15 with bugs
+2. **Focus on UX:** Beautiful UI = judges impressed + community shares
+3. **Test Thoroughly:** Use vulnerable contracts from Ethernaut, CTF challenges
+4. **Document Well:** README, inline comments, clear error messages
+5. **Be Authentic:** This solves a REAL problem - emphasize that
+6. **Community First:** Post early, get feedback, iterate
+7. **Security:** Validate all inputs, handle API errors gracefully
+8. **Performance:** Cache results, debounce analysis, optimize prompts
+
+**You've got this! Build something great. 🚀**
+
+================================================================================
+END OF PROMPT
+================================================================================
