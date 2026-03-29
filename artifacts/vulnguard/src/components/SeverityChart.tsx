@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
-import type { Vulnerability } from "@workspace/api-client-react/src/generated/api.schemas";
+import type { Vulnerability } from "@workspace/api-client-react";
 
 interface SeverityChartProps {
   vulnerabilities: Vulnerability[];

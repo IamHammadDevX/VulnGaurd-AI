@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useScanContract, useGenerateFix } from "@workspace/api-client-react";
-import type { ScanResult, Vulnerability } from "@workspace/api-client-react/src/generated/api.schemas";
+import type { ScanResult, Vulnerability } from "@workspace/api-client-react";
 import { useToast } from "./use-toast";
 
 export function useScanner() {
