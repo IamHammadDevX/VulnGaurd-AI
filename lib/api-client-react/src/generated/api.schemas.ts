@@ -31,13 +31,44 @@ export const VulnerabilitySeverity = {
 
 export interface Vulnerability {
   id: number;
+  /** Vulnerability category (e.g. Reentrancy, Integer Overflow) */
   type: string;
   severity: VulnerabilitySeverity;
-  /** @nullable */
+  /**
+   * SWC Registry identifier (e.g. SWC-107)
+   * @nullable
+   */
+  swc_id?: string | null;
+  /**
+   * Primary line number where the vulnerability occurs
+   * @nullable
+   */
   line_number: number | null;
+  /**
+   * Range or list of affected lines (e.g. "8-12, 24")
+   * @nullable
+   */
+  affected_lines?: string | null;
+  /**
+   * Comma-separated list of affected function names
+   * @nullable
+   */
+  affected_functions?: string | null;
   title: string;
+  /** Plain English explanation for non-technical users */
   description: string;
+  /** Detailed technical explanation of the attack vector */
   technical_risk: string;
+  /**
+   * Step-by-step how an attacker would exploit this
+   * @nullable
+   */
+  attack_scenario?: string | null;
+  /**
+   * What an attacker could gain if exploited
+   * @nullable
+   */
+  impact?: string | null;
   /** @nullable */
   vulnerable_code: string | null;
   /** @nullable */

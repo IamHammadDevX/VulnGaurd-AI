@@ -149,23 +149,44 @@ components:
           type: integer
         type:
           type: string
+          description: Vulnerability category (e.g. Reentrancy, Integer Overflow)
         severity:
           type: string
           enum: [CRITICAL, HIGH, MEDIUM, LOW]
         line_number:
           type: ["integer", "null"]
+          description: Primary line number where the vulnerability occurs
+        affected_lines:
+          type: ["string", "null"]
+          description: Range or list of affected lines (e.g. "8-12, 24")
         title:
           type: string
+          description: Short descriptive title
         description:
           type: string
+          description: Plain English explanation for non-technical users
         technical_risk:
           type: string
+          description: Detailed technical explanation of the attack vector
+        attack_scenario:
+          type: ["string", "null"]
+          description: Step-by-step how an attacker would exploit this
+        affected_functions:
+          type: ["string", "null"]
+          description: Comma-separated list of affected function names
+        impact:
+          type: ["string", "null"]
+          description: What an attacker could gain if exploited
+        swc_id:
+          type: ["string", "null"]
+          description: SWC Registry identifier (e.g. SWC-107)
         vulnerable_code:
           type: ["string", "null"]
         fixed_code:
           type: ["string", "null"]
         recommendation:
           type: string
+          description: Best practice recommendation to prevent this
       required:
         - id
         - type
