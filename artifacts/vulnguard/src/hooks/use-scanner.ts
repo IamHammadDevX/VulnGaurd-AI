@@ -49,7 +49,7 @@ export function useScanner() {
             return {
               ...v,
               fixed_code: data.fixed_code,
-              description: data.explanation || v.description,
+              fix_explanation: data.explanation,
             };
           }
           return v;
