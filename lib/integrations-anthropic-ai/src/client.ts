@@ -34,13 +34,28 @@ if (!OPENROUTER_API_KEY) {
 }
 
 function toOpenRouterMessages(system: string | undefined, messages: ChatMessage[]) {
-  const combined: Array<{ role: "system" | "user" | "assistant"; content: string }> = [];
+  const combined: Array<{ role: "user" | "assistant"; content: string }> = [
+    ...messages,
+  ];
+
+  // Some free providers reject system/developer roles.
   if (system && system.trim().length > 0) {
-    combined.push({ role: "system", content: system });
+    const systemPrefix = `System instructions:\n${system}\n\n`;
+    const firstUserIndex = combined.findIndex((message) => message.role === "user");
+
+    if (firstUserIndex >= 0) {
+      combined[firstUserIndex] = {
+        ...combined[firstUserIndex],
+        content: `${systemPrefix}${combined[firstUserIndex].content}`,
+      };
+    } else {
+      combined.unshift({
+        role: "user",
+        content: `${systemPrefix}Please follow the instructions above.`,
+      });
+    }
   }
-  for (const message of messages) {
-    combined.push(message);
-  }
+
   return combined;
 }
 
