@@ -6,6 +6,7 @@ import scanStreamRouter from "./vulnguard/scan-stream.js";
 import generateFixRouter from "./vulnguard/generate-fix.js";
 import reportRouter from "./vulnguard/report.js";
 import teamsRouter from "./teams.js";
+import dashboardRouter from "./dashboard.js";
 
 const router: IRouter = Router();
 
@@ -15,6 +16,7 @@ router.use(scanRouter);
 router.use(scanStreamRouter);
 router.use(generateFixRouter);
 router.use(reportRouter);
+router.use(dashboardRouter);
 router.use(teamsRouter);
 
 export default router;

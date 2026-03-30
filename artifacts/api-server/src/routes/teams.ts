@@ -371,27 +371,4 @@ router.get("/user/profile", async (req: Request, res: Response) => {
   });
 });
 
-router.get("/user/scans", async (req: Request, res: Response) => {
-  if (!req.isAuthenticated()) {
-    res.status(401).json({ error: "Unauthorized" });
-    return;
-  }
-
-  const scans = await db
-    .select({
-      id: scansTable.id,
-      contractName: scansTable.contractName,
-      contractHash: scansTable.contractHash,
-      riskScore: scansTable.riskScore,
-      status: scansTable.status,
-      executionTime: scansTable.executionTime,
-      createdAt: scansTable.createdAt,
-    })
-    .from(scansTable)
-    .where(eq(scansTable.userId, req.user.id))
-    .orderBy(scansTable.createdAt);
-
-  res.json({ scans });
-});
-
 export default router;
