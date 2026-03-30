@@ -25,6 +25,7 @@ VulnGuard AI helps developers and auditors find security vulnerabilities in Ethe
 |-------|-----------|
 | Frontend | React 19, Vite, Tailwind CSS v4, Monaco Editor |
 | Backend | Node.js, Express 5, TypeScript |
+| Database | Supabase Postgres + Drizzle ORM |
 | AI | OpenRouter (`anthropic/claude-3.7-sonnet` by default) |
 | API Contract | OpenAPI 3.0, Orval codegen, Zod validation |
 | PDF | PDFKit |
@@ -92,6 +93,7 @@ Open `.env` and fill in your values:
 OPENROUTER_API_KEY=sk-or-your-key-here
 OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
 OPENROUTER_MODEL=anthropic/claude-3.7-sonnet
+DATABASE_URL=postgresql://postgres.<project-ref>:<password>@aws-0-<region>.pooler.supabase.com:6543/postgres?sslmode=require
 PORT=8080
 NODE_ENV=development
 LOG_LEVEL=info
@@ -105,13 +107,19 @@ LOG_LEVEL=info
 pnpm install
 ```
 
-### 4. Run code generation
+### 4. Provision database schema (Supabase)
+
+```bash
+pnpm --filter @workspace/db run push
+```
+
+### 5. Run code generation
 
 ```bash
 pnpm --filter @workspace/api-spec run codegen
 ```
 
-### 5. Start the development servers
+### 6. Start the development servers
 
 Open two terminals:
 
@@ -232,6 +240,8 @@ This project is built to run natively on [Replit](https://replit.com). Add your 
 
 | Variable | Required | Description |
 |----------|----------|-------------|
+| `DATABASE_URL` | Yes | Supabase Postgres connection string used by Drizzle and API runtime |
+| `SUPABASE_DB_URL` | No | Fallback DB URL if `DATABASE_URL` is not set |
 | `OPENROUTER_API_KEY` | Yes | Your OpenRouter API key |
 | `OPENROUTER_BASE_URL` | No | OpenRouter base URL (default: `https://openrouter.ai/api/v1`) |
 | `OPENROUTER_MODEL` | No | OpenRouter model ID (default: `anthropic/claude-3.7-sonnet`) |
@@ -240,6 +250,8 @@ This project is built to run natively on [Replit](https://replit.com). Add your 
 | `PORT` | No | API server port (default: `8080`) |
 | `NODE_ENV` | No | `development` or `production` |
 | `LOG_LEVEL` | No | Pino log level (default: `info`) |
+
+For a full setup walkthrough, see `docs/SUPABASE_SETUP.md`.
 
 ---
 
