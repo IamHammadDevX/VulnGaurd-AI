@@ -2,13 +2,13 @@
 
 **AI-Powered Solidity Smart Contract Vulnerability Scanner**
 
-VulnGuard AI helps developers and auditors find security vulnerabilities in Ethereum smart contracts before they go live. Paste your Solidity code, click Scan, and receive a detailed vulnerability report powered by Anthropic Claude — complete with severity ratings, plain-English explanations, before/after fix code, and a downloadable PDF audit report.
+VulnGuard AI helps developers and auditors find security vulnerabilities in Ethereum smart contracts before they go live. Paste your Solidity code, click Scan, and receive a detailed vulnerability report powered by OpenRouter-hosted LLMs — complete with severity ratings, plain-English explanations, before/after fix code, and a downloadable PDF audit report.
 
 ---
 
 ## Features
 
-- **AI-Powered Analysis** — Uses Anthropic Claude to detect 15+ vulnerability classes including reentrancy, integer overflow, access control issues, and more
+- **AI-Powered Analysis** — Uses OpenRouter to detect 15+ vulnerability classes including reentrancy, integer overflow, access control issues, and more
 - **Monaco Code Editor** — Full-featured Solidity editor with syntax highlighting and drag-and-drop `.sol` file support
 - **Severity Ratings** — Every finding is rated CRITICAL / HIGH / MEDIUM / LOW with color-coded cards
 - **Before / After Code** — Each vulnerability shows the vulnerable snippet alongside the fixed version
@@ -25,7 +25,7 @@ VulnGuard AI helps developers and auditors find security vulnerabilities in Ethe
 |-------|-----------|
 | Frontend | React 19, Vite, Tailwind CSS v4, Monaco Editor |
 | Backend | Node.js, Express 5, TypeScript |
-| AI | Anthropic Claude (claude-sonnet-4-6) |
+| AI | OpenRouter (`anthropic/claude-3.7-sonnet` by default) |
 | API Contract | OpenAPI 3.0, Orval codegen, Zod validation |
 | PDF | PDFKit |
 | Charts | Recharts |
@@ -46,7 +46,7 @@ vulnguard-ai/
 │   │               ├── generate-fix.ts  # POST /api/generate-fix
 │   │               ├── report.ts        # GET  /api/report/:scanId
 │   │               ├── store.ts         # In-memory scan store
-│   │               └── prompts.ts       # Claude system prompts
+│   │               └── prompts.ts       # LLM system prompts
 │   └── vulnguard/           # React frontend (Vite)
 │       └── src/
 │           ├── pages/Home.tsx
@@ -58,7 +58,7 @@ vulnguard-ai/
 │   ├── api-spec/openapi.yaml            # OpenAPI 3.0 specification
 │   ├── api-client-react/                # Generated React Query hooks
 │   ├── api-zod/                         # Generated Zod validation schemas
-│   └── integrations-anthropic-ai/      # Anthropic client wrapper
+│   └── integrations-anthropic-ai/      # OpenRouter client wrapper
 ├── .env.example                         # Environment variable template
 └── README.md
 ```
@@ -71,7 +71,7 @@ vulnguard-ai/
 
 - Node.js 20+
 - pnpm 9+
-- An Anthropic API key — get one at [console.anthropic.com](https://console.anthropic.com/)
+- An OpenRouter API key — get one at [openrouter.ai/keys](https://openrouter.ai/keys)
 
 ### 1. Clone the repository
 
@@ -89,8 +89,9 @@ cp .env.example .env
 Open `.env` and fill in your values:
 
 ```env
-AI_INTEGRATIONS_ANTHROPIC_API_KEY=sk-ant-your-key-here
-AI_INTEGRATIONS_ANTHROPIC_BASE_URL=https://api.anthropic.com
+OPENROUTER_API_KEY=sk-or-your-key-here
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+OPENROUTER_MODEL=anthropic/claude-3.7-sonnet
 PORT=8080
 NODE_ENV=development
 LOG_LEVEL=info
@@ -219,10 +220,10 @@ Download the PDF audit report for a completed scan.
 
 ## Running on Replit
 
-This project is built to run natively on [Replit](https://replit.com). The Anthropic API key is provisioned automatically via Replit's AI Integrations — no manual setup needed.
+This project is built to run natively on [Replit](https://replit.com). Add your OpenRouter credentials as environment variables.
 
 1. Fork or import the repo on Replit
-2. Add the **Anthropic AI Integration** from the Integrations panel
+2. Add `OPENROUTER_API_KEY` and optional `OPENROUTER_MODEL` in Secrets
 3. Click **Run** — all three services start automatically
 
 ---
@@ -231,8 +232,11 @@ This project is built to run natively on [Replit](https://replit.com). The Anthr
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `AI_INTEGRATIONS_ANTHROPIC_API_KEY` | Yes | Your Anthropic API key |
-| `AI_INTEGRATIONS_ANTHROPIC_BASE_URL` | Yes | Anthropic API base URL (default: `https://api.anthropic.com`) |
+| `OPENROUTER_API_KEY` | Yes | Your OpenRouter API key |
+| `OPENROUTER_BASE_URL` | No | OpenRouter base URL (default: `https://openrouter.ai/api/v1`) |
+| `OPENROUTER_MODEL` | No | OpenRouter model ID (default: `anthropic/claude-3.7-sonnet`) |
+| `OPENROUTER_HTTP_REFERER` | No | Optional referer header sent to OpenRouter |
+| `OPENROUTER_APP_NAME` | No | Optional app title header sent to OpenRouter |
 | `PORT` | No | API server port (default: `8080`) |
 | `NODE_ENV` | No | `development` or `production` |
 | `LOG_LEVEL` | No | Pino log level (default: `info`) |
@@ -257,7 +261,7 @@ MIT — see [LICENSE](LICENSE) for details.
 
 ## Acknowledgements
 
-- [Anthropic Claude](https://www.anthropic.com/) — AI analysis engine
+- [OpenRouter](https://openrouter.ai/) — LLM gateway and routing
 - [OpenZeppelin](https://docs.openzeppelin.com/) — Security patterns and references
 - [SWC Registry](https://swcregistry.io/) — Smart contract weakness classification
 - [Secureum](https://secureum.substack.com/) — Solidity security knowledge base

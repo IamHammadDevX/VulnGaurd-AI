@@ -1,5 +1,6 @@
 import { Router, type IRouter } from "express";
 import { anthropic } from "@workspace/integrations-anthropic-ai";
+import { OPENROUTER_MODEL } from "@workspace/integrations-anthropic-ai";
 import { GenerateFixBody } from "@workspace/api-zod";
 import * as zod from "zod";
 
@@ -41,7 +42,7 @@ router.post("/generate-fix", async (req, res) => {
 
   try {
     const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-6",
+      model: OPENROUTER_MODEL,
       max_tokens: 8192,
       system: GENERATE_FIX_SYSTEM,
       messages: [
@@ -101,7 +102,7 @@ Provide the fix with explanation and resources.`,
       resources: parsed.resources?.length ? parsed.resources : DEFAULT_RESOURCES,
     });
   } catch (err) {
-    req.log.error({ err }, "Error generating fix");
+    req.log.error({ err }, "Error generating AI fix");
     res.status(500).json({ error: "Failed to generate fix. Please try again." });
   }
 });

@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { createHash } from "crypto";
 import { anthropic } from "@workspace/integrations-anthropic-ai";
+import { OPENROUTER_MODEL } from "@workspace/integrations-anthropic-ai";
 import { ScanContractBody } from "@workspace/api-zod";
 import { SYSTEM_PROMPT, buildUserPrompt } from "./prompts.js";
 import { storeScan } from "./store.js";
@@ -42,7 +43,7 @@ function sseWrite(res: import("express").Response, event: string, data: unknown)
   res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
 }
 
-// ── Scanning stage messages (shown while Claude processes) ────────────────────
+// ── Scanning stage messages (shown while AI processes) ────────────────────────
 const STAGES = [
   { ms: 0,    msg: "Parsing Solidity abstract syntax tree..." },
   { ms: 3000, msg: "Checking access control patterns..." },
@@ -52,7 +53,7 @@ const STAGES = [
   { ms: 16000, msg: "Inspecting oracle & flash loan risks..." },
   { ms: 20000, msg: "Checking storage layout & proxy patterns..." },
   { ms: 25000, msg: "Running final comprehensive audit..." },
-  { ms: 30000, msg: "Claude is deep-auditing the contract..." },
+  { ms: 30000, msg: "AI is deep-auditing the contract..." },
   { ms: 40000, msg: "Almost there — finalizing analysis..." },
 ];
 
@@ -101,9 +102,9 @@ router.post("/scan-stream", async (req, res) => {
   const clearTimers = () => stageTimers.forEach(clearTimeout);
 
   try {
-    // ── Claude API call with streaming ──
+    // ── OpenRouter API call with streaming-compatible wrapper ──
     const claudeStream = anthropic.messages.stream({
-      model: "claude-sonnet-4-6",
+      model: OPENROUTER_MODEL,
       max_tokens: 8192,
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: buildUserPrompt(code, contractName ?? undefined) }],
@@ -184,7 +185,7 @@ router.post("/scan-stream", async (req, res) => {
           vulnerabilities: vulnerabilities as unknown as Record<string, unknown>[],
           summary: scanData.summary,
           executionTime: analysis_time_ms,
-          modelUsed: "claude-sonnet-4-6",
+          modelUsed: OPENROUTER_MODEL,
         });
       } catch (dbErr) {
         req.log.warn({ err: dbErr }, "Failed to persist scan to database");
@@ -214,7 +215,7 @@ router.post("/scan-stream", async (req, res) => {
   } catch (err: unknown) {
     clearTimers();
     completed = true;
-    req.log.error({ err }, "Error calling Anthropic API");
+    req.log.error({ err }, "Error calling OpenRouter API");
     const status = (err as { status?: number }).status;
     if (status === 429) {
       sseWrite(res, "error", { message: "Rate limit exceeded. Please wait a moment and try again." });

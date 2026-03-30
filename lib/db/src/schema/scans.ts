@@ -19,7 +19,7 @@ export const scansTable = pgTable(
     vulnerabilities: jsonb("vulnerabilities").notNull().default(sql`'[]'::jsonb`),
     summary: text("summary"),
     executionTime: integer("execution_time"),
-    modelUsed: varchar("model_used").default("claude-sonnet-4-6"),
+    modelUsed: varchar("model_used").default("anthropic/claude-3.7-sonnet"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
   },

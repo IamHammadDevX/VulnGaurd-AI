@@ -16,7 +16,7 @@ pnpm workspace monorepo using TypeScript. VulnGuard AI — an AI-powered Solidit
 - **Validation**: Zod (`zod/v4`), `drizzle-zod`
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle)
-- **AI**: Anthropic Claude via Replit AI Integrations (`@workspace/integrations-anthropic-ai`)
+- **AI**: OpenRouter-backed model access via `@workspace/integrations-anthropic-ai`
 
 ## Structure
 
@@ -58,7 +58,7 @@ artifacts-monorepo/
 ## VulnGuard AI Features
 
 - **Solidity code editor**: Monaco editor with syntax highlighting, drag-and-drop .sol file support
-- **AI scanning**: Claude claude-sonnet-4-6 analyzes contracts for 15+ vulnerability types
+- **AI scanning**: OpenRouter model analyzes contracts for 15+ vulnerability types
 - **SSE streaming**: Real-time vulnerability results via `/api/scan-stream`
 - **Vulnerability detection**: Reentrancy, Access Control, Integer Overflow, Unchecked Calls, etc.
 - **Severity scoring**: CRITICAL / HIGH / MEDIUM / LOW with risk score 0-100

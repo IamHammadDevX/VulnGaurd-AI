@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { createHash } from "crypto";
 import { anthropic } from "@workspace/integrations-anthropic-ai";
+import { OPENROUTER_MODEL } from "@workspace/integrations-anthropic-ai";
 import { ScanContractBody } from "@workspace/api-zod";
 import { SYSTEM_PROMPT, buildUserPrompt } from "./prompts.js";
 import { storeScan } from "./store.js";
@@ -59,7 +60,7 @@ router.post("/scan", async (req, res) => {
 
   try {
     const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-6",
+      model: OPENROUTER_MODEL,
       max_tokens: 8192,
       system: SYSTEM_PROMPT,
       messages: [
@@ -134,7 +135,7 @@ router.post("/scan", async (req, res) => {
 
     res.json({ ...scanData, scanId });
   } catch (err: unknown) {
-    req.log.error({ err }, "Error calling Anthropic API");
+    req.log.error({ err }, "Error calling OpenRouter API");
     const status = (err as { status?: number }).status;
     if (status === 429) {
       res.status(429).json({ error: "Rate limit exceeded. Please wait a moment and try again." });

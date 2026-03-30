@@ -211,7 +211,7 @@ function ScanningSpinner() {
       <div className="space-y-2">
         <p className="text-sm font-medium text-white">Auditing smart contract…</p>
         <p className="text-xs text-muted-foreground max-w-[260px]">
-          Claude is analyzing 15+ vulnerability categories
+          AI is analyzing 15+ vulnerability categories
         </p>
       </div>
 
