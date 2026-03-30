@@ -80,6 +80,7 @@
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
+    "@supabase/supabase-js": "^2.100.1",
     "monaco-editor": "^0.55.1",
     "react-dropzone": "^15.0.0"
   }

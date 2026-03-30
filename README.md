@@ -242,6 +242,10 @@ This project is built to run natively on [Replit](https://replit.com). Add your 
 |----------|----------|-------------|
 | `DATABASE_URL` | Yes | Supabase Postgres connection string used by Drizzle and API runtime |
 | `SUPABASE_DB_URL` | No | Fallback DB URL if `DATABASE_URL` is not set |
+| `SUPABASE_URL` | Yes (for auth) | Supabase project URL used by API auth verification |
+| `SUPABASE_ANON_KEY` | Yes (for auth) | Supabase anon/publishable key used by frontend auth |
+| `VITE_SUPABASE_URL` | Yes (frontend auth) | Vite-exposed Supabase URL |
+| `VITE_SUPABASE_ANON_KEY` | Yes (frontend auth) | Vite-exposed Supabase anon/publishable key |
 | `OPENROUTER_API_KEY` | Yes | Your OpenRouter API key |
 | `OPENROUTER_BASE_URL` | No | OpenRouter base URL (default: `https://openrouter.ai/api/v1`) |
 | `OPENROUTER_MODEL` | No | OpenRouter model ID (default: `anthropic/claude-3.7-sonnet`) |

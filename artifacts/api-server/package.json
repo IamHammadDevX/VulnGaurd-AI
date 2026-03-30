@@ -21,6 +21,7 @@
     "pdfkit": "^0.18.0",
     "pino": "^9",
     "pino-http": "^10",
+    "@supabase/supabase-js": "^2.57.4",
     "zod": "catalog:"
   },
   "devDependencies": {

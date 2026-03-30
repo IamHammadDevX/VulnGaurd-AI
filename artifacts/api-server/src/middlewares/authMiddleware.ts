@@ -1,6 +1,9 @@
 import * as oidc from "openid-client";
 import { type Request, type Response, type NextFunction } from "express";
 import type { AuthUser } from "@workspace/api-zod";
+import { db, usersTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
+import { getSupabaseAdminClient } from "../lib/supabase";
 import {
   clearSession,
   getOidcConfig,
@@ -53,6 +56,74 @@ async function refreshIfExpired(
   }
 }
 
+function getSupabaseToken(req: Request): string | null {
+  const authHeader = req.headers.authorization;
+  if (authHeader?.startsWith("Bearer ")) {
+    return authHeader.slice(7);
+  }
+
+  const cookieToken = req.cookies?.["sb-access-token"];
+  return typeof cookieToken === "string" ? cookieToken : null;
+}
+
+async function authenticateWithSupabase(req: Request): Promise<AuthUser | null> {
+  const token = getSupabaseToken(req);
+  if (!token) return null;
+
+  const supabase = getSupabaseAdminClient();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase.auth.getUser(token);
+  if (error || !data.user) {
+    return null;
+  }
+
+  const metadata = (data.user.user_metadata ?? {}) as Record<string, unknown>;
+  const userData = {
+    id: data.user.id,
+    email: data.user.email ?? null,
+    firstName:
+      (typeof metadata["first_name"] === "string" && metadata["first_name"]) ||
+      (typeof metadata["full_name"] === "string" && metadata["full_name"].split(" ")[0]) ||
+      null,
+    lastName:
+      (typeof metadata["last_name"] === "string" && metadata["last_name"]) ||
+      null,
+    profileImageUrl:
+      (typeof metadata["avatar_url"] === "string" && metadata["avatar_url"]) ||
+      null,
+  };
+
+  await db
+    .insert(usersTable)
+    .values(userData)
+    .onConflictDoUpdate({
+      target: usersTable.id,
+      set: {
+        email: userData.email,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        profileImageUrl: userData.profileImageUrl,
+        updatedAt: new Date(),
+      },
+    });
+
+  const [dbUser] = await db
+    .select()
+    .from(usersTable)
+    .where(eq(usersTable.id, data.user.id));
+
+  if (!dbUser) return null;
+
+  return {
+    id: dbUser.id,
+    email: dbUser.email,
+    firstName: dbUser.firstName,
+    lastName: dbUser.lastName,
+    profileImageUrl: dbUser.profileImageUrl,
+  };
+}
+
 export async function authMiddleware(
   req: Request,
   res: Response,
@@ -61,6 +132,13 @@ export async function authMiddleware(
   req.isAuthenticated = function (this: Request) {
     return this.user != null;
   } as Request["isAuthenticated"];
+
+  const supabaseUser = await authenticateWithSupabase(req);
+  if (supabaseUser) {
+    req.user = supabaseUser;
+    next();
+    return;
+  }
 
   const sid = getSessionId(req);
   if (!sid) {

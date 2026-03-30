@@ -18,16 +18,54 @@ interface ProfileData {
 }
 
 export default function Profile() {
-  const { user, isLoading, isAuthenticated, login, logout } = useAuth();
+  const { user, isLoading, isAuthenticated, login, logout, updateProfile } = useAuth();
   const [profile, setProfile] = useState<ProfileData | null>(null);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [profileImageUrl, setProfileImageUrl] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [status, setStatus] = useState("");
 
   useEffect(() => {
     if (!isAuthenticated) return;
     fetch("/api/user/profile", { credentials: "include" })
       .then((r) => r.json())
-      .then((data) => setProfile(data.user))
+      .then((data) => {
+        const next = data.user as ProfileData;
+        setProfile(next);
+        setFirstName(next?.firstName ?? "");
+        setLastName(next?.lastName ?? "");
+        setEmail(next?.email ?? "");
+        setProfileImageUrl(next?.profileImageUrl ?? "");
+      })
       .catch(() => {});
   }, [isAuthenticated]);
+
+  const handleSaveProfile = async () => {
+    setStatus("");
+    setSaving(true);
+
+    const result = await updateProfile({
+      firstName,
+      lastName,
+      email,
+      profileImageUrl,
+    });
+
+    setSaving(false);
+
+    if (result.error) {
+      setStatus(result.error);
+      return;
+    }
+
+    setStatus("Profile updated. If you changed email, verify it from your inbox.");
+    fetch("/api/user/profile", { credentials: "include" })
+      .then((r) => r.json())
+      .then((data) => setProfile(data.user))
+      .catch(() => null);
+  };
 
   if (isLoading) {
     return (
@@ -89,6 +127,63 @@ export default function Profile() {
                 {user?.email ?? "No email"}
               </p>
             </div>
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="bg-card/50 border border-white/6 rounded-xl p-5 space-y-3"
+        >
+          <h2 className="text-sm font-semibold">Edit Profile</h2>
+          {status && <p className="text-xs text-primary">{status}</p>}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="text-[11px] text-muted-foreground">First name</label>
+              <input
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                className="mt-1 w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm"
+              />
+            </div>
+            <div>
+              <label className="text-[11px] text-muted-foreground">Last name</label>
+              <input
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                className="mt-1 w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-[11px] text-muted-foreground">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="mt-1 w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm"
+            />
+          </div>
+
+          <div>
+            <label className="text-[11px] text-muted-foreground">Photo URL</label>
+            <input
+              value={profileImageUrl}
+              onChange={(e) => setProfileImageUrl(e.target.value)}
+              className="mt-1 w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm"
+            />
+          </div>
+
+          <div className="flex justify-end">
+            <button
+              onClick={handleSaveProfile}
+              disabled={saving}
+              className="px-4 py-2 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary/90 disabled:opacity-50"
+            >
+              {saving ? "Saving..." : "Save profile"}
+            </button>
           </div>
         </motion.div>
 
