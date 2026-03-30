@@ -4,6 +4,7 @@ import { anthropic } from "@workspace/integrations-anthropic-ai";
 import { ScanContractBody } from "@workspace/api-zod";
 import { SYSTEM_PROMPT, buildUserPrompt } from "./prompts.js";
 import { storeScan } from "./store.js";
+import { db, scansTable } from "@workspace/db";
 import * as zod from "zod";
 
 const router: IRouter = Router();
@@ -166,8 +167,29 @@ router.post("/scan-stream", async (req, res) => {
       timestamp: new Date().toISOString(),
     };
 
-    // ── Store for PDF report ──
+    // ── Store for PDF report (in-memory) ──
     const scanId = storeScan(scanData);
+
+    // ── Persist to DB if user is authenticated ──
+    if (req.isAuthenticated()) {
+      try {
+        await db.insert(scansTable).values({
+          id: scanId,
+          userId: req.user.id,
+          contractName: scanData.contract_name,
+          contractCode: code,
+          contractHash: scanData.code_hash,
+          riskScore: scanData.risk_score,
+          status: "completed",
+          vulnerabilities: vulnerabilities as unknown as Record<string, unknown>[],
+          summary: scanData.summary,
+          executionTime: analysis_time_ms,
+          modelUsed: "claude-sonnet-4-6",
+        });
+      } catch (dbErr) {
+        req.log.warn({ err: dbErr }, "Failed to persist scan to database");
+      }
+    }
 
     // ── Stream each vulnerability with a small delay ──
     sseWrite(res, "meta", {

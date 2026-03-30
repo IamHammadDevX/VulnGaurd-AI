@@ -35,11 +35,6 @@ export interface Vulnerability {
   type: string;
   severity: VulnerabilitySeverity;
   /**
-   * SWC Registry identifier (e.g. SWC-107)
-   * @nullable
-   */
-  swc_id?: string | null;
-  /**
    * Primary line number where the vulnerability occurs
    * @nullable
    */
@@ -49,11 +44,7 @@ export interface Vulnerability {
    * @nullable
    */
   affected_lines?: string | null;
-  /**
-   * Comma-separated list of affected function names
-   * @nullable
-   */
-  affected_functions?: string | null;
+  /** Short descriptive title */
   title: string;
   /** Plain English explanation for non-technical users */
   description: string;
@@ -65,12 +56,22 @@ export interface Vulnerability {
    */
   attack_scenario?: string | null;
   /**
+   * Comma-separated list of affected function names
+   * @nullable
+   */
+  affected_functions?: string | null;
+  /**
    * What an attacker could gain if exploited
    * @nullable
    */
   impact?: string | null;
   /**
-   * Estimated gas cost impact of this vulnerability
+   * SWC Registry identifier (e.g. SWC-107)
+   * @nullable
+   */
+  swc_id?: string | null;
+  /**
+   * Gas cost impact of the vulnerability and its fix
    * @nullable
    */
   gas_impact?: string | null;
@@ -78,6 +79,7 @@ export interface Vulnerability {
   vulnerable_code: string | null;
   /** @nullable */
   fixed_code: string | null;
+  /** Best practice recommendation to prevent this */
   recommendation: string;
 }
 
@@ -110,3 +112,63 @@ export interface GenerateFixResult {
 export interface ErrorResponse {
   error: string;
 }
+
+export interface AuthUser {
+  id: string;
+  /** @nullable */
+  email: string | null;
+  /** @nullable */
+  firstName: string | null;
+  /** @nullable */
+  lastName: string | null;
+  /** @nullable */
+  profileImageUrl: string | null;
+}
+
+export interface AuthUserEnvelope {
+  user: AuthUser | null;
+}
+
+export interface MobileTokenExchangeRequest {
+  /** @minLength 1 */
+  code: string;
+  /** @minLength 1 */
+  code_verifier: string;
+  /** @minLength 1 */
+  redirect_uri: string;
+  /** @minLength 1 */
+  state: string;
+  /** @minLength 1 */
+  nonce?: string;
+}
+
+export interface MobileTokenExchangeSuccess {
+  token: string;
+}
+
+export const LogoutSuccessValue = {
+  success: true,
+} as const;
+export type LogoutSuccess = typeof LogoutSuccessValue;
+
+export interface ErrorEnvelope {
+  error: string;
+}
+
+/**
+ * Opaque session token — `Bearer <sid>`.
+ */
+export type AuthorizationSessionHeaderParameter = string;
+
+export type BeginBrowserLoginParams = {
+  /**
+   * Relative path to redirect to after login (must start with `/`). Defaults to `/`.
+   */
+  returnTo?: string;
+};
+
+export type HandleBrowserLoginCallbackParams = {
+  code?: string;
+  state?: string;
+  iss?: string;
+};

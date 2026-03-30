@@ -15,6 +15,7 @@ import { EXAMPLE_CONTRACTS } from "@/lib/constants";
 import { formatBytes, cn } from "@/lib/utils";
 import { VulnerabilityCard } from "@/components/VulnerabilityCard";
 import { SeverityChart } from "@/components/SeverityChart";
+import { UserMenu } from "@/components/UserMenu";
 
 const MAX_BYTES = 50 * 1024;
 
@@ -446,6 +447,7 @@ export default function Home() {
               <Github className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">GitHub</span>
             </a>
+            <UserMenu />
           </div>
         </div>
 
