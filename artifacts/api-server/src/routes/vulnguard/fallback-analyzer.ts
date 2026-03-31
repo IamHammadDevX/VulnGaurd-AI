@@ -103,6 +103,36 @@ function firstLineMatching(lines: string[], regex: RegExp): number | null {
   return null;
 }
 
+function isStateMutationLine(line: string): boolean {
+  const trimmed = line.trim();
+  if (!trimmed) return false;
+
+  // Skip control/guard lines that often include comparisons (>=, <=, ==, !=).
+  if (/^(require|assert|if|while|for)\s*\(/.test(trimmed)) return false;
+
+  // ++ / -- are clear mutation operations.
+  if (/\+\+|--/.test(trimmed)) return true;
+
+  // Match real assignment operators while avoiding comparison operators.
+  // Examples matched: a = 1, x += 1, balances[msg.sender] -= amount
+  const assignment = /(^|[^<>=!])([A-Za-z_][A-Za-z0-9_\.\[\]]*)\s*(\+=|-=|\*=|\/=|%=|=)/;
+  if (!assignment.test(trimmed)) return false;
+
+  // Avoid local variable declarations so we focus on state changes.
+  if (/^(uint|int|address|bool|string|bytes\d*|bytes|mapping|struct|enum)\b/.test(trimmed)) {
+    return false;
+  }
+
+  return true;
+}
+
+function firstMutationLine(lines: string[]): number | null {
+  for (let i = 0; i < lines.length; i++) {
+    if (isStateMutationLine(lines[i])) return i;
+  }
+  return null;
+}
+
 export function analyzeContractFallback(code: string, contractName?: string): FallbackAnalysis {
   const vulnerabilities: FallbackVulnerability[] = [];
   const sourceLines = code.split(/\r?\n/);
@@ -118,9 +148,8 @@ export function analyzeContractFallback(code: string, contractName?: string): Fa
   // Reentrancy + unchecked external calls within function blocks.
   for (const fn of functions) {
     const extRegex = /(\.call\s*\{|\.call\s*\(|\.send\s*\(|\.transfer\s*\()/;
-    const updateRegex = /([A-Za-z0-9_\.\]\[)]+\s*([+\-*/]?=))/;
     const extIdx = firstLineMatching(fn.lines, extRegex);
-    const updateIdx = firstLineMatching(fn.lines, updateRegex);
+    const updateIdx = firstMutationLine(fn.lines);
 
     if (extIdx !== null && updateIdx !== null && extIdx < updateIdx) {
       const line = fn.startLine + extIdx;
