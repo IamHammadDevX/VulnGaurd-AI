@@ -1,0 +1,14 @@
+{
+  "buildCommand": "npx pnpm install && npx pnpm run build",
+  "outputDirectory": "dist/public",
+  "rewrites": [
+    {
+      "source": "/api/:match*",
+      "destination": "https://your-deployed-backend-url.com/api/:match*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
