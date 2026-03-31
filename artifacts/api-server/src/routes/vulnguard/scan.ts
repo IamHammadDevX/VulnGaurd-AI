@@ -5,6 +5,7 @@ import { OPENROUTER_MODEL } from "@workspace/integrations-anthropic-ai";
 import { ScanContractBody } from "@workspace/api-zod";
 import { SYSTEM_PROMPT, buildUserPrompt } from "./prompts.js";
 import { storeScan } from "./store.js";
+import { analyzeContractFallback, type FallbackVulnerability } from "./fallback-analyzer.js";
 import * as zod from "zod";
 
 const router: IRouter = Router();
@@ -82,6 +83,98 @@ const AIResponseSchema = zod.object({
   summary: zod.string().optional(),
 });
 
+function vulnKey(v: { type: string; line_number: number | null | undefined; title: string }): string {
+  return `${v.type}|${v.line_number ?? -1}|${v.title}`;
+}
+
+function normalizeFallbackVulns(vulns: FallbackVulnerability[]): Array<Record<string, unknown>> {
+  return vulns.map((v) => ({
+    id: v.id,
+    type: v.type,
+    severity: v.severity,
+    swc_id: v.swc_id,
+    line_number: v.line_number,
+    affected_lines: v.affected_lines,
+    affected_functions: v.affected_functions,
+    title: v.title,
+    description: v.description,
+    technical_risk: v.technical_risk,
+    attack_scenario: v.attack_scenario,
+    impact: v.impact,
+    vulnerable_code: v.vulnerable_code,
+    fixed_code: v.fixed_code,
+    recommendation: v.recommendation,
+  }));
+}
+
+function mergeVulnerabilities(
+  aiVulns: Array<Record<string, unknown>>,
+  fallbackVulns: FallbackVulnerability[],
+): Array<Record<string, unknown>> {
+  const merged = [...aiVulns];
+  const seen = new Set(
+    aiVulns.map((v) =>
+      vulnKey({
+        type: String(v.type ?? ""),
+        line_number: typeof v.line_number === "number" ? v.line_number : null,
+        title: String(v.title ?? ""),
+      }),
+    ),
+  );
+
+  for (const f of fallbackVulns) {
+    const key = vulnKey(f);
+    if (seen.has(key)) continue;
+    merged.push(...normalizeFallbackVulns([f]));
+    seen.add(key);
+  }
+
+  return merged;
+}
+
+function tryParseAiJson(text: string): unknown {
+  const trimmed = text.trim();
+
+  try {
+    return JSON.parse(trimmed);
+  } catch {
+    // Continue with extraction strategies.
+  }
+
+  const codeBlockMatch = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (codeBlockMatch) {
+    return JSON.parse(codeBlockMatch[1].trim());
+  }
+
+  let braceCount = 0;
+  let jsonStart = -1;
+  let jsonEnd = -1;
+  for (let i = 0; i < trimmed.length; i++) {
+    if (trimmed[i] === "{") {
+      if (braceCount === 0) jsonStart = i;
+      braceCount++;
+    } else if (trimmed[i] === "}") {
+      braceCount--;
+      if (braceCount === 0 && jsonStart !== -1) {
+        jsonEnd = i;
+        break;
+      }
+    }
+  }
+
+  if (jsonStart !== -1 && jsonEnd !== -1) {
+    return JSON.parse(trimmed.slice(jsonStart, jsonEnd + 1));
+  }
+
+  const lastOpen = trimmed.lastIndexOf("{");
+  const lastClose = trimmed.lastIndexOf("}");
+  if (lastOpen !== -1 && lastClose > lastOpen) {
+    return JSON.parse(trimmed.slice(lastOpen, lastClose + 1));
+  }
+
+  throw new Error("Could not find JSON structure in AI response");
+}
+
 router.post("/scan", async (req, res) => {
   const startTime = Date.now();
 
@@ -103,6 +196,8 @@ router.post("/scan", async (req, res) => {
     return;
   }
 
+  const fallback = analyzeContractFallback(code, contractName ?? undefined);
+
   try {
     const message = await anthropic.messages.create({
       model: OPENROUTER_MODEL,
@@ -118,87 +213,37 @@ router.post("/scan", async (req, res) => {
 
     const content = message.content[0];
     if (content.type !== "text") {
-      res.status(500).json({ error: "Unexpected response from AI" });
-      return;
-    }
-
-    let rawParsed: unknown;
-    try {
-      const text = content.text.trim();
-      
-      req.log.info({rawResponseLength: text.length, rawPreview: text.slice(0, 500)}, "Raw AI response received");
-      
-      // Strategy 1: Try direct JSON parse first (if response_format worked)
-      try {
-        rawParsed = JSON.parse(text);
-        req.log.info("Successfully parsed raw response as JSON");
-      } catch (e1) {
-        req.log.warn(`Direct JSON parse failed: ${String(e1)}, trying extraction strategies`);
-        
-        // Strategy 2: Extract JSON from markdown code blocks (```json ... ```)
-        let jsonStr = text;
-        const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-        if (codeBlockMatch) {
-          jsonStr = codeBlockMatch[1].trim();
-          req.log.info("Extracted JSON from markdown code block");
-        } else {
-          // Strategy 3: Try to find JSON object by matching braces
-          let braceCount = 0;
-          let jsonStart = -1;
-          let jsonEnd = -1;
-          
-          for (let i = 0; i < text.length; i++) {
-            if (text[i] === "{") {
-              if (braceCount === 0) jsonStart = i;
-              braceCount++;
-            } else if (text[i] === "}") {
-              braceCount--;
-              if (braceCount === 0 && jsonStart !== -1) {
-                jsonEnd = i;
-                break;
-              }
-            }
-          }
-          
-          if (jsonStart !== -1 && jsonEnd !== -1) {
-            jsonStr = text.slice(jsonStart, jsonEnd + 1);
-            req.log.info("Extracted JSON from brace matching");
-          } else {
-            // Strategy 4: Try to parse from last { to last }
-            const lastBraceStart = text.lastIndexOf("{");
-            const lastBraceEnd = text.lastIndexOf("}");
-            if (lastBraceStart !== -1 && lastBraceEnd > lastBraceStart) {
-              jsonStr = text.slice(lastBraceStart, lastBraceEnd + 1);
-              req.log.info("Extracted JSON from last braces");
-            } else {
-              throw new Error("Could not find JSON structure in response");
-            }
-          }
-        }
-        
-        rawParsed = JSON.parse(jsonStr);
-        req.log.info("Successfully parsed extracted JSON");
-      }
-      
-      // Validate it has expected fields
-      if (!rawParsed || typeof rawParsed !== 'object') {
-        throw new Error("Parsed JSON is not an object");
-      }
-    } catch (jsonError) {
-      req.log.error(
-        { rawFull: content.text.slice(0, 2000), error: String(jsonError) },
-        "Failed to parse AI response as JSON"
-      );
-
       const analysis_time_ms = Date.now() - startTime;
       const scanData = {
         success: true,
         contract_name: contractName ?? "Unknown Contract",
         code_hash: createHash("sha256").update(code).digest("hex"),
-        total_vulnerabilities: 0,
-        risk_score: 0,
-        vulnerabilities: [],
-        summary: "AI returned an unstructured response. Please retry scan for a detailed structured report.",
+        total_vulnerabilities: fallback.vulnerabilities.length,
+        risk_score: fallback.risk_score,
+        vulnerabilities: normalizeFallbackVulns(fallback.vulnerabilities),
+        summary: `${fallback.summary} (AI returned unexpected content type.)`,
+        analysis_time_ms,
+        timestamp: new Date().toISOString(),
+      };
+      const scanId = storeScan(scanData);
+      res.json({ ...scanData, scanId });
+      return;
+    }
+
+    let rawParsed: unknown;
+    try {
+      rawParsed = tryParseAiJson(content.text);
+    } catch (jsonError) {
+      req.log.warn({ err: String(jsonError) }, "AI JSON parse failed, using fallback analysis");
+      const analysis_time_ms = Date.now() - startTime;
+      const scanData = {
+        success: true,
+        contract_name: contractName ?? "Unknown Contract",
+        code_hash: createHash("sha256").update(code).digest("hex"),
+        total_vulnerabilities: fallback.vulnerabilities.length,
+        risk_score: fallback.risk_score,
+        vulnerabilities: normalizeFallbackVulns(fallback.vulnerabilities),
+        summary: `${fallback.summary} (AI response was unstructured.)`,
         analysis_time_ms,
         timestamp: new Date().toISOString(),
       };
@@ -209,24 +254,44 @@ router.post("/scan", async (req, res) => {
     }
 
     const aiResult = AIResponseSchema.safeParse(rawParsed);
+    const analysis_time_ms = Date.now() - startTime;
+    const timestamp = new Date().toISOString();
+
     if (!aiResult.success) {
-      req.log.warn({ issues: aiResult.error.issues, parsed: rawParsed }, "AI response schema validation failed, using partial data");
-      
-      // Instead of failing, try to extract useful data from the partial response
+      req.log.warn({ issues: aiResult.error.issues }, "AI schema validation failed, merging with fallback");
       const partial = rawParsed as Record<string, unknown>;
-      const analysis_time_ms = Date.now() - startTime;
+      const aiVulns = Array.isArray(partial.vulnerabilities)
+        ? (partial.vulnerabilities as VulnerabilityAIType[]).map((v, idx) => ({
+            id: v?.id ?? idx + 1,
+            type: v?.type ?? "unknown",
+            severity: v?.severity ?? "LOW",
+            swc_id: v?.swc_id ?? null,
+            line_number: v?.line_number ?? null,
+            affected_lines: v?.affected_lines ?? null,
+            affected_functions: v?.affected_functions ?? null,
+            title: v?.title ?? "Vulnerability",
+            description: v?.description ?? "Potential issue detected.",
+            technical_risk: v?.technical_risk ?? "",
+            attack_scenario: v?.attack_scenario ?? null,
+            impact: v?.impact ?? null,
+            vulnerable_code: v?.vulnerable_code ?? null,
+            fixed_code: v?.fixed_code ?? null,
+            recommendation: v?.recommendation ?? "Review and patch this issue.",
+          }))
+        : [];
+
+      const merged = mergeVulnerabilities(aiVulns as Array<Record<string, unknown>>, fallback.vulnerabilities);
+
       const scanData = {
         success: true,
         contract_name: (partial.contract_name as string) || contractName || "Unknown Contract",
         code_hash: createHash("sha256").update(code).digest("hex"),
-        total_vulnerabilities: (partial.total_vulnerabilities as number) || 0,
-        risk_score: (partial.risk_score as number) || 0,
-        vulnerabilities: Array.isArray(partial.vulnerabilities) ? 
-          (partial.vulnerabilities as VulnerabilityAIType[]).filter(v => v && typeof v === 'object') 
-          : [],
-        summary: (partial.summary as string) || "Scan completed with partial results.",
+        total_vulnerabilities: merged.length,
+        risk_score: Math.max((partial.risk_score as number) || 0, fallback.risk_score),
+        vulnerabilities: merged,
+        summary: (partial.summary as string) || `${fallback.summary} (AI response partial.)`,
         analysis_time_ms,
-        timestamp: new Date().toISOString(),
+        timestamp,
       };
 
       const scanId = storeScan(scanData);
@@ -235,10 +300,7 @@ router.post("/scan", async (req, res) => {
     }
 
     const parsed = aiResult.data;
-    const analysis_time_ms = Date.now() - startTime;
-    const timestamp = new Date().toISOString();
-
-    const vulnerabilities = (parsed.vulnerabilities ?? []).map((v: VulnerabilityAIType, idx: number) => ({
+    const aiVulns = (parsed.vulnerabilities ?? []).map((v: VulnerabilityAIType, idx: number) => ({
       id: v.id ?? idx + 1,
       type: v.type,
       severity: v.severity,
@@ -248,33 +310,48 @@ router.post("/scan", async (req, res) => {
       affected_functions: v.affected_functions ?? null,
       title: v.title,
       description: v.description,
-      technical_risk: v.technical_risk,
+      technical_risk: v.technical_risk ?? "",
       attack_scenario: v.attack_scenario ?? null,
       impact: v.impact ?? null,
       vulnerable_code: v.vulnerable_code ?? null,
       fixed_code: v.fixed_code ?? null,
-      recommendation: v.recommendation,
+      recommendation: v.recommendation ?? "Review and patch this issue.",
     }));
+
+    const merged = mergeVulnerabilities(aiVulns as Array<Record<string, unknown>>, fallback.vulnerabilities);
 
     const scanData = {
       success: true,
       contract_name: parsed.contract_name ?? contractName ?? "Unknown Contract",
       code_hash: createHash("sha256").update(code).digest("hex"),
-      total_vulnerabilities: parsed.total_vulnerabilities ?? vulnerabilities.length,
-      risk_score: parsed.risk_score ?? 0,
-      vulnerabilities,
-      summary: parsed.summary ?? "Analysis complete.",
+      total_vulnerabilities: merged.length,
+      risk_score: Math.max(parsed.risk_score ?? 0, fallback.risk_score),
+      vulnerabilities: merged,
+      summary: parsed.summary ?? fallback.summary,
       analysis_time_ms,
       timestamp,
     };
 
     const scanId = storeScan(scanData);
-
     res.json({ ...scanData, scanId });
   } catch (err: unknown) {
-    req.log.error({ err }, "Error calling OpenRouter API");
+    req.log.error({ err }, "Error calling OpenRouter API, using fallback analyzer");
     const resolved = resolveAiError(err);
-    res.status(resolved.status).json({ error: resolved.message });
+    const analysis_time_ms = Date.now() - startTime;
+    const scanData = {
+      success: true,
+      contract_name: contractName ?? "Unknown Contract",
+      code_hash: createHash("sha256").update(code).digest("hex"),
+      total_vulnerabilities: fallback.vulnerabilities.length,
+      risk_score: fallback.risk_score,
+      vulnerabilities: normalizeFallbackVulns(fallback.vulnerabilities),
+      summary: `${fallback.summary} (AI unavailable: ${resolved.message})`,
+      analysis_time_ms,
+      timestamp: new Date().toISOString(),
+    };
+
+    const scanId = storeScan(scanData);
+    res.json({ ...scanData, scanId });
   }
 });
 
