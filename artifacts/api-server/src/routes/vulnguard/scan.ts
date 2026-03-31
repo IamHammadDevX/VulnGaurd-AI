@@ -9,6 +9,51 @@ import * as zod from "zod";
 
 const router: IRouter = Router();
 
+function resolveAiError(err: unknown): { status: number; message: string } {
+  const status = (err as { status?: number })?.status;
+  const message = (err as { message?: string })?.message ?? "";
+
+  if (status === 429) {
+    return { status: 429, message: "AI rate limit reached. Please wait 30-60 seconds and retry." };
+  }
+  if (status === 401 || status === 403) {
+    return {
+      status: 502,
+      message: "AI provider authentication failed. Verify OPENROUTER_API_KEY in backend environment.",
+    };
+  }
+  if (status === 402) {
+    return {
+      status: 502,
+      message: "AI provider quota/billing issue. Check OpenRouter credits and model access.",
+    };
+  }
+  if (status === 400) {
+    return {
+      status: 502,
+      message: "AI request rejected. Check OPENROUTER_MODEL and provider compatibility.",
+    };
+  }
+  if (status && status >= 500) {
+    return {
+      status: 502,
+      message: "AI provider is temporarily unavailable. Please retry shortly.",
+    };
+  }
+
+  if (/timeout|timed out|abort/i.test(message)) {
+    return {
+      status: 504,
+      message: "AI request timed out. Please retry with a smaller contract or try again shortly.",
+    };
+  }
+
+  return {
+    status: 500,
+    message: "Failed to analyze contract. Please try again.",
+  };
+}
+
 const VulnerabilityAI = zod.object({
   id: zod.number().optional(),
   type: zod.string(),
@@ -228,12 +273,8 @@ router.post("/scan", async (req, res) => {
     res.json({ ...scanData, scanId });
   } catch (err: unknown) {
     req.log.error({ err }, "Error calling OpenRouter API");
-    const status = (err as { status?: number }).status;
-    if (status === 429) {
-      res.status(429).json({ error: "Rate limit exceeded. Please wait a moment and try again." });
-    } else {
-      res.status(500).json({ error: "Failed to analyze contract. Please try again." });
-    }
+    const resolved = resolveAiError(err);
+    res.status(resolved.status).json({ error: resolved.message });
   }
 });
 
