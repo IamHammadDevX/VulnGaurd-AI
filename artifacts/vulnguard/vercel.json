@@ -4,7 +4,7 @@
   "rewrites": [
     {
       "source": "/api/:match*",
-      "destination": "https://your-deployed-backend-url.com/api/:match*"
+      "destination": "https://vulngaurd-ai.onrender.com/api/:match*"
     },
     {
       "source": "/(.*)",
