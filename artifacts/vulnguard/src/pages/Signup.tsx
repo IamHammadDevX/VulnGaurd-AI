@@ -1,17 +1,19 @@
 import { useState, type FormEvent } from "react";
 import { Link, useLocation } from "wouter";
-import { UserPlus, Shield } from "lucide-react";
-import { useAuth } from "@workspace/replit-auth-web";
+import { UserPlus, Shield, Eye, EyeOff } from "lucide-react";
+import { useAuth } from "@workspace/replit-auth-web";        
 
 export default function Signup() {
   const [, navigate] = useLocation();
-  const { signUpWithPassword, isAuthenticated } = useAuth();
+  const { signUpWithPassword, isAuthenticated } = useAuth(); 
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -21,15 +23,26 @@ export default function Signup() {
     return null;
   }
 
+  const validatePassword = (pass: string) => {
+    if (pass.length < 8) return "Password must be at least 8 characters.";
+    if (!/[A-Z]/.test(pass)) return "Password must contain at least one uppercase letter.";
+    if (!/[a-z]/.test(pass)) return "Password must contain at least one lowercase letter.";
+    if (!/[0-9]/.test(pass)) return "Password must contain at least one number.";
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(pass)) return "Password must contain at least one special character.";
+    return null;
+  };
+
   const handleSignup = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
     setNotice("");
 
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      setError(passwordError);
       return;
     }
+
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
       return;

@@ -218,7 +218,7 @@ router.post("/scan-stream", async (req, res) => {
       const partial = rawParsed as Record<string, unknown>;
       const analysis_time_ms = Date.now() - startTime;
       const vulnerabilities = (Array.isArray(partial.vulnerabilities) ? 
-        (partial.vulnerabilities as VulnerabilityAI[]).filter(v => v && typeof v === 'object') 
+        (partial.vulnerabilities as any[]).filter(v => v && typeof v === 'object') 
         : []).map((v, idx) => ({
         id: v.id ?? idx + 1,
         type: v.type || "unknown",

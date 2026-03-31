@@ -1,6 +1,6 @@
 import { useMemo, useState, type FormEvent } from "react";
 import { Link, useLocation } from "wouter";
-import { Github, Mail, KeyRound, Shield } from "lucide-react";
+import { Github, Mail, KeyRound, Shield, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@workspace/replit-auth-web";
 
 function getMessage(query: URLSearchParams): string {
@@ -25,6 +25,7 @@ export default function Login() {
   const query = useMemo(() => new URLSearchParams(window.location.search), []);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState(getMessage(query));
@@ -86,8 +87,8 @@ export default function Login() {
           <p className="text-xs text-muted-foreground mt-1">GitHub, email/password, or magic link</p>
         </div>
 
-        {error && <p className="text-xs text-red-400">{error}</p>}
-        {notice && <p className="text-xs text-green-400">{notice}</p>}
+        {error && <p className="text-xs text-red-500 bg-red-500/10 p-2 rounded">{error}</p>}
+        {notice && <p className="text-xs text-green-500 bg-green-500/10 p-2 rounded">{notice}</p>}
 
         <button
           onClick={handleGitHub}
@@ -107,7 +108,7 @@ export default function Login() {
           </div>
         </div>
 
-        <form onSubmit={handlePasswordLogin} className="space-y-3">
+        <form onSubmit={handlePasswordLogin} className="space-y-3" autoComplete="off">
           <div>
             <label className="text-xs text-muted-foreground">Email</label>
             <input
@@ -116,22 +117,35 @@ export default function Login() {
               onChange={(e) => setEmail(e.target.value)}
               className="mt-1 w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm"
               required
+              autoComplete="off"
+              name="login-email"
             />
           </div>
-          <div>
+          <div className="relative">
             <label className="text-xs text-muted-foreground">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm"
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="mt-1 w-full pl-3 pr-10 py-2 rounded-lg bg-white/5 border border-white/10 text-sm"
+                required
+                autoComplete="new-password"
+                name="login-password"
+              />
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 -translate-y-1/2 mt-[2px] text-muted-foreground hover:text-white"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
           </div>
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 disabled:opacity-60"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 disabled:opacity-60 mt-4"
           >
             <KeyRound className="w-4 h-4" />
             Sign in with password

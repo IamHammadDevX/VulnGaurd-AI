@@ -3,18 +3,8 @@ import { useLocation } from "wouter";
 import { createClient } from "@supabase/supabase-js";
 
 function getClient() {
-  const meta = import.meta as unknown as {
-    env?: {
-      VITE_SUPABASE_URL?: string;
-      VITE_SUPABASE_ANON_KEY?: string;
-      SUPABASE_URL?: string;
-      SUPABASE_ANON_KEY?: string;
-    };
-  };
-
-  const url = meta.env?.VITE_SUPABASE_URL ?? meta.env?.SUPABASE_URL ?? "";
-  const key = meta.env?.VITE_SUPABASE_ANON_KEY ?? meta.env?.SUPABASE_ANON_KEY ?? "";
-  if (!url || !key) return null;
+  const url = import.meta.env.VITE_SUPABASE_URL ?? import.meta.env.SUPABASE_URL ?? "";
+  const key = import.meta.env.VITE_SUPABASE_ANON_KEY ?? import.meta.env.SUPABASE_ANON_KEY ?? "";
 
   return createClient(url, key, {
     auth: {

@@ -17,6 +17,8 @@ import { VulnerabilityCard } from "@/components/VulnerabilityCard";
 import { SeverityChart } from "@/components/SeverityChart";
 import { UserMenu } from "@/components/UserMenu";
 import { TeamSwitcher } from "@/components/TeamSwitcher";
+import { useAuth } from "@workspace/replit-auth-web";
+import Landing from "./Landing";
 
 const MAX_BYTES = 50 * 1024;
 
@@ -300,7 +302,7 @@ function IdleState() {
 // ════════════════════════════════════════════════════════════════════════════
 // Home
 // ════════════════════════════════════════════════════════════════════════════
-export default function Home() {
+function Scanner() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [mobileTab, setMobileTab] = useState<"editor" | "results">("editor");
 
@@ -993,4 +995,25 @@ export default function Home() {
 
     </div>
   );
+}
+
+export default function Home() {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-[#0E1117]">
+        <div className="flex flex-col items-center gap-4">
+          <Shield className="w-12 h-12 text-primary animate-pulse" />
+          <p className="text-slate-400 font-medium animate-pulse">Loading VulnGuard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Landing />;
+  }
+
+  return <Scanner />;
 }
