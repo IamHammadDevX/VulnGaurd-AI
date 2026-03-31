@@ -1,0 +1,4 @@
+{
+  "code": "pragma solidity ^0.8.0;\n\ncontract VulnerableBank {\n    mapping(address => uint256) public balances;\n    \n    function withdraw(uint256 amount) public {\n        require(balances[msg.sender] >= amount);\n        (bool success, ) = msg.sender.call{value: amount}(\"\");\n        require(success);\n        balances[msg.sender] -= amount; // Reentrancy bug!\n    }\n}",
+  "contractName": "VulnerableBank"
+}

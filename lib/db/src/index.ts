@@ -18,11 +18,32 @@ function shouldUseSsl(connectionString: string): boolean {
   return /supabase\.(co|com)/i.test(connectionString);
 }
 
-const connectionString = getDatabaseUrl();
+function normalizeConnectionString(connectionString: string): string {
+  try {
+    const url = new URL(connectionString);
+
+    // We control SSL behavior explicitly in Pool config below.
+    url.searchParams.delete("sslmode");
+    url.searchParams.delete("sslcert");
+    url.searchParams.delete("sslkey");
+    url.searchParams.delete("sslrootcert");
+
+    return url.toString();
+  } catch {
+    return connectionString;
+  }
+}
+
+const rawConnectionString = getDatabaseUrl();
+const connectionString = normalizeConnectionString(rawConnectionString);
 
 export const pool = new Pool({
   connectionString,
-  ssl: shouldUseSsl(connectionString) ? { rejectUnauthorized: false } : false,
+  ssl: shouldUseSsl(rawConnectionString)
+    ? {
+        rejectUnauthorized: false,
+      }
+    : false,
 });
 export const db = drizzle(pool, { schema });
 

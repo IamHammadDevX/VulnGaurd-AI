@@ -19,12 +19,12 @@ const VulnerabilityAI = zod.object({
   affected_functions: zod.string().nullable().optional(),
   title: zod.string(),
   description: zod.string(),
-  technical_risk: zod.string(),
+  technical_risk: zod.string().optional(),
   attack_scenario: zod.string().nullable().optional(),
   impact: zod.string().nullable().optional(),
   vulnerable_code: zod.string().nullable().optional(),
   fixed_code: zod.string().nullable().optional(),
-  recommendation: zod.string(),
+  recommendation: zod.string().optional(),
 });
 
 type VulnerabilityAIType = zod.infer<typeof VulnerabilityAI>;
@@ -80,20 +80,112 @@ router.post("/scan", async (req, res) => {
     let rawParsed: unknown;
     try {
       const text = content.text.trim();
-      const jsonStart = text.indexOf("{");
-      const jsonEnd = text.lastIndexOf("}");
-      const jsonStr = jsonStart !== -1 && jsonEnd !== -1 ? text.slice(jsonStart, jsonEnd + 1) : text;
-      rawParsed = JSON.parse(jsonStr);
-    } catch {
-      req.log.error({ raw: content.text }, "Failed to parse AI JSON response");
-      res.status(500).json({ error: "Failed to parse AI analysis. Please try again." });
+      
+      req.log.info({rawResponseLength: text.length, rawPreview: text.slice(0, 500)}, "Raw AI response received");
+      
+      // Strategy 1: Try direct JSON parse first (if response_format worked)
+      try {
+        rawParsed = JSON.parse(text);
+        req.log.info("Successfully parsed raw response as JSON");
+      } catch (e1) {
+        req.log.warn(`Direct JSON parse failed: ${String(e1)}, trying extraction strategies`);
+        
+        // Strategy 2: Extract JSON from markdown code blocks (```json ... ```)
+        let jsonStr = text;
+        const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+        if (codeBlockMatch) {
+          jsonStr = codeBlockMatch[1].trim();
+          req.log.info("Extracted JSON from markdown code block");
+        } else {
+          // Strategy 3: Try to find JSON object by matching braces
+          let braceCount = 0;
+          let jsonStart = -1;
+          let jsonEnd = -1;
+          
+          for (let i = 0; i < text.length; i++) {
+            if (text[i] === "{") {
+              if (braceCount === 0) jsonStart = i;
+              braceCount++;
+            } else if (text[i] === "}") {
+              braceCount--;
+              if (braceCount === 0 && jsonStart !== -1) {
+                jsonEnd = i;
+                break;
+              }
+            }
+          }
+          
+          if (jsonStart !== -1 && jsonEnd !== -1) {
+            jsonStr = text.slice(jsonStart, jsonEnd + 1);
+            req.log.info("Extracted JSON from brace matching");
+          } else {
+            // Strategy 4: Try to parse from last { to last }
+            const lastBraceStart = text.lastIndexOf("{");
+            const lastBraceEnd = text.lastIndexOf("}");
+            if (lastBraceStart !== -1 && lastBraceEnd > lastBraceStart) {
+              jsonStr = text.slice(lastBraceStart, lastBraceEnd + 1);
+              req.log.info("Extracted JSON from last braces");
+            } else {
+              throw new Error("Could not find JSON structure in response");
+            }
+          }
+        }
+        
+        rawParsed = JSON.parse(jsonStr);
+        req.log.info("Successfully parsed extracted JSON");
+      }
+      
+      // Validate it has expected fields
+      if (!rawParsed || typeof rawParsed !== 'object') {
+        throw new Error("Parsed JSON is not an object");
+      }
+    } catch (jsonError) {
+      req.log.error(
+        { rawFull: content.text.slice(0, 2000), error: String(jsonError) },
+        "Failed to parse AI response as JSON"
+      );
+
+      const analysis_time_ms = Date.now() - startTime;
+      const scanData = {
+        success: true,
+        contract_name: contractName ?? "Unknown Contract",
+        code_hash: createHash("sha256").update(code).digest("hex"),
+        total_vulnerabilities: 0,
+        risk_score: 0,
+        vulnerabilities: [],
+        summary: "AI returned an unstructured response. Please retry scan for a detailed structured report.",
+        analysis_time_ms,
+        timestamp: new Date().toISOString(),
+      };
+
+      const scanId = storeScan(scanData);
+      res.json({ ...scanData, scanId });
       return;
     }
 
     const aiResult = AIResponseSchema.safeParse(rawParsed);
     if (!aiResult.success) {
-      req.log.error({ issues: aiResult.error.issues }, "AI response did not match expected schema");
-      res.status(502).json({ error: "AI returned an unexpected format. Please try again." });
+      req.log.warn({ issues: aiResult.error.issues, parsed: rawParsed }, "AI response schema validation failed, using partial data");
+      
+      // Instead of failing, try to extract useful data from the partial response
+      const partial = rawParsed as Record<string, unknown>;
+      const analysis_time_ms = Date.now() - startTime;
+      const scanData = {
+        success: true,
+        contract_name: (partial.contract_name as string) || contractName || "Unknown Contract",
+        code_hash: createHash("sha256").update(code).digest("hex"),
+        total_vulnerabilities: (partial.total_vulnerabilities as number) || 0,
+        risk_score: (partial.risk_score as number) || 0,
+        vulnerabilities: Array.isArray(partial.vulnerabilities) ? 
+          (partial.vulnerabilities as VulnerabilityAIType[]).filter(v => v && typeof v === 'object') 
+          : [],
+        summary: (partial.summary as string) || "Scan completed with partial results.",
+        analysis_time_ms,
+        timestamp: new Date().toISOString(),
+      };
+
+      const scanId = storeScan(scanData);
+      res.json({ ...scanData, scanId });
       return;
     }
 

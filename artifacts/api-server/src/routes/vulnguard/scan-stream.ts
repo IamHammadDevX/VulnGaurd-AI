@@ -116,21 +116,178 @@ router.post("/scan-stream", async (req, res) => {
 
     // ── Parse JSON ──
     let rawParsed: unknown;
+    const text = fullText.trim();
     try {
-      const text = fullText.trim();
-      const jsonStart = text.indexOf("{");
-      const jsonEnd = text.lastIndexOf("}");
-      const jsonStr = jsonStart !== -1 && jsonEnd !== -1 ? text.slice(jsonStart, jsonEnd + 1) : text;
-      rawParsed = JSON.parse(jsonStr);
-    } catch {
-      sseWrite(res, "error", { message: "Failed to parse AI analysis. Please try again." });
+      req.log.info({responseLength: text.length, preview: text.slice(0, 500)}, "Raw AI response received");
+      
+      // Strategy 1: Try direct JSON parse first
+      try {
+        rawParsed = JSON.parse(text);
+        req.log.info("Successfully parsed raw response as JSON");
+      } catch (e1) {
+        req.log.warn(`Direct JSON parse failed: ${String(e1)}, trying extraction strategies`);
+        
+        // Strategy 2: Extract JSON from markdown code blocks (```json ... ```)
+        let jsonStr = text;
+        const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+        if (codeBlockMatch) {
+          jsonStr = codeBlockMatch[1].trim();
+          req.log.info("Extracted JSON from markdown code block");
+        } else {
+          // Strategy 3: Try to find JSON object by matching braces
+          let braceCount = 0;
+          let jsonStart = -1;
+          let jsonEnd = -1;
+          
+          for (let i = 0; i < text.length; i++) {
+            if (text[i] === "{") {
+              if (braceCount === 0) jsonStart = i;
+              braceCount++;
+            } else if (text[i] === "}") {
+              braceCount--;
+              if (braceCount === 0 && jsonStart !== -1) {
+                jsonEnd = i;
+                break;
+              }
+            }
+          }
+          
+          if (jsonStart !== -1 && jsonEnd !== -1) {
+            jsonStr = text.slice(jsonStart, jsonEnd + 1);
+            req.log.info("Extracted JSON from brace matching");
+          } else {
+            // Strategy 4: Try to parse from last { to last }
+            const lastBraceStart = text.lastIndexOf("{");
+            const lastBraceEnd = text.lastIndexOf("}");
+            if (lastBraceStart !== -1 && lastBraceEnd > lastBraceStart) {
+              jsonStr = text.slice(lastBraceStart, lastBraceEnd + 1);
+              req.log.info("Extracted JSON from last braces");
+            } else {
+              throw new Error("Could not find JSON structure in response");
+            }
+          }
+        }
+        
+        rawParsed = JSON.parse(jsonStr);
+        req.log.info("Successfully parsed extracted JSON");
+      }
+      
+      // Validate it has expected fields
+      if (!rawParsed || typeof rawParsed !== 'object') {
+        throw new Error("Parsed JSON is not an object");
+      }
+    } catch (jsonError) {
+      // Fallback: do not fail entire scan when model returns prose/invalid JSON.
+      req.log.error({ 
+        preview: text.slice(0, 800), 
+        error: String(jsonError) 
+      }, "Failed to parse AI response as JSON");
+
+      const analysis_time_ms = Date.now() - startTime;
+      const fallback = {
+        success: true,
+        contract_name: contractName ?? "Unknown Contract",
+        code_hash: createHash("sha256").update(code).digest("hex"),
+        total_vulnerabilities: 0,
+        risk_score: 0,
+        vulnerabilities: [],
+        summary: "AI returned an unstructured response. Please retry scan for a detailed structured report.",
+        analysis_time_ms,
+        timestamp: new Date().toISOString(),
+      };
+
+      const scanId = storeScan(fallback);
+      sseWrite(res, "meta", {
+        contract_name: fallback.contract_name,
+        total_vulnerabilities: fallback.total_vulnerabilities,
+        risk_score: fallback.risk_score,
+        summary: fallback.summary,
+        analysis_time_ms,
+        scanId,
+      });
+      sseWrite(res, "complete", { ...fallback, scanId });
       res.end();
       return;
     }
 
     const aiResult = AIResponseSchema.safeParse(rawParsed);
     if (!aiResult.success) {
-      sseWrite(res, "error", { message: "AI returned an unexpected format. Please try again." });
+      req.log.warn({ issues: aiResult.error.issues, parsed: rawParsed }, "AI response schema validation failed, using partial data");
+      
+      // Instead of failing, try to extract useful data from the partial response
+      const partial = rawParsed as Record<string, unknown>;
+      const analysis_time_ms = Date.now() - startTime;
+      const vulnerabilities = (Array.isArray(partial.vulnerabilities) ? 
+        (partial.vulnerabilities as VulnerabilityAI[]).filter(v => v && typeof v === 'object') 
+        : []).map((v, idx) => ({
+        id: v.id ?? idx + 1,
+        type: v.type || "unknown",
+        severity: v.severity || "LOW",
+        swc_id: v.swc_id ?? null,
+        line_number: v.line_number ?? null,
+        affected_lines: v.affected_lines ?? null,
+        affected_functions: v.affected_functions ?? null,
+        title: v.title || "Vulnerability",
+        description: v.description || "No description",
+        technical_risk: v.technical_risk || "",
+        attack_scenario: v.attack_scenario ?? null,
+        impact: v.impact ?? null,
+        gas_impact: v.gas_impact ?? null,
+        vulnerable_code: v.vulnerable_code ?? null,
+        fixed_code: v.fixed_code ?? null,
+        recommendation: v.recommendation || "",
+      }));
+
+      const scanData = {
+        success: true,
+        contract_name: (partial.contract_name as string) || contractName || "Unknown Contract",
+        code_hash: createHash("sha256").update(code).digest("hex"),
+        total_vulnerabilities: (partial.total_vulnerabilities as number) || vulnerabilities.length,
+        risk_score: (partial.risk_score as number) || 0,
+        vulnerabilities,
+        summary: (partial.summary as string) || "Scan completed with partial results.",
+        analysis_time_ms,
+        timestamp: new Date().toISOString(),
+      };
+
+      const scanId = storeScan(scanData);
+      
+      // Persist to DB if user is authenticated
+      if (req.isAuthenticated()) {
+        try {
+          await db.insert(scansTable).values({
+            id: scanId,
+            userId: req.user.id,
+            contractName: scanData.contract_name,
+            contractCode: code,
+            contractHash: scanData.code_hash,
+            riskScore: scanData.risk_score,
+            status: "completed",
+            vulnerabilities: vulnerabilities as unknown as Record<string, unknown>[],
+            summary: scanData.summary,
+            executionTime: analysis_time_ms,
+            modelUsed: OPENROUTER_MODEL,
+          });
+        } catch (dbErr) {
+          req.log.warn({ err: dbErr }, "Failed to persist scan to database");
+        }
+      }
+
+      sseWrite(res, "meta", {
+        contract_name: scanData.contract_name,
+        total_vulnerabilities: scanData.total_vulnerabilities,
+        risk_score: scanData.risk_score,
+        summary: scanData.summary,
+        analysis_time_ms,
+        scanId,
+      });
+
+      for (const vuln of vulnerabilities) {
+        await new Promise<void>((resolve) => setTimeout(resolve, 180));
+        sseWrite(res, "vuln", vuln);
+      }
+
+      sseWrite(res, "complete", { ...scanData, scanId });
       res.end();
       return;
     }

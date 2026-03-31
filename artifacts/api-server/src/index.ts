@@ -1,19 +1,31 @@
-import app from "./app";
-import { logger } from "./lib/logger";
+import fs from "node:fs";
+import path from "node:path";
+import dotenv from "dotenv";
 
-const rawPort = process.env["PORT"];
+const envCandidates = [
+  path.resolve(process.cwd(), ".env"),
+  path.resolve(process.cwd(), "..", "..", ".env"),
+  path.resolve(import.meta.dirname, "..", "..", "..", ".env"),
+  path.resolve(import.meta.dirname, "..", "..", "..", "..", ".env"),
+];
 
-if (!rawPort) {
-  throw new Error(
-    "PORT environment variable is required but was not provided.",
-  );
+for (const candidate of envCandidates) {
+  if (fs.existsSync(candidate)) {
+    dotenv.config({ path: candidate });
+    break;
+  }
 }
+
+const rawPort = process.env["PORT"] ?? "8080";
 
 const port = Number(rawPort);
 
 if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
+
+const { default: app } = await import("./app");
+const { logger } = await import("./lib/logger");
 
 app.listen(port, (err) => {
   if (err) {

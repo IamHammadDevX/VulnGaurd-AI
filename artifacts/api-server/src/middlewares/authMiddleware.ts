@@ -7,9 +7,9 @@ import { getSupabaseAdminClient } from "../lib/supabase";
 import {
   clearSession,
   getOidcConfig,
-  getSessionId,
   getSession,
   updateSession,
+  SESSION_COOKIE,
   type SessionData,
 } from "../lib/auth";
 
@@ -94,24 +94,90 @@ async function authenticateWithSupabase(req: Request): Promise<AuthUser | null> 
       null,
   };
 
-  await db
-    .insert(usersTable)
-    .values(userData)
-    .onConflictDoUpdate({
-      target: usersTable.id,
-      set: {
+  // Keep auth resilient: avoid crashing requests when legacy rows already own the same email.
+  let dbUser:
+    | {
+        id: string;
+        email: string | null;
+        firstName: string | null;
+        lastName: string | null;
+        profileImageUrl: string | null;
+      }
+    | undefined;
+
+  const [existingById] = await db
+    .select()
+    .from(usersTable)
+    .where(eq(usersTable.id, userData.id));
+
+  if (existingById) {
+    await db
+      .update(usersTable)
+      .set({
         email: userData.email,
         firstName: userData.firstName,
         lastName: userData.lastName,
         profileImageUrl: userData.profileImageUrl,
         updatedAt: new Date(),
-      },
-    });
+      })
+      .where(eq(usersTable.id, userData.id));
 
-  const [dbUser] = await db
-    .select()
-    .from(usersTable)
-    .where(eq(usersTable.id, data.user.id));
+    dbUser = {
+      id: existingById.id,
+      email: userData.email,
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      profileImageUrl: userData.profileImageUrl,
+    };
+  } else if (userData.email) {
+    const [existingByEmail] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.email, userData.email));
+
+    if (existingByEmail) {
+      await db
+        .update(usersTable)
+        .set({
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          profileImageUrl: userData.profileImageUrl,
+          updatedAt: new Date(),
+        })
+        .where(eq(usersTable.id, existingByEmail.id));
+
+      // Preserve existing PK to avoid FK breakage from legacy rows.
+      dbUser = {
+        id: existingByEmail.id,
+        email: existingByEmail.email,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        profileImageUrl: userData.profileImageUrl,
+      };
+    }
+  }
+
+  if (!dbUser) {
+    await db
+      .insert(usersTable)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: usersTable.id,
+        set: {
+          email: userData.email,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          profileImageUrl: userData.profileImageUrl,
+          updatedAt: new Date(),
+        },
+      });
+
+    const [inserted] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.id, userData.id));
+    dbUser = inserted;
+  }
 
   if (!dbUser) return null;
 
@@ -133,29 +199,59 @@ export async function authMiddleware(
     return this.user != null;
   } as Request["isAuthenticated"];
 
-  const supabaseUser = await authenticateWithSupabase(req);
+  let supabaseUser: AuthUser | null = null;
+  try {
+    supabaseUser = await authenticateWithSupabase(req);
+  } catch (err) {
+    req.log.warn({ err }, "Supabase auth sync failed; continuing without auth");
+  }
+
   if (supabaseUser) {
     req.user = supabaseUser;
     next();
     return;
   }
 
-  const sid = getSessionId(req);
+  // Legacy session store should only read its own cookie sid, never Bearer JWTs.
+  const sidValue = req.cookies?.[SESSION_COOKIE];
+  const sid = typeof sidValue === "string" ? sidValue : undefined;
   if (!sid) {
     next();
     return;
   }
 
-  const session = await getSession(sid);
-  if (!session?.user?.id) {
-    await clearSession(res, sid);
+  let session: SessionData | null = null;
+  try {
+    session = await getSession(sid);
+  } catch (err) {
+    req.log.warn({ err }, "Legacy session lookup failed; continuing without auth");
     next();
     return;
   }
 
-  const refreshed = await refreshIfExpired(sid, session);
+  if (!session?.user?.id) {
+    try {
+      await clearSession(res, sid);
+    } catch (err) {
+      req.log.warn({ err }, "Failed to clear legacy session cookie");
+    }
+    next();
+    return;
+  }
+
+  let refreshed: SessionData | null = null;
+  try {
+    refreshed = await refreshIfExpired(sid, session);
+  } catch (err) {
+    req.log.warn({ err }, "Legacy session refresh failed; continuing without auth");
+  }
+
   if (!refreshed) {
-    await clearSession(res, sid);
+    try {
+      await clearSession(res, sid);
+    } catch (err) {
+      req.log.warn({ err }, "Failed to clear legacy session cookie");
+    }
     next();
     return;
   }

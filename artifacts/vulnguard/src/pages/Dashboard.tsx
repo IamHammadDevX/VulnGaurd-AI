@@ -176,7 +176,7 @@ export default function Dashboard() {
     try {
       const r = await fetch("/api/user/dashboard/trend", { credentials: "include" });
       const data = await r.json();
-      setTrend(data.trend);
+      setTrend(Array.isArray(data?.trend) ? data.trend : []);
     } catch {}
   }, []);
 
@@ -279,6 +279,8 @@ export default function Dashboard() {
     const date = new Date(d);
     return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   };
+
+  const trendData = Array.isArray(trend) ? trend : [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -403,10 +405,10 @@ export default function Dashboard() {
                   <h2 className="font-semibold text-sm">Vulnerability Trend (30 Days)</h2>
                 </div>
                 <div className="p-4 h-72">
-                  {trend.length > 0 ? (
+                  {trendData.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart
-                        data={trend}
+                        data={trendData}
                         margin={{ top: 5, right: 10, left: -20, bottom: 0 }}
                       >
                         <defs>

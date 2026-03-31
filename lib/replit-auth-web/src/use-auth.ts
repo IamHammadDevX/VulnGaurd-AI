@@ -32,10 +32,30 @@ type SupabaseEnv = {
   anonKey: string;
 };
 
+declare global {
+  interface Window {
+    __VULNGUARD_SUPABASE__?: {
+      url?: string;
+      anonKey?: string;
+    };
+  }
+}
+
 let cachedSupabaseEnv: SupabaseEnv | null | undefined;
 
 function getSupabaseEnv(): SupabaseEnv | null {
   if (cachedSupabaseEnv !== undefined) return cachedSupabaseEnv;
+
+  const runtimeConfig =
+    typeof window !== "undefined" ? window.__VULNGUARD_SUPABASE__ : undefined;
+
+  if (runtimeConfig?.url && runtimeConfig?.anonKey) {
+    cachedSupabaseEnv = {
+      url: runtimeConfig.url,
+      anonKey: runtimeConfig.anonKey,
+    };
+    return cachedSupabaseEnv;
+  }
 
   const meta = import.meta as unknown as {
     env?: {
