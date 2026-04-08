@@ -9,6 +9,10 @@ import Teams from "@/pages/Teams";
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
 import AuthCallback from "@/pages/AuthCallback";
+import Privacy from "@/pages/Privacy";
+import Terms from "@/pages/Terms";
+import Contact from "@/pages/Contact";
+import Support from "@/pages/Support";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -30,6 +34,10 @@ function AppRouter() {
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/profile" component={Profile} />
       <Route path="/teams" component={Teams} />
+      <Route path="/privacy" component={Privacy} />
+      <Route path="/terms" component={Terms} />
+      <Route path="/contact" component={Contact} />
+      <Route path="/support" component={Support} />
       <Route component={NotFound} />
     </Switch>
   );
