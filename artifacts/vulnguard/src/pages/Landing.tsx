@@ -1,5 +1,6 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Link } from "wouter";
+import { useAuth } from "@workspace/replit-auth-web";
 import { Shield, Lock, Zap, Code2, ChevronRight, CheckCircle2, ArrowRight, Play, Cpu, Layers } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -95,6 +96,8 @@ const TESTIMONIALS = [
 
 export default function Landing() {
   const { scrollYProgress } = useScroll();
+  const { isAuthenticated } = useAuth();
+  
   const y1 = useTransform(scrollYProgress, [0, 1], [0, 200]);
   const y2 = useTransform(scrollYProgress, [0, 1], [0, -100]);
 
@@ -118,14 +121,24 @@ export default function Landing() {
              <a href="#testimonials" className="hover:text-white transition-colors">Testimonials</a>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/login">
-              <a className="text-sm font-medium text-slate-300 hover:text-white transition-colors duration-200 hidden sm:block">Log In</a>
-            </Link>
-            <Link href="/signup">
-              <a className="text-sm font-medium bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-full transition-all flex items-center gap-1 shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:shadow-[0_0_25px_rgba(59,130,246,0.5)]">
-                Start Scanning
-              </a>
-            </Link>
+            {!isAuthenticated ? (
+              <>
+                <Link href="/login">
+                  <a className="text-sm font-medium text-slate-300 hover:text-white transition-colors duration-200 hidden sm:block">Log In</a>
+                </Link>
+                <Link href="/signup">
+                  <a className="text-sm font-medium bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-full transition-all flex items-center gap-1 shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:shadow-[0_0_25px_rgba(59,130,246,0.5)]">
+                    Start Scanning
+                  </a>
+                </Link>
+              </>
+            ) : (
+              <Link href="/">
+                <a className="text-sm font-medium bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-full transition-all flex items-center gap-1 shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:shadow-[0_0_25px_rgba(59,130,246,0.5)]">
+                  Scanner
+                </a>
+              </Link>
+            )}
           </div>
         </div>
       </nav>
@@ -175,17 +188,28 @@ export default function Landing() {
               transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
               className="flex flex-col sm:flex-row items-center justify-center gap-4"
             >
-              <Link href="/signup">
-                <a className="w-full sm:w-auto px-8 py-4 bg-primary text-primary-foreground font-semibold rounded-full hover:bg-primary/90 transition-all flex items-center justify-center gap-2 group shadow-[0_0_30px_rgba(59,130,246,0.3)]">
-                  Start Free Scan
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </a>
-              </Link>
-              <Link href="/login">
-                <a className="w-full sm:w-auto px-8 py-4 bg-white/5 text-white font-semibold rounded-full hover:bg-white/10 hover:text-white border border-white/10 transition-all flex items-center justify-center gap-2">
-                  <Play className="w-4 h-4 fill-current" /> View Demo
-                </a>
-              </Link>
+              {!isAuthenticated ? (
+                <>
+                  <Link href="/signup">
+                    <a className="w-full sm:w-auto px-8 py-4 bg-primary text-primary-foreground font-semibold rounded-full hover:bg-primary/90 transition-all flex items-center justify-center gap-2 group shadow-[0_0_30px_rgba(59,130,246,0.3)]">
+                      Start Free Scan
+                      <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    </a>
+                  </Link>
+                  <Link href="/login">
+                    <a className="w-full sm:w-auto px-8 py-4 bg-white/5 text-white font-semibold rounded-full hover:bg-white/10 hover:text-white border border-white/10 transition-all flex items-center justify-center gap-2">
+                      <Play className="w-4 h-4 fill-current" /> View Demo
+                    </a>
+                  </Link>
+                </>
+              ) : (
+                <Link href="/">
+                  <a className="w-full sm:w-auto px-8 py-4 bg-primary text-primary-foreground font-semibold rounded-full hover:bg-primary/90 transition-all flex items-center justify-center gap-2 group shadow-[0_0_30px_rgba(59,130,246,0.3)]">
+                    Go to Scanner
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </a>
+                </Link>
+              )}
             </motion.div>
           </div>
 

@@ -1,8 +1,11 @@
 import { motion } from "framer-motion";
 import { Link } from "wouter";
 import { Shield, LifeBuoy, FileQuestion, MessageSquare, BookOpen, ChevronRight } from "lucide-react";
+import { useAuth } from "@workspace/replit-auth-web";
 
 export default function Support() {
+  const { isAuthenticated } = useAuth();
+  
   const faqs = [
     {
       q: "How accurate is the AI Scanner?",
@@ -26,7 +29,7 @@ export default function Support() {
     <div className="min-h-screen bg-[#0E1117] text-slate-200 overflow-hidden font-sans selection:bg-primary/30 flex flex-col">
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-[#0E1117]/80 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/">
+          <Link href="/home">
             <a className="flex items-center gap-2 hover:opacity-80 transition-opacity">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
                 <Shield className="w-5 h-5 text-white" />
@@ -35,9 +38,15 @@ export default function Support() {
             </a>
           </Link>
           <div className="flex items-center gap-4">
-            <Link href="/login">
-              <a className="text-sm font-medium text-slate-300 hover:text-white transition-colors duration-200">Log In</a>
-            </Link>
+            {!isAuthenticated ? (
+              <Link href="/login">
+                <a className="text-sm font-medium text-slate-300 hover:text-white transition-colors duration-200">Log In</a>
+              </Link>
+            ) : (
+              <Link href="/">
+                <a className="text-sm font-medium text-slate-300 hover:text-white transition-colors duration-200">Scanner</a>
+              </Link>
+            )}
           </div>
         </div>
       </nav>

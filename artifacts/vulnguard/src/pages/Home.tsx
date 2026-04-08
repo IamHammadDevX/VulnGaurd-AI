@@ -405,7 +405,7 @@ function Scanner() {
       <header className="border-b border-white/6 bg-card/40 backdrop-blur-2xl sticky top-0 z-50 shrink-0">
         <div className="max-w-[1600px] mx-auto px-4 h-14 flex items-center justify-between gap-4">
           {/* Logo */}
-          <Link href="/">
+          <Link href="/home">
             <a className="flex items-center gap-2.5 shrink-0 hover:opacity-80 transition-opacity cursor-pointer">
               <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-accent p-[1.5px] shrink-0">
                 <div className="w-full h-full bg-background rounded-[10px] flex items-center justify-center">
@@ -434,6 +434,11 @@ function Scanner() {
 
           {/* Right nav */}
           <div className="flex items-center gap-2 shrink-0">
+            <Link href="/home">
+              <a className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/8 text-muted-foreground hover:text-white text-xs font-medium transition-colors">
+                Home
+              </a>
+            </Link>
             {result && (
               <motion.button
                 initial={{ opacity: 0, scale: 0.9 }}

@@ -2,7 +2,8 @@ import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import Home from "@/pages/Home";
+// Home is DefaultHome
+// DefaultHome imported below
 import Dashboard from "@/pages/Dashboard";
 import Profile from "@/pages/Profile";
 import Teams from "@/pages/Teams";
@@ -14,6 +15,8 @@ import Terms from "@/pages/Terms";
 import Contact from "@/pages/Contact";
 import Support from "@/pages/Support";
 import NotFound from "@/pages/not-found";
+import Landing from "@/pages/Landing";
+import DefaultHome from "@/pages/Home";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,7 +30,8 @@ const queryClient = new QueryClient({
 function AppRouter() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
+      <Route path="/" component={DefaultHome} />
+      <Route path="/home" component={Landing} />
       <Route path="/login" component={Login} />
       <Route path="/signup" component={Signup} />
       <Route path="/auth/callback" component={AuthCallback} />
