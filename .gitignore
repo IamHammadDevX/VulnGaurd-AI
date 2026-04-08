@@ -1,18 +1,22 @@
-# See https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
+# Dependencies
+node_modules/
 
-# compiled output
-dist
-tmp
-out-tsc
+# Build and compiler output
+dist/
+tmp/
+out-tsc/
 *.tsbuildinfo
-.expo
-.expo-shared
+artifacts/*/dist/
+lib/*/dist/
 
-# dependencies
-node_modules
+# Logs and coverage
+coverage/
+npm-debug.log*
+yarn-error.log*
+testem.log
 
 # IDEs and editors
-/.idea
+.idea/
 .project
 .classpath
 .c9/
@@ -20,40 +24,63 @@ node_modules
 .settings/
 *.sublime-workspace
 
-# IDE - VSCode
+# VS Code (allow shared workspace config)
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
 
-# misc
-/.sass-cache
-/connect.lock
-/coverage
-/libpeerconnection.log
-npm-debug.log
-yarn-error.log
-testem.log
-/typings
-
-# System Files
-.DS_Store
-Thumbs.db
-
-.cursor/rules/nx-rules.mdc
-.github/instructions/nx.instructions.md
-
 # Replit
 .cache/
 .local/
 
-# Environment variables — NEVER commit secrets
-.env
-.env.local
-.env.*.local
-*.env
+# Misc
+.sass-cache/
+connect.lock
+libpeerconnection.log
+typings/
+.expo/
+.expo-shared/
 
-# Build output
-artifacts/*/dist/
-lib/*/dist/
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local tooling-specific files
+.cursor/rules/nx-rules.mdc
+.github/instructions/nx.instructions.md
+
+# Environment and secrets (never commit)
+.env
+.env.*
+*.env
+!.env.example
+!.env.template
+
+# Secrets and credentials
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+.pgpass
+
+# Database files and local dumps/backups
+*.db
+*.sqlite
+*.sqlite3
+*.sqlitedb
+*.db-journal
+*.db-wal
+*.db-shm
+*.dump
+*.bak
+*.backup
+*.sql.gz
+*.sqlite.gz
+
+# Supabase local runtime artifacts
+supabase/.temp/
+supabase/.branches/
