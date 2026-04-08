@@ -1,4 +1,5 @@
 import { useCallback, useRef, useEffect, useState } from "react";
+import { Link } from "wouter";
 import { useDropzone } from "react-dropzone";
 import Editor from "@monaco-editor/react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -404,19 +405,21 @@ function Scanner() {
       <header className="border-b border-white/6 bg-card/40 backdrop-blur-2xl sticky top-0 z-50 shrink-0">
         <div className="max-w-[1600px] mx-auto px-4 h-14 flex items-center justify-between gap-4">
           {/* Logo */}
-          <div className="flex items-center gap-2.5 shrink-0">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-accent p-[1.5px] shrink-0">
-              <div className="w-full h-full bg-background rounded-[10px] flex items-center justify-center">
-                <Shield className="w-4 h-4 text-primary" />
+          <Link href="/">
+            <a className="flex items-center gap-2.5 shrink-0 hover:opacity-80 transition-opacity cursor-pointer">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-accent p-[1.5px] shrink-0">
+                <div className="w-full h-full bg-background rounded-[10px] flex items-center justify-center">
+                  <Shield className="w-4 h-4 text-primary" />
+                </div>
               </div>
-            </div>
-            <div className="flex flex-col">
-              <span className="font-display font-bold text-base leading-tight glow-text">VulnGuard AI</span>
-              <span className="text-[10px] text-muted-foreground/60 hidden sm:block leading-tight">
-                Smart Contract Security Scanner
-              </span>
-            </div>
-          </div>
+              <div className="flex flex-col">
+                <span className="font-display font-bold text-base leading-tight glow-text">VulnGuard AI</span>
+                <span className="text-[10px] text-muted-foreground/60 hidden sm:block leading-tight">
+                  Smart Contract Security Scanner
+                </span>
+              </div>
+            </a>
+          </Link>
 
           {/* Progress stepper — hidden on mobile */}
           {phase !== "idle" && (
