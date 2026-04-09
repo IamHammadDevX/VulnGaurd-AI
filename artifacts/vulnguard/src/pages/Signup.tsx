@@ -1,11 +1,11 @@
 import { useState, type FormEvent } from "react";
 import { Link, useLocation } from "wouter";
-import { UserPlus, Shield, Eye, EyeOff } from "lucide-react";
+import { UserPlus, Shield, Eye, EyeOff, Chrome } from "lucide-react";
 import { useAuth } from "@workspace/replit-auth-web";        
 
 export default function Signup() {
   const [, navigate] = useLocation();
-  const { signUpWithPassword, isAuthenticated } = useAuth(); 
+  const { signUpWithPassword, signInWithGoogle, isAuthenticated } = useAuth(); 
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -22,6 +22,16 @@ export default function Signup() {
     navigate("/dashboard", { replace: true });
     return null;
   }
+
+  const handleGoogle = async () => {
+    setError("");
+    setLoading(true);
+    const result = await signInWithGoogle();
+    if (result.error) {
+      setError(result.error);
+      setLoading(false);
+    }
+  };
 
   const validatePassword = (pass: string) => {
     if (pass.length < 8) return "Password must be at least 8 characters.";
@@ -73,11 +83,29 @@ export default function Signup() {
             <Shield className="w-5 h-5 text-primary" />
           </div>
           <h1 className="text-xl font-bold">Create your account</h1>
-          <p className="text-xs text-muted-foreground mt-1">Email/password with verification</p>
+          <p className="text-xs text-muted-foreground mt-1">Google or email/password with verification</p>
         </div>
 
         {error && <p className="text-xs text-red-400">{error}</p>}
         {notice && <p className="text-xs text-green-400">{notice}</p>}
+
+        <button
+          onClick={handleGoogle}
+          disabled={loading}
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-white text-black text-sm font-semibold hover:bg-white/90 disabled:opacity-60"
+        >
+          <Chrome className="w-4 h-4" />
+          Sign up with Google
+        </button>
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-white/10" />
+          </div>
+          <div className="relative flex justify-center text-[10px] uppercase text-muted-foreground">
+            <span className="bg-card px-2">or</span>
+          </div>
+        </div>
 
         <form onSubmit={handleSignup} className="space-y-3">
           <div className="grid grid-cols-2 gap-2">

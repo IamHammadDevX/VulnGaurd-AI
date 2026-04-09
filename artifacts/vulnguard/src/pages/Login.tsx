@@ -1,6 +1,6 @@
 import { useMemo, useState, type FormEvent } from "react";
 import { Link, useLocation } from "wouter";
-import { Github, Mail, KeyRound, Shield, Eye, EyeOff } from "lucide-react";
+import { Github, Mail, KeyRound, Shield, Eye, EyeOff, Chrome } from "lucide-react";
 import { useAuth } from "@workspace/replit-auth-web";
 
 function getMessage(query: URLSearchParams): string {
@@ -17,6 +17,7 @@ export default function Login() {
   const [, navigate] = useLocation();
   const {
     signInWithGitHub,
+    signInWithGoogle,
     signInWithPassword,
     signInWithMagicLink,
     isAuthenticated,
@@ -39,6 +40,16 @@ export default function Login() {
     setError("");
     setLoading(true);
     const result = await signInWithGitHub();
+    if (result.error) {
+      setError(result.error);
+      setLoading(false);
+    }
+  };
+
+  const handleGoogle = async () => {
+    setError("");
+    setLoading(true);
+    const result = await signInWithGoogle();
     if (result.error) {
       setError(result.error);
       setLoading(false);
@@ -84,20 +95,31 @@ export default function Login() {
             <Shield className="w-5 h-5 text-primary" />
           </div>
           <h1 className="text-xl font-bold">Login to VulnGuard</h1>
-          <p className="text-xs text-muted-foreground mt-1">GitHub, email/password, or magic link</p>
+          <p className="text-xs text-muted-foreground mt-1">GitHub, Google, email/password, or magic link</p>
         </div>
 
         {error && <p className="text-xs text-red-500 bg-red-500/10 p-2 rounded">{error}</p>}
         {notice && <p className="text-xs text-green-500 bg-green-500/10 p-2 rounded">{notice}</p>}
 
-        <button
-          onClick={handleGitHub}
-          disabled={loading}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-white text-black text-sm font-semibold hover:bg-white/90 disabled:opacity-60"
-        >
-          <Github className="w-4 h-4" />
-          Continue with GitHub
-        </button>
+        <div className="space-y-2">
+          <button
+            onClick={handleGitHub}
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-white text-black text-sm font-semibold hover:bg-white/90 disabled:opacity-60"
+          >
+            <Github className="w-4 h-4" />
+            Continue with GitHub
+          </button>
+
+          <button
+            onClick={handleGoogle}
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-white text-black text-sm font-semibold hover:bg-white/90 disabled:opacity-60"
+          >
+            <Chrome className="w-4 h-4" />
+            Continue with Google
+          </button>
+        </div>
 
         <div className="relative">
           <div className="absolute inset-0 flex items-center">

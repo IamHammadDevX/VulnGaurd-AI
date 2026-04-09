@@ -11,6 +11,7 @@ interface AuthState {
   login: () => void;
   logout: () => void;
   signInWithGitHub: () => Promise<{ error?: string }>;
+  signInWithGoogle: () => Promise<{ error?: string }>;
   signInWithPassword: (email: string, password: string) => Promise<{ error?: string }>;
   signUpWithPassword: (input: {
     email: string;
@@ -262,6 +263,22 @@ export function useAuth(): AuthState {
     return {};
   }, [supabase]);
 
+  const signInWithGoogle = useCallback(async (): Promise<{ error?: string }> => {
+    if (!supabase) {
+      return { error: "Supabase is not configured" };
+    }
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+      },
+    });
+
+    if (error) return { error: error.message };
+    return {};
+  }, [supabase]);
+
   const signInWithPassword = useCallback(
     async (email: string, password: string): Promise<{ error?: string }> => {
       if (!supabase) return { error: "Supabase is not configured" };
@@ -364,6 +381,7 @@ export function useAuth(): AuthState {
     login,
     logout,
     signInWithGitHub,
+    signInWithGoogle,
     signInWithPassword,
     signUpWithPassword,
     signInWithMagicLink,
