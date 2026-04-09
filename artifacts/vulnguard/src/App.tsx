@@ -12,6 +12,8 @@ import Profile from "@/pages/Profile";
 import Teams from "@/pages/Teams";
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
+import ForgotPassword from "@/pages/ForgotPassword";
+import ResetPassword from "@/pages/ResetPassword";
 import AuthCallback from "@/pages/AuthCallback";
 import Privacy from "@/pages/Privacy";
 import Terms from "@/pages/Terms";
@@ -37,6 +39,8 @@ function AppRouter() {
       <Route path="/home" component={Landing} />
       <Route path="/login" component={Login} />
       <Route path="/signup" component={Signup} />
+      <Route path="/forgot-password" component={ForgotPassword} />
+      <Route path="/reset-password" component={ResetPassword} />
       <Route path="/auth/callback" component={AuthCallback} />
       <Route path="/dashboard">
         {() => (

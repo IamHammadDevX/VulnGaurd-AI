@@ -20,6 +20,8 @@ interface AuthState {
     lastName?: string;
   }) => Promise<{ error?: string }>;
   signInWithMagicLink: (email: string) => Promise<{ error?: string }>;
+  resetPassword: (email: string) => Promise<{ error?: string }>;
+  updatePassword: (password: string) => Promise<{ error?: string }>;
   updateProfile: (input: {
     email?: string;
     firstName?: string;
@@ -374,6 +376,34 @@ export function useAuth(): AuthState {
     [supabase],
   );
 
+  const resetPassword = useCallback(
+    async (email: string): Promise<{ error?: string }> => {
+      if (!supabase) return { error: "Supabase is not configured" };
+
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) return { error: error.message };
+      return {};
+    },
+    [supabase],
+  );
+
+  const updatePassword = useCallback(
+    async (password: string): Promise<{ error?: string }> => {
+      if (!supabase) return { error: "Supabase is not configured" };
+
+      const { error } = await supabase.auth.updateUser({
+        password,
+      });
+
+      if (error) return { error: error.message };
+      return {};
+    },
+    [supabase],
+  );
+
   return {
     user,
     isLoading,
@@ -385,6 +415,8 @@ export function useAuth(): AuthState {
     signInWithPassword,
     signUpWithPassword,
     signInWithMagicLink,
+    resetPassword,
+    updatePassword,
     updateProfile,
   };
 }
