@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@workspace/replit-auth-web";
 import { AuthLoadingOverlay } from "@/components/AuthLoadingOverlay";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { CookieConsent } from "@/components/CookieConsent";
 // Home is DefaultHome
 // DefaultHome imported below
 import Dashboard from "@/pages/Dashboard";
@@ -95,6 +96,7 @@ function App() {
           <AppInitializer />
         </WouterRouter>
         <Toaster />
+        <CookieConsent />
       </TooltipProvider>
     </QueryClientProvider>
   );

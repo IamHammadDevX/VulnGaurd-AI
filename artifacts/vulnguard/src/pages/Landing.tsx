@@ -107,13 +107,11 @@ export default function Landing() {
       {/* 1. Navbar Minimal */}
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-[#0E1117]/80 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/">
-            <a className="flex items-center gap-2 cursor-pointer transition-opacity hover:opacity-80">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                <Shield className="w-5 h-5 text-white" />
-              </div>
-              <span className="font-bold text-lg tracking-tight text-white hidden sm:block">VulnGuard</span>
-            </a>
+          <Link href="/" className="flex items-center gap-2 cursor-pointer transition-opacity hover:opacity-80">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+              <Shield className="w-5 h-5 text-white" />
+            </div>
+            <span className="font-bold text-lg tracking-tight text-white hidden sm:block">VulnGuard</span>
           </Link>
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
              <a href="#features" className="hover:text-white transition-colors">Features</a>
@@ -123,20 +121,16 @@ export default function Landing() {
           <div className="flex items-center gap-4">
             {!isAuthenticated ? (
               <>
-                <Link href="/login">
-                  <a className="text-sm font-medium text-slate-300 hover:text-white transition-colors duration-200 hidden sm:block">Log In</a>
+                <Link href="/login" className="text-sm font-medium text-slate-300 hover:text-white transition-colors duration-200 hidden sm:block">
+                  Log In
                 </Link>
-                <Link href="/signup">
-                  <a className="text-sm font-medium bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-full transition-all flex items-center gap-1 shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:shadow-[0_0_25px_rgba(59,130,246,0.5)]">
-                    Start Scanning
-                  </a>
+                <Link href="/signup" className="text-sm font-medium bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-full transition-all flex items-center gap-1 shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:shadow-[0_0_25px_rgba(59,130,246,0.5)]">
+                  Start Scanning
                 </Link>
               </>
             ) : (
-              <Link href="/">
-                <a className="text-sm font-medium bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-full transition-all flex items-center gap-1 shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:shadow-[0_0_25px_rgba(59,130,246,0.5)]">
-                  Scanner
-                </a>
+              <Link href="/" className="text-sm font-medium bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-full transition-all flex items-center gap-1 shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:shadow-[0_0_25px_rgba(59,130,246,0.5)]">
+                Scanner
               </Link>
             )}
           </div>
@@ -419,9 +413,10 @@ export default function Landing() {
           <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between text-sm text-slate-500">
             <p>© {new Date().getFullYear()} VulnGuard AI. All rights reserved.</p>
             <div className="flex gap-6 mt-4 md:mt-0 pb-4 md:pb-0">
-              <a href="#" className="hover:text-white transition-colors">Twitter</a>
-              <a href="#" className="hover:text-white transition-colors">GitHub</a>
-              <a href="#" className="hover:text-white transition-colors">Discord</a>
+              <a href="https://x.com/thisis_hammad" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">X / Twitter</a>
+              <a href="https://github.com/IamHammadDevX" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">GitHub</a>
+              <a href="https://www.instagram.com/hi_itshammad/" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Instagram</a>
+              <a href="https://www.linkedin.com/in/iamhammaddevx" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">LinkedIn</a>
             </div>
           </div>
         </div>
