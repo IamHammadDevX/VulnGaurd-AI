@@ -78,7 +78,7 @@ export function CookieConsent() {
               <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
                 Cookie Consent
               </h2>
-              <p className="text-sm text-slate-600 dark:text-slate-400">
+              <p className="text-sm text-slate-700 dark:text-slate-400">
                 We use cookies to enhance your experience, analyze site traffic, and serve personalized content.
                 Please review our{" "}
                 <a
@@ -101,7 +101,7 @@ export function CookieConsent() {
 
           {/* Details Section */}
           {showDetails && (
-            <div className="mb-6 p-4 bg-slate-50 dark:bg-slate-900 rounded-lg space-y-4 border border-slate-200 dark:border-slate-800">
+            <div className="mb-6 p-4 bg-slate-100 dark:bg-slate-900 rounded-lg space-y-4 border border-slate-300 dark:border-slate-800">
               <div>
                 <div className="flex items-center gap-3 mb-2">
                   <Checkbox
@@ -111,12 +111,12 @@ export function CookieConsent() {
                   />
                   <Label
                     htmlFor="necessary"
-                    className="font-medium cursor-not-allowed opacity-75"
+                    className="font-medium cursor-not-allowed text-slate-700 dark:text-slate-300"
                   >
                     Necessary Cookies
                   </Label>
                 </div>
-                <p className="text-sm text-slate-600 dark:text-slate-400 ml-8">
+                <p className="text-sm text-slate-700 dark:text-slate-400 ml-8">
                   Essential for the site to function. These cannot be disabled.
                 </p>
               </div>
@@ -130,11 +130,11 @@ export function CookieConsent() {
                       handleConsentChange("analytics", checked as boolean)
                     }
                   />
-                  <Label htmlFor="analytics" className="font-medium cursor-pointer">
+                  <Label htmlFor="analytics" className="font-medium cursor-pointer text-slate-800 dark:text-slate-200">
                     Analytics Cookies
                   </Label>
                 </div>
-                <p className="text-sm text-slate-600 dark:text-slate-400 ml-8">
+                <p className="text-sm text-slate-700 dark:text-slate-400 ml-8">
                   Help us understand how you use the site to improve performance.
                 </p>
               </div>
@@ -148,11 +148,11 @@ export function CookieConsent() {
                       handleConsentChange("preferences", checked as boolean)
                     }
                   />
-                  <Label htmlFor="preferences" className="font-medium cursor-pointer">
+                  <Label htmlFor="preferences" className="font-medium cursor-pointer text-slate-800 dark:text-slate-200">
                     Preference Cookies
                   </Label>
                 </div>
-                <p className="text-sm text-slate-600 dark:text-slate-400 ml-8">
+                <p className="text-sm text-slate-700 dark:text-slate-400 ml-8">
                   Remember your settings and preferences for a better experience.
                 </p>
               </div>
@@ -166,11 +166,11 @@ export function CookieConsent() {
                       handleConsentChange("marketing", checked as boolean)
                     }
                   />
-                  <Label htmlFor="marketing" className="font-medium cursor-pointer">
+                  <Label htmlFor="marketing" className="font-medium cursor-pointer text-slate-800 dark:text-slate-200">
                     Marketing Cookies
                   </Label>
                 </div>
-                <p className="text-sm text-slate-600 dark:text-slate-400 ml-8">
+                <p className="text-sm text-slate-700 dark:text-slate-400 ml-8">
                   Used to track your interests and show relevant content.
                 </p>
               </div>
@@ -195,7 +195,7 @@ export function CookieConsent() {
             <Button
               variant="outline"
               onClick={handleAcceptNecessary}
-              className="border-slate-300 dark:border-slate-700"
+              className="border-slate-400 dark:border-slate-700"
             >
               Reject All
             </Button>
