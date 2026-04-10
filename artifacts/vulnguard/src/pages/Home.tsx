@@ -357,7 +357,7 @@ function Scanner() {
   useEffect(() => {
     if (phase === "done" && result) {
       // Scan completed
-      const durationSeconds = result.duration ? Math.round(result.duration / 1000) : 0;
+      const durationSeconds = result.analysis_time_ms ? Math.round(result.analysis_time_ms / 1000) : 0;
       scanEvents.completed(foundCount, riskScore ?? 0, durationSeconds);
     }
   }, [phase, result, foundCount, riskScore]);
