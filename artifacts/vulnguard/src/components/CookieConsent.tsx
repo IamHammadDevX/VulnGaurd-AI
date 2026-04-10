@@ -10,6 +10,7 @@ import {
   hasUserConsented,
   type CookieConsent,
 } from "@/lib/cookies";
+import { consentEvents } from "@/lib/analytics";
 
 export function CookieConsent() {
   const [isOpen, setIsOpen] = useState(false);
@@ -36,6 +37,7 @@ export function CookieConsent() {
       marketing: true,
     };
     setCookieConsent(newConsent);
+    consentEvents.accepted({ analytics: true, marketing: true, preferences: true });
     setIsOpen(false);
   };
 
@@ -47,6 +49,7 @@ export function CookieConsent() {
       marketing: false,
     };
     setCookieConsent(newConsent);
+    consentEvents.rejected();
     setIsOpen(false);
   };
 
@@ -54,6 +57,7 @@ export function CookieConsent() {
     // Ensure necessary is always true
     const newConsent = { ...consent, necessary: true };
     setCookieConsent(newConsent);
+    consentEvents.customized();
     setIsOpen(false);
   };
 

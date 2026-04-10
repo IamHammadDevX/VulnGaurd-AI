@@ -1,12 +1,18 @@
 import { motion } from "framer-motion";
 import { Link } from "wouter";
 import { Shield, ChevronRight, Mail, Phone, MapPin, Loader2, CheckCircle2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { engagementEvents } from "@/lib/analytics";
 
 export default function Contact() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Track page view
+  useEffect(() => {
+    engagementEvents.supportContacted("page_visited");
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -27,6 +33,7 @@ export default function Contact() {
 
       if (!response.ok) throw new Error("Failed to send message");
       
+      engagementEvents.supportContacted("form_submitted");
       setIsSuccess(true);
       (e.target as HTMLFormElement).reset();
     } catch (err) {

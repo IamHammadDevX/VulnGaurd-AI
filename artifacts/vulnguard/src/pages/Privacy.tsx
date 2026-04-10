@@ -1,8 +1,15 @@
 import { motion } from "framer-motion";
 import { Link } from "wouter";
 import { Shield, Book, FileText, CheckCircle2, Lock } from "lucide-react";
+import { useEffect } from "react";
+import { engagementEvents } from "@/lib/analytics";
 
 export default function Privacy() {
+  // Track page view
+  useEffect(() => {
+    engagementEvents.privacyPolicyViewed();
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#0E1117] text-slate-200 overflow-hidden font-sans selection:bg-primary/30 flex flex-col">
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-[#0E1117]/80 backdrop-blur-xl">

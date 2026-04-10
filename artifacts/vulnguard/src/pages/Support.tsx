@@ -2,9 +2,17 @@ import { motion } from "framer-motion";
 import { Link } from "wouter";
 import { Shield, LifeBuoy, FileQuestion, MessageSquare, BookOpen, ChevronRight } from "lucide-react";
 import { useAuth } from "@workspace/replit-auth-web";
+import { useEffect, useState } from "react";
+import { engagementEvents } from "@/lib/analytics";
 
 export default function Support() {
   const { isAuthenticated } = useAuth();
+  const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+
+  // Track page view
+  useEffect(() => {
+    engagementEvents.documentationViewed("support_page");
+  }, []);
   
   const faqs = [
     {
@@ -24,6 +32,13 @@ export default function Support() {
       a: "Currently, our platform is heavily optimized for Solidity (Ethereum/EVM compatibility). Support for Vyper, Rust, and Move (Solana/Near) is on our roadmap."
     }
   ];
+
+  const handleFaqClick = (index: number) => {
+    setExpandedFaq(expandedFaq === index ? null : index);
+    if (expandedFaq !== index) {
+      engagementEvents.faqViewed(faqs[index].q);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#0E1117] text-slate-200 overflow-hidden font-sans selection:bg-primary/30 flex flex-col">
@@ -110,13 +125,19 @@ export default function Support() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {faqs.map((faq, i) => (
-              <div key={i} className="space-y-3">
+              <button
+                key={i}
+                onClick={() => handleFaqClick(i)}
+                className="text-left space-y-3 p-4 rounded-lg border border-white/10 hover:border-primary/50 bg-white/5 hover:bg-white/10 transition-all cursor-pointer"
+              >
                 <h4 className="text-lg font-semibold text-white flex items-start gap-2">
                   <span className="text-primary mt-1">✦</span>
                   {faq.q}
                 </h4>
-                <p className="text-slate-400 text-sm leading-relaxed pl-6">{faq.a}</p>
-              </div>
+                {expandedFaq === i && (
+                  <p className="text-slate-400 text-sm leading-relaxed pl-6">{faq.a}</p>
+                )}
+              </button>
             ))}
           </div>
         </motion.div>

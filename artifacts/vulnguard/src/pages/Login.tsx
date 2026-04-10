@@ -2,6 +2,7 @@ import { useMemo, useState, type FormEvent } from "react";
 import { Link, useLocation } from "wouter";
 import { Github, Mail, KeyRound, Shield, Eye, EyeOff, Chrome } from "lucide-react";
 import { useAuth } from "@workspace/replit-auth-web";
+import { userEvents } from "@/lib/analytics";
 
 function getMessage(query: URLSearchParams): string {
   if (query.get("verified") === "1") {
@@ -39,6 +40,7 @@ export default function Login() {
   const handleGitHub = async () => {
     setError("");
     setLoading(true);
+    userEvents.login("github");
     const result = await signInWithGitHub();
     if (result.error) {
       setError(result.error);
@@ -49,6 +51,7 @@ export default function Login() {
   const handleGoogle = async () => {
     setError("");
     setLoading(true);
+    userEvents.login("google");
     const result = await signInWithGoogle();
     if (result.error) {
       setError(result.error);
@@ -61,6 +64,7 @@ export default function Login() {
     setError("");
     setNotice("");
     setLoading(true);
+    userEvents.login("email");
     const result = await signInWithPassword(email.trim(), password);
     setLoading(false);
     if (result.error) {
@@ -78,6 +82,7 @@ export default function Login() {
       return;
     }
     setLoading(true);
+    userEvents.login("magic-link");
     const result = await signInWithMagicLink(email.trim());
     setLoading(false);
     if (result.error) {

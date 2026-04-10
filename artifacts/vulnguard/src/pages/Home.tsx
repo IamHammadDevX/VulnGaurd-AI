@@ -19,6 +19,7 @@ import { SeverityChart } from "@/components/SeverityChart";
 import { UserMenu } from "@/components/UserMenu";
 import { TeamSwitcher } from "@/components/TeamSwitcher";
 import { useAuth } from "@workspace/replit-auth-web";
+import { scanEvents, reportEvents, engagementEvents } from "@/lib/analytics";
 import Landing from "./Landing";
 
 const MAX_BYTES = 50 * 1024;
@@ -318,9 +319,15 @@ function Scanner() {
     isScanning,
     isGeneratingFix,
     handleScan,
-    handleDownloadReport,
+    handleDownloadReport: originalHandleDownloadReport,
     handleGenerateFix,
   } = useStreamScanner();
+
+  // Wrap report download to track event
+  const handleDownloadReport = useCallback(() => {
+    reportEvents.downloaded("pdf");
+    originalHandleDownloadReport();
+  }, [originalHandleDownloadReport]);
 
   // When scan starts, switch to results tab on mobile
   useEffect(() => {
@@ -337,6 +344,23 @@ function Scanner() {
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [handleScan, isScanning, code]);
+
+  // Track scan events
+  useEffect(() => {
+    if (phase === "streaming" && !isScanning) {
+      // Scan started
+      const sizeKB = new Blob([code]).size / 1024;
+      scanEvents.started(sizeKB);
+    }
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase === "done" && result) {
+      // Scan completed
+      const durationSeconds = result.duration ? Math.round(result.duration / 1000) : 0;
+      scanEvents.completed(foundCount, riskScore ?? 0, durationSeconds);
+    }
+  }, [phase, result, foundCount, riskScore]);
 
   // Drag and drop
   const onDrop = useCallback(
@@ -554,7 +578,12 @@ function Scanner() {
                     return (
                       <button
                         key={key}
-                        onClick={() => { setContractName(contract.name); setCode(contract.code); }}
+                        onClick={() => {
+                          setContractName(contract.name);
+                          setCode(contract.code);
+                          engagementEvents.featureViewed("example_contract");
+                          scanEvents.charCodeLoaded(contract.name);
+                        }}
                         className={cn(
                           "flex items-center gap-2 px-3 py-2 rounded-xl border text-left transition-all shrink-0 snap-start",
                           "hover:scale-[1.02] active:scale-[0.98]",

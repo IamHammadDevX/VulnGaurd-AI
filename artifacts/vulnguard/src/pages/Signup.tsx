@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { Link, useLocation } from "wouter";
 import { UserPlus, Shield, Eye, EyeOff, Chrome } from "lucide-react";
-import { useAuth } from "@workspace/replit-auth-web";        
+import { useAuth } from "@workspace/replit-auth-web";
+import { userEvents } from "@/lib/analytics";        
 
 export default function Signup() {
   const [, navigate] = useLocation();
@@ -26,6 +27,7 @@ export default function Signup() {
   const handleGoogle = async () => {
     setError("");
     setLoading(true);
+    userEvents.signup("google");
     const result = await signInWithGoogle();
     if (result.error) {
       setError(result.error);
@@ -59,6 +61,7 @@ export default function Signup() {
     }
 
     setLoading(true);
+    userEvents.signup("email");
     const result = await signUpWithPassword({
       email: email.trim(),
       password,
