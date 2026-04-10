@@ -195,18 +195,22 @@ export function CookieConsent() {
             <Button
               variant="outline"
               onClick={handleAcceptNecessary}
-              className="border-slate-400 dark:border-slate-700"
+              className="border-slate-400 dark:border-slate-600 text-slate-900 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800"
             >
               Reject All
             </Button>
 
             {showDetails && (
-              <Button variant="outline" onClick={handleCustomConsent}>
+              <Button 
+                variant="outline" 
+                onClick={handleCustomConsent}
+                className="border-slate-400 dark:border-slate-600 text-slate-900 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
                 Save Preferences
               </Button>
             )}
 
-            <Button onClick={handleAcceptAll} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={handleAcceptAll} className="bg-blue-600 hover:bg-blue-700 text-white">
               Accept All
             </Button>
           </div>
