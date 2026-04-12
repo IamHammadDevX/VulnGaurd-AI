@@ -1,6 +1,18 @@
 {
   "buildCommand": "npx pnpm install && npx pnpm run build",
   "outputDirectory": "dist/public",
+  "redirects": [
+    {
+      "source": "/home",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/home/:path*",
+      "destination": "/",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/:match*",

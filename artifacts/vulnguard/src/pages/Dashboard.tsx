@@ -287,7 +287,7 @@ export default function Dashboard() {
       <header className="border-b border-white/6 bg-card/40 backdrop-blur-2xl sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link href="/home" className="flex items-center gap-2 text-muted-foreground hover:text-white transition text-sm">
+            <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-white transition text-sm">
               Home
             </Link>
             <span className="text-white/20">/</span>
