@@ -6,6 +6,14 @@ BEGIN;
 -- Keep schema reachable for Supabase roles, but lock table access to explicit grants.
 GRANT USAGE ON SCHEMA public TO anon, authenticated;
 
+-- Secure-by-default baseline for all current and future objects in public schema.
+REVOKE ALL ON ALL TABLES IN SCHEMA public FROM anon, authenticated;
+REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM anon, authenticated;
+
+-- Ensure future objects are not accidentally exposed.
+ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON TABLES FROM anon, authenticated;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON SEQUENCES FROM anon, authenticated;
+
 -- Remove broad table access from public-facing roles.
 REVOKE ALL ON TABLE public.sessions FROM anon, authenticated;
 REVOKE ALL ON TABLE public.users FROM anon, authenticated;

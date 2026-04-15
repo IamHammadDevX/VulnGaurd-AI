@@ -10,6 +10,7 @@
   "scripts": {
     "push": "drizzle-kit push --config ./drizzle.config.ts",
     "push-force": "drizzle-kit push --force --config ./drizzle.config.ts",
+    "push:secure": "pnpm run push && pnpm run secure:rls && pnpm run secure:rls:check",
     "secure:rls": "node ./scripts/secure-rls.mjs",
     "secure:rls:check": "node ./scripts/check-rls.mjs"
   },

@@ -1,5 +1,15 @@
-import "dotenv/config";
+import path from "node:path";
+import { config as loadEnv } from "dotenv";
 import { defineConfig } from "drizzle-kit";
+
+const candidateEnvFiles = [
+  path.resolve(process.cwd(), ".env"),
+  path.resolve(process.cwd(), "..", "..", ".env"),
+];
+
+for (const envFile of candidateEnvFiles) {
+  loadEnv({ path: envFile, override: false });
+}
 
 const databaseUrl = process.env.DATABASE_URL ?? process.env.SUPABASE_DB_URL;
 

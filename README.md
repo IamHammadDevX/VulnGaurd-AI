@@ -107,11 +107,13 @@ LOG_LEVEL=info
 pnpm install
 ```
 
-### 4. Provision database schema (Supabase)
+### 4. Provision database schema (Supabase) and enforce RLS
 
 ```bash
-pnpm --filter @workspace/db run push
+pnpm --filter @workspace/db run push:secure
 ```
+
+This command performs schema push, applies RLS hardening, and verifies RLS status/policies.
 
 ### 5. Run code generation
 
