@@ -312,6 +312,7 @@ function IdleState() {
 function Scanner() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [mobileTab, setMobileTab] = useState<"editor" | "results">("editor");
+  const [focusMode, setFocusMode] = useState(false);
   const [editorTheme, setEditorTheme] = useState<"vs" | "vs-dark">(
     document.documentElement.classList.contains("dark") ? "vs-dark" : "vs"
   );
@@ -453,7 +454,7 @@ function Scanner() {
       <header className="border-b border-border bg-background/80 backdrop-blur-2xl sticky top-0 z-50 shrink-0">
         <div className="max-w-[1600px] mx-auto px-4 h-14 flex items-center justify-between gap-4">
           {/* Logo */}
-          <Link href="/home">
+          <Link href="/">
             <a className="flex items-center gap-2.5 shrink-0 hover:opacity-80 transition-opacity cursor-pointer">
               <BrandLogo showTagline textClassName="glow-text" />
             </a>
@@ -472,11 +473,19 @@ function Scanner() {
 
           {/* Right nav */}
           <div className="flex items-center gap-2 shrink-0">
-            <Link href="/home">
+            <Link href="/">
               <a className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card hover:bg-muted/40 border border-border text-muted-foreground hover:text-foreground text-xs font-medium transition-colors">
                 Home
               </a>
             </Link>
+            <button
+              type="button"
+              onClick={() => setFocusMode((value) => !value)}
+              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card hover:bg-muted/40 border border-border text-muted-foreground hover:text-foreground text-xs font-medium transition-colors"
+            >
+              <Terminal className="w-3.5 h-3.5" />
+              {focusMode ? "Exit Focus" : "Focus Mode"}
+            </button>
             {result && (
               <motion.button
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -544,7 +553,12 @@ function Scanner() {
       </div>
 
       {/* ── Main Layout ── */}
-      <main className="flex-1 max-w-[1600px] w-full mx-auto p-3 md:p-5 grid grid-cols-1 lg:grid-cols-2 gap-4 relative z-10 pb-4">
+      <main
+        className={cn(
+          "flex-1 max-w-[1600px] w-full mx-auto p-3 md:p-5 grid grid-cols-1 gap-4 relative z-10 pb-4",
+          focusMode ? "lg:grid-cols-1" : "lg:grid-cols-2"
+        )}
+      >
 
         {/* ── LEFT PANEL — Editor ── */}
         <div className={cn(
@@ -754,7 +768,8 @@ function Scanner() {
         {/* ── RIGHT PANEL — Results ── */}
         <div className={cn(
           "flex flex-col gap-3 lg:h-[calc(100vh-5.5rem)]",
-          mobileTab !== "results" && "hidden lg:flex"
+          mobileTab !== "results" && "hidden lg:flex",
+          focusMode && "lg:hidden"
         )}>
           <AnimatePresence mode="wait">
 

@@ -292,7 +292,7 @@ export default function Dashboard() {
               Home
             </Link>
             <span className="text-border">/</span>
-            <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition text-sm">
+            <Link href="/scanner" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition text-sm">
               Scanner
             </Link>
             <span className="text-border">/</span>
@@ -523,7 +523,7 @@ export default function Dashboard() {
                         Export CSV
                       </button>
                       <Link
-                        href="/"
+                        href="/scanner"
                         className="text-xs text-primary hover:underline"
                       >
                         New Scan
@@ -590,7 +590,7 @@ export default function Dashboard() {
                       {search ? "No scans match your search" : "No scans yet. Run your first scan!"}
                     </p>
                     {!search && (
-                      <Link href="/" className="inline-block text-xs text-primary hover:underline">
+                      <Link href="/scanner" className="inline-block text-xs text-primary hover:underline">
                         Go to Scanner
                       </Link>
                     )}

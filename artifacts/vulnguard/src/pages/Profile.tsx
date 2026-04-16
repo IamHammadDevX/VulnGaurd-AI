@@ -99,7 +99,7 @@ export default function Profile() {
               Home
             </Link>
             <span className="text-border">/</span>
-            <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition text-sm">
+            <Link href="/scanner" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition text-sm">
               Scanner
             </Link>
             <span className="text-border">/</span>

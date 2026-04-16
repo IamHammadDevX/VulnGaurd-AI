@@ -45,8 +45,9 @@ function AppRouter() {
   return (
     <Suspense fallback={<AuthLoadingOverlay />}>
       <Switch>
-        <Route path="/" component={DefaultHome} />
+        <Route path="/" component={Landing} />
         <Route path="/home" component={Landing} />
+        <Route path="/scanner" component={DefaultHome} />
         <Route path="/login" component={Login} />
         <Route path="/signup" component={Signup} />
         <Route path="/forgot-password" component={ForgotPassword} />
@@ -141,7 +142,7 @@ function GlobalHomeShortcut() {
 
   return (
     <a
-      href="/home"
+      href="/"
       className="fixed bottom-4 right-4 z-50 inline-flex items-center gap-2 rounded-full border border-border bg-card/95 px-4 py-2 text-sm font-semibold text-foreground shadow-lg backdrop-blur-md transition-colors hover:bg-muted/60"
       aria-label="Back to homepage"
     >
