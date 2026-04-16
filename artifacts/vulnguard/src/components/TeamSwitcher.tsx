@@ -51,20 +51,20 @@ export function TeamSwitcher() {
     <div className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#0a0a0a] hover:bg-white/10 border border-white/8 text-xs"
+        className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-card hover:bg-muted/40 border border-border text-xs text-muted-foreground"
       >
         <span className="max-w-[120px] truncate">{active?.name ?? "Team"}</span>
-        <ChevronsUpDown className="w-3.5 h-3.5 text-zinc-500" />
+        <ChevronsUpDown className="w-3.5 h-3.5 text-muted-foreground" />
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-1.5 w-52 bg-[#0a0a0a] border border-white/5 rounded-xl p-1 z-[100]">
+        <div className="absolute right-0 mt-1.5 w-52 bg-popover border border-border rounded-xl p-1 z-[100]">
           {teams.map((team) => (
             <button
               key={team.id}
               onClick={() => selectTeam(team.id)}
-              className={`w-full text-left px-2.5 py-2 rounded-lg text-xs hover:bg-[#0a0a0a] ${
-                team.id === active?.id ? "bg-white/10 text-white" : "text-zinc-500"
+              className={`w-full text-left px-2.5 py-2 rounded-lg text-xs hover:bg-muted/40 ${
+                team.id === active?.id ? "bg-primary/10 text-primary" : "text-muted-foreground"
               }`}
             >
               <p className="font-semibold truncate">{team.name}</p>

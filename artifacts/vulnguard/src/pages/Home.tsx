@@ -18,9 +18,7 @@ import { UserMenu } from "@/components/UserMenu";
 import { TeamSwitcher } from "@/components/TeamSwitcher";
 import { BrandLogo } from "@/components/branding/BrandLogo";
 import { ThemeToggleButton } from "@/components/ThemeToggleButton";
-import { useAuth } from "@workspace/replit-auth-web";
 import { scanEvents, reportEvents, engagementEvents } from "@/lib/analytics";
-import Landing from "@/pages/Landing";
 
 const MAX_BYTES = 50 * 1024;
 
@@ -550,15 +548,16 @@ function Scanner() {
       {/* ── Main Layout ── */}
       <main
         className={cn(
-          "flex-1 max-w-[1600px] w-full mx-auto p-3 md:p-5 grid grid-cols-1 gap-4 relative z-10 pb-4",
-          focusMode ? "lg:grid-cols-1" : "lg:grid-cols-2"
+          "flex-1 max-w-[1600px] w-full mx-auto p-3 md:p-5 flex flex-col gap-4 relative z-10 pb-4 lg:grid",
+          focusMode ? "lg:grid-cols-1 lg:grid-rows-[1fr_auto]" : "lg:grid-cols-2 lg:auto-rows-max",
+          focusMode && "lg:h-[calc(100vh-5.5rem)]"
         )}
       >
 
         {/* ── LEFT PANEL — Editor ── */}
         <div className={cn(
           "flex flex-col gap-3",
-          focusMode ? "lg:h-[58vh]" : "lg:h-[calc(100vh-5.5rem)]",
+          focusMode ? "lg:min-h-[65vh] lg:max-h-[70vh]" : "lg:h-[calc(100vh-5.5rem)]",
           "lg:block",
           mobileTab !== "editor" && "hidden lg:flex"
         )}>
@@ -764,7 +763,8 @@ function Scanner() {
         {/* ── RIGHT PANEL — Results ── */}
         <div className={cn(
           "flex flex-col gap-3",
-          focusMode ? "lg:h-[calc(100vh-5.5rem-58vh)]" : "lg:h-[calc(100vh-5.5rem)]",
+          focusMode ? "lg:min-h-[calc(100vh-5.5rem-65vh)] lg:flex-1" : "lg:h-[calc(100vh-5.5rem)]",
+          "lg:min-h-0",
           mobileTab !== "results" && "hidden lg:flex"
         )}>
           <AnimatePresence mode="wait">
@@ -900,18 +900,18 @@ function Scanner() {
                 )}
 
                 {/* ── Scrollable results ── */}
-                <div className="flex-1 overflow-y-auto scrollbar-custom min-h-0 rounded-xl glass-panel">
-                  <div className="p-4 flex flex-col gap-5">
+                <div className="flex-1 overflow-y-auto scrollbar-custom min-h-0 rounded-xl glass-panel flex flex-col">
+                  <div className="p-3 md:p-4 flex flex-col gap-4 md:gap-5 pb-6">
 
                     {/* Summary */}
                     {result?.summary && (
                       <motion.div
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                        className="p-4 rounded-xl bg-card border border-primary/15"
+                        className="p-3 md:p-4 rounded-xl bg-card border border-primary/15 shrink-0"
                       >
-                        <div className="flex items-start gap-3">
+                        <div className="flex items-start gap-2 md:gap-3">
                           <Layers className="w-4 h-4 text-foreground shrink-0 mt-0.5" />
-                          <p className="text-sm leading-relaxed text-muted-foreground">{result.summary}</p>
+                          <p className="text-xs md:text-sm leading-relaxed text-muted-foreground">{result.summary}</p>
                         </div>
                       </motion.div>
                     )}
@@ -923,14 +923,14 @@ function Scanner() {
                         {phase === "done" && result && (
                           <motion.div
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                            className="glass-panel rounded-xl p-4 mb-4"
+                            className="glass-panel rounded-xl p-3 md:p-4 mb-3 md:mb-4 shrink-0"
                           >
                             <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3 text-center">
                               Severity Distribution
                             </h3>
                             <Suspense
                               fallback={
-                                <div className="h-64 flex items-center justify-center text-muted-foreground border border-dashed border-border rounded-xl">
+                                <div className="h-48 md:h-64 flex items-center justify-center text-muted-foreground border border-dashed border-border rounded-xl text-xs">
                                   Loading severity chart...
                                 </div>
                               }
@@ -941,15 +941,15 @@ function Scanner() {
                         )}
 
                         {/* Header row */}
-                        <div className="flex items-center gap-2 mb-3">
-                          <h3 className="text-base font-display font-bold">
+                        <div className="flex items-center gap-2 mb-2 md:mb-3 sticky top-0 bg-background/50 backdrop-blur-sm p-1 -m-1 shrink-0">
+                          <h3 className="text-base md:text-lg font-display font-bold">
                             {phase === "streaming" ? "Discovering Issues" : "Detected Issues"}
                           </h3>
                           <motion.span
                             key={partialVulns.length}
                             initial={{ scale: 1.3 }}
                             animate={{ scale: 1 }}
-                            className="bg-primary/10 text-primary px-2 py-0.5 rounded-md text-sm font-bold"
+                            className="bg-primary/10 text-primary px-2 py-0.5 rounded-md text-xs md:text-sm font-bold"
                           >
                             {partialVulns.length}
                           </motion.span>
@@ -968,7 +968,7 @@ function Scanner() {
                         </div>
 
                         {/* Cards */}
-                        <div className="space-y-3">
+                        <div className="space-y-2 md:space-y-3">
                           <AnimatePresence initial={false}>
                             {partialVulns.map((vuln, i) => (
                               <motion.div
@@ -997,27 +997,27 @@ function Scanner() {
                       <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="flex flex-col items-center justify-center py-12 text-center gap-4"
+                        className="flex flex-col items-center justify-center py-8 md:py-12 text-center gap-3 md:gap-4 shrink-0"
                       >
                         <motion.div
-                          className="w-20 h-20 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center"
+                          className="w-16 md:w-20 h-16 md:h-20 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center shrink-0"
                           animate={{ scale: [1, 1.05, 1] }}
                           transition={{ duration: 2, repeat: Infinity }}
                         >
-                          <ShieldCheck className="w-10 h-10 text-green-400" />
+                          <ShieldCheck className="w-8 md:w-10 h-8 md:h-10 text-green-400" />
                         </motion.div>
                         <div>
-                          <h3 className="text-xl font-display font-bold text-green-400 mb-1">Contract Looks Clean!</h3>
-                          <p className="text-sm text-muted-foreground max-w-xs">
+                          <h3 className="text-lg md:text-xl font-display font-bold text-green-400 mb-1">Contract Looks Clean!</h3>
+                          <p className="text-xs md:text-sm text-muted-foreground max-w-xs">
                             No automated vulnerabilities detected. Always recommend a manual review before mainnet.
                           </p>
                         </div>
                         {result && (
                           <button
                             onClick={handleDownloadReport}
-                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 text-green-400 text-sm font-bold transition-colors"
+                            className="flex items-center gap-2 px-3 md:px-4 py-2 md:py-2.5 rounded-xl bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 text-green-400 text-xs md:text-sm font-bold transition-colors"
                           >
-                            <Download className="w-4 h-4" />
+                            <Download className="w-3.5 h-3.5 md:w-4 md:h-4" />
                             Download Clean Report PDF
                           </button>
                         )}
@@ -1026,14 +1026,14 @@ function Scanner() {
 
                     {/* Error state */}
                     {phase === "error" && (
-                      <div className="flex flex-col items-center justify-center py-10 text-center gap-3">
-                        <AlertTriangle className="w-10 h-10 text-red-400" />
-                        <p className="text-sm text-red-300 max-w-xs">Scan failed. Please try again.</p>
+                      <div className="flex flex-col items-center justify-center py-8 md:py-10 text-center gap-2 md:gap-3 shrink-0">
+                        <AlertTriangle className="w-8 md:w-10 h-8 md:h-10 text-red-400" />
+                        <p className="text-xs md:text-sm text-red-300 max-w-xs">Scan failed. Please try again.</p>
                         <button
                           onClick={handleScan}
-                          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 text-sm font-bold transition-colors"
+                          className="flex items-center gap-2 px-3 md:px-4 py-2 md:py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 text-xs md:text-sm font-bold transition-colors"
                         >
-                          <RefreshCw className="w-4 h-4" />
+                          <RefreshCw className="w-3.5 h-3.5 md:w-4 md:h-4" />
                           Retry Scan
                         </button>
                       </div>
@@ -1091,22 +1091,7 @@ function Scanner() {
 }
 
 export default function Home() {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  if (isLoading) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <Shield className="w-12 h-12 text-foreground animate-pulse" />
-          <p className="text-muted-foreground font-medium animate-pulse">Loading VulnGuard...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <Landing />;
-  }
-
+  // ProtectedRoute wrapper at route level ensures authentication
+  // No need to check auth state here
   return <Scanner />;
 }

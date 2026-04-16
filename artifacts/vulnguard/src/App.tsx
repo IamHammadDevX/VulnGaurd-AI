@@ -46,7 +46,13 @@ function AppRouter() {
       <Switch>
         <Route path="/" component={Landing} />
         <Route path="/home" component={Landing} />
-        <Route path="/scanner" component={DefaultHome} />
+        <Route path="/scanner">
+          {() => (
+            <ProtectedRoute>
+              <DefaultHome />
+            </ProtectedRoute>
+          )}
+        </Route>
         <Route path="/login" component={Login} />
         <Route path="/signup" component={Signup} />
         <Route path="/forgot-password" component={ForgotPassword} />
