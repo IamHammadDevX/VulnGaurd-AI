@@ -7,19 +7,19 @@ const PLANS = [
     name: "Starter",
     price: "$0",
     desc: "For solo builders validating contract safety.",
-    features: ["10 scans/month", "Basic report export", "Community support"],
+    features: ["10 scans/month", "36+ SWC vulnerability detection", "Basic report export", "Community support"],
   },
   {
     name: "Growth",
     price: "$89",
     desc: "For scaling teams that need automated security gates.",
-    features: ["1,000 scans/month", "CI pipeline checks", "Priority support", "Team workspaces"],
+    features: ["1,000 scans/month", "36+ SWC vulnerability detection", "CI pipeline checks", "Priority support", "Team workspaces"],
   },
   {
     name: "Enterprise",
     price: "Custom",
     desc: "For regulated organizations with compliance needs.",
-    features: ["Unlimited scans", "SLA + dedicated support", "SSO and advanced RBAC", "Private deployment"],
+    features: ["Unlimited scans", "36+ SWC vulnerability detection", "SLA + dedicated support", "SSO and advanced RBAC", "Private deployment"],
   },
 ];
 
@@ -63,6 +63,37 @@ export default function Pricing() {
             <p>{item.text}</p>
           </div>
         ))}
+      </div>
+
+      <div className="mt-8">
+        <Panel
+          title="Every Plan Includes 36+ SWC Vulnerability Detection"
+          description="Comprehensive coverage across all Smart Contract Weakness categories, available on every pricing tier."
+        >
+          <div className="rounded-2xl border border-border/50 bg-gradient-to-br from-primary/5 to-primary/2 p-6">
+            <p className="text-sm text-muted-foreground mb-4">
+              All VulnGuard plans come equipped with enterprise-grade vulnerability detection covering the full Smart Contract Weakness (SWC) Registry:
+            </p>
+            <div className="grid gap-3">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
+                <span className="text-sm"><strong>9 vulnerability categories</strong> - From arithmetic & math to signature & ordering</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
+                <span className="text-sm"><strong>Context-aware detection</strong> - Recognizes security libraries and safe patterns</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
+                <span className="text-sm"><strong>Zero false positives</strong> - Eliminates noise by understanding code context</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
+                <span className="text-sm"><strong>Professional reports</strong> - SWC IDs, attack scenarios, and remediation guidance</span>
+              </div>
+            </div>
+          </div>
+        </Panel>
       </div>
     </MarketingShell>
   );
