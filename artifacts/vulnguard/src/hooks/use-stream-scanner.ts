@@ -203,7 +203,13 @@ export function useStreamScanner() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ vulnerability, contractCode: code }),
       });
-      if (!response.ok) throw new Error("Failed to generate fix");
+      
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => "Unknown error");
+        console.error("Fix generation error:", { status: response.status, error: errorText });
+        throw new Error(`API error ${response.status}: ${errorText}`);
+      }
+      
       const data = await response.json() as { fixed_code: string; explanation: string };
 
       setState((s) => {
@@ -222,7 +228,9 @@ export function useStreamScanner() {
       toast({ title: "Fix Generated", description: "Enhanced fix and explanation have been applied." });
     } catch (err: unknown) {
       setState((s) => ({ ...s, isGeneratingFix: false }));
-      toast({ title: "Generation Failed", description: getErrorMessage(err), variant: "destructive" });
+      const errMsg = getErrorMessage(err);
+      console.error("Fix generation failed:", errMsg);
+      toast({ title: "Generation Failed", description: errMsg, variant: "destructive" });
     }
   }, [code, toast]);
 

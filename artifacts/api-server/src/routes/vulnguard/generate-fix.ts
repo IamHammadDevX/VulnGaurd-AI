@@ -35,7 +35,8 @@ const DEFAULT_RESOURCES = [
 router.post("/generate-fix", generateFixLimiter, async (req, res) => {
   const parseResult = GenerateFixBody.safeParse(req.body);
   if (!parseResult.success) {
-    res.status(400).json({ error: "Invalid request body" });
+    req.log.error({ issues: parseResult.error.issues }, "Invalid request body for generate-fix");
+    res.status(400).json({ error: "Invalid request body", details: parseResult.error.issues });
     return;
   }
 
@@ -70,6 +71,7 @@ Provide the fix with explanation and resources.`,
 
     const content = message.content[0];
     if (content.type !== "text") {
+      req.log.error({ contentType: content.type }, "Unexpected content type from AI");
       res.status(500).json({ error: "Unexpected response from AI" });
       return;
     }
@@ -81,7 +83,8 @@ Provide the fix with explanation and resources.`,
       const jsonEnd = text.lastIndexOf("}");
       const jsonStr = jsonStart !== -1 && jsonEnd !== -1 ? text.slice(jsonStart, jsonEnd + 1) : text;
       rawParsed = JSON.parse(jsonStr);
-    } catch {
+    } catch (parseErr) {
+      req.log.error({ parseErr }, "Failed to parse AI response as JSON");
       res.status(500).json({ error: "Failed to parse fix response" });
       return;
     }
