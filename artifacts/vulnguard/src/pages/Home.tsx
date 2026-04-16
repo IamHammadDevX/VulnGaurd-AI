@@ -79,11 +79,11 @@ function MiniCopy({ text, label }: { text: string; label?: string }) {
     <button
       onClick={copy}
       title={`Copy ${label ?? ""}`}
-      className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-[#0a0a0a] hover:bg-white/12 border border-white/8 transition-colors"
+      className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-card hover:bg-muted/40 border border-border transition-colors"
     >
       {done
         ? <Check className="w-2.5 h-2.5 text-green-400" />
-        : <Copy className="w-2.5 h-2.5 text-zinc-500" />
+        : <Copy className="w-2.5 h-2.5 text-muted-foreground" />
       }
       {done ? "Copied" : (label ?? "Copy")}
     </button>
@@ -144,7 +144,7 @@ function ScanStepper({ activeStep }: { activeStep: StepId }) {
                       animate={{ scale: 1 }}
                       exit={{ scale: 0 }}
                     >
-                      <Icon className="w-3.5 h-3.5 text-white animate-pulse" />
+                      <Icon className="w-3.5 h-3.5 text-foreground animate-pulse" />
                     </motion.div>
                   ) : (
                     <motion.div
@@ -152,7 +152,7 @@ function ScanStepper({ activeStep }: { activeStep: StepId }) {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                     >
-                      <Icon className="w-3.5 h-3.5 text-zinc-500/30" />
+                      <Icon className="w-3.5 h-3.5 text-muted-foreground/40" />
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -160,8 +160,8 @@ function ScanStepper({ activeStep }: { activeStep: StepId }) {
               <span className={cn(
                 "text-[9px] font-bold uppercase tracking-wider whitespace-nowrap",
                 isComplete ? "text-green-400/70"
-                  : isActive ? "text-white"
-                  : "text-zinc-500/30"
+                  : isActive ? "text-foreground"
+                  : "text-muted-foreground/50"
               )}>
                 {step.label}
               </span>
@@ -169,7 +169,7 @@ function ScanStepper({ activeStep }: { activeStep: StepId }) {
 
             {/* Connector line (not after last) */}
             {i < STEPS.length - 1 && (
-              <div className="flex-1 h-px mx-1.5 relative overflow-hidden rounded-full bg-white/8">
+              <div className="flex-1 h-px mx-1.5 relative overflow-hidden rounded-full bg-border">
                 <motion.div
                   initial={false}
                   animate={{ width: isComplete ? "100%" : "0%" }}
@@ -203,7 +203,7 @@ function ScanningSpinner() {
           transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
         />
         <div className="absolute inset-0 flex items-center justify-center">
-          <Shield className="w-8 h-8 text-white" />
+          <Shield className="w-8 h-8 text-foreground" />
         </div>
         {/* Scan line sweep */}
         <motion.div
@@ -219,13 +219,13 @@ function ScanningSpinner() {
       </div>
 
       <div className="space-y-2">
-        <p className="text-sm font-medium text-white">Auditing smart contract…</p>
-        <p className="text-xs text-zinc-500 max-w-[260px]">
+        <p className="text-sm font-medium text-foreground">Auditing smart contract…</p>
+        <p className="text-xs text-muted-foreground max-w-[260px]">
           AI is analyzing 15+ vulnerability categories
         </p>
       </div>
 
-      <div className="flex items-center gap-2 text-xs text-zinc-500/50">
+      <div className="flex items-center gap-2 text-xs text-muted-foreground/80">
         <Clock className="w-3.5 h-3.5" />
         Typically 15–45 seconds
       </div>
@@ -251,18 +251,18 @@ function IdleState() {
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.97 }}
       transition={{ duration: 0.3 }}
-      className="flex-1 glass-panel rounded-xl flex flex-col items-center justify-center p-8 text-center border-dashed border-white/5 relative overflow-hidden"
+      className="flex-1 glass-panel rounded-xl flex flex-col items-center justify-center p-8 text-center border-dashed border-border relative overflow-hidden"
     >
       {/* Cyber grid background */}
       <div className="absolute inset-0 cyber-grid pointer-events-none rounded-xl" />
 
       {/* Floating shield icon */}
       <motion.div
-        className="w-24 h-24 rounded-xl bg-white/10 border border-primary/20 flex items-center justify-center mb-6 relative"
+        className="w-24 h-24 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-6 relative"
         animate={{ y: [0, -8, 0] }}
         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
       >
-        <FileCode className="w-10 h-10 text-white opacity-80" />
+        <FileCode className="w-10 h-10 text-foreground opacity-80" />
         <motion.div
           className="absolute -inset-1 rounded-xl border border-primary/15"
           animate={{ scale: [1, 1.08, 1], opacity: [0.5, 0, 0.5] }}
@@ -271,10 +271,10 @@ function IdleState() {
       </motion.div>
 
       <h2 className="text-2xl font-display font-bold mb-2">Ready for Analysis</h2>
-      <p className="text-zinc-500 max-w-sm mx-auto leading-relaxed text-sm mb-8">
+      <p className="text-muted-foreground max-w-sm mx-auto leading-relaxed text-sm mb-8">
         Paste Solidity code or drag a{" "}
-        <code className="text-white font-mono text-xs">.sol</code> file, then click{" "}
-        <span className="text-white font-semibold">Scan Contract</span>
+        <code className="text-foreground font-mono text-xs">.sol</code> file, then click{" "}
+        <span className="text-foreground font-semibold">Scan Contract</span>
       </p>
 
       {/* Feature grid */}
@@ -285,22 +285,22 @@ function IdleState() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.05 * i }}
-            className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-white/3 border border-white/6 hover:bg-white/6 hover:border-white/12 transition-colors cursor-default"
+            className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-muted/30 border border-border hover:bg-muted/50 transition-colors cursor-default"
           >
             <span className="text-xl">{item.icon}</span>
-            <span className="text-[10px] text-zinc-500 font-medium">{item.label}</span>
+            <span className="text-[10px] text-muted-foreground font-medium">{item.label}</span>
           </motion.div>
         ))}
       </div>
 
       {/* CTA hint */}
       <motion.p
-        className="mt-6 text-[10px] text-zinc-500/40 flex items-center gap-1.5"
+        className="mt-6 text-[10px] text-muted-foreground/80 flex items-center gap-1.5"
         animate={{ opacity: [0.4, 0.8, 0.4] }}
         transition={{ duration: 3, repeat: Infinity }}
       >
         <KeyboardIcon className="w-3 h-3" />
-        Press <kbd className="font-mono px-1 py-0.5 bg-white/8 rounded text-[9px]">Ctrl</kbd>+<kbd className="font-mono px-1 py-0.5 bg-white/8 rounded text-[9px]">Enter</kbd> to scan
+        Press <kbd className="font-mono px-1 py-0.5 bg-muted rounded text-[9px]">Ctrl</kbd>+<kbd className="font-mono px-1 py-0.5 bg-muted rounded text-[9px]">Enter</kbd> to scan
       </motion.p>
     </motion.div>
   );
@@ -425,7 +425,7 @@ function Scanner() {
     <div className="min-h-screen flex flex-col relative bg-background text-foreground">
       {/* Ambient background glow */}
       <div className="fixed inset-0 z-[-1] pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-foreground/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/4 rounded-full blur-3xl" />
         <div className="cyber-grid absolute inset-0 opacity-50" />
       </div>
@@ -516,7 +516,7 @@ function Scanner() {
               {mobileTab === tab && (
                 <motion.div
                   layoutId="mobile-tab-indicator"
-                  className="absolute bottom-0 inset-x-0 h-0.5 bg-white rounded-full"
+                  className="absolute bottom-0 inset-x-0 h-0.5 bg-foreground rounded-full"
                 />
               )}
             </button>
@@ -536,27 +536,27 @@ function Scanner() {
           <div className="glass-panel rounded-xl flex flex-col h-full overflow-hidden">
 
             {/* Toolbar */}
-            <div className="p-3 md:p-4 border-b border-white/5 bg-black/15 flex flex-col gap-3 shrink-0">
+            <div className="p-3 md:p-4 border-b border-border bg-card/60 flex flex-col gap-3 shrink-0">
 
               {/* Row: name + upload */}
               <div className="flex items-center gap-2">
-                <div className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl bg-[#0a0a0a] border border-white/8 focus-within:border-primary/40 transition-colors min-w-0">
-                  <FileCode className="w-4 h-4 text-zinc-500 shrink-0" />
+                <div className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl bg-background border border-input focus-within:border-primary/40 transition-colors min-w-0">
+                  <FileCode className="w-4 h-4 text-muted-foreground shrink-0" />
                   <input
                     type="text"
                     placeholder="Contract name (optional)"
                     value={contractName}
                     onChange={(e) => setContractName(e.target.value)}
-                    className="bg-transparent border-none outline-none text-sm font-semibold placeholder:text-zinc-500/50 w-full min-w-0"
+                    className="bg-transparent border-none outline-none text-sm font-semibold placeholder:text-muted-foreground/70 w-full min-w-0"
                   />
                   {contractName && (
-                    <span className="text-[10px] text-zinc-500/50 font-mono shrink-0">.sol</span>
+                    <span className="text-[10px] text-muted-foreground/70 font-mono shrink-0">.sol</span>
                   )}
                 </div>
                 <input ref={fileInputRef} type="file" accept=".sol" className="hidden" onChange={handleFileInputChange} />
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="touch-target flex items-center gap-1.5 px-3 py-2 rounded-xl border border-white/5 bg-[#0a0a0a] hover:bg-white/10 hover:border-primary/30 text-zinc-500 hover:text-white transition-all text-sm font-medium shrink-0"
+                  className="touch-target flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border bg-card hover:bg-muted/40 hover:border-primary/30 text-muted-foreground hover:text-foreground transition-all text-sm font-medium shrink-0"
                 >
                   <UploadCloud className="w-4 h-4" />
                   <span className="hidden sm:inline text-xs">Upload .sol</span>
@@ -565,7 +565,7 @@ function Scanner() {
 
               {/* Example contracts — horizontally scrollable on mobile */}
               <div>
-                <p className="text-[10px] text-zinc-500/50 font-bold uppercase tracking-widest mb-2">
+                <p className="text-[10px] text-muted-foreground/80 font-bold uppercase tracking-widest mb-2">
                   Load Example
                 </p>
                 <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-custom snap-x">
@@ -583,7 +583,7 @@ function Scanner() {
                         className={cn(
                           "flex items-center gap-2 px-3 py-2 rounded-xl border text-left transition-all shrink-0 snap-start",
                           "hover:scale-[1.02] active:scale-[0.98]",
-                          meta?.color ?? "text-zinc-500 border-white/5 bg-[#0a0a0a] hover:bg-white/10"
+                          meta?.color ?? "text-muted-foreground border-border bg-card hover:bg-muted/40"
                         )}
                       >
                         <div className="flex flex-col min-w-0">
@@ -613,24 +613,24 @@ function Scanner() {
               {...getRootProps()}
               className={cn(
                 "flex-1 relative min-h-[220px] transition-colors duration-300",
-                isDragActive ? "bg-white/5" : "bg-[#060b12]"
+                isDragActive ? "bg-primary/10" : "bg-background"
               )}
             >
               <AnimatePresence>
                 {isDragActive && (
                   <motion.div
                     initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                    className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/10 backdrop-blur-sm border-2 border-dashed border-primary rounded-none pointer-events-none"
+                    className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm border-2 border-dashed border-primary rounded-none pointer-events-none"
                   >
-                    <UploadCloud className="w-12 h-12 text-white mb-3 animate-bounce" />
-                    <p className="text-base font-bold text-white">Drop your .sol file</p>
-                    <p className="text-sm text-white/60 mt-1">Max 50 KB</p>
+                    <UploadCloud className="w-12 h-12 text-foreground mb-3 animate-bounce" />
+                    <p className="text-base font-bold text-foreground">Drop your .sol file</p>
+                    <p className="text-sm text-muted-foreground mt-1">Max 50 KB</p>
                   </motion.div>
                 )}
               </AnimatePresence>
               <Suspense
                 fallback={
-                  <div className="flex h-full items-center justify-center text-sm text-zinc-500">
+                  <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
                     Loading code editor...
                   </div>
                 }
@@ -662,28 +662,28 @@ function Scanner() {
             </div>
 
             {/* Editor footer */}
-            <div className="p-3 border-t border-white/5 bg-black/25 shrink-0 flex flex-col gap-2">
+            <div className="p-3 border-t border-border bg-card/70 shrink-0 flex flex-col gap-2">
               {/* Size bar */}
               <div className="flex items-center gap-2.5">
-                <div className="flex-1 h-1 rounded-full bg-[#0a0a0a] overflow-hidden">
+                <div className="flex-1 h-1 rounded-full bg-muted overflow-hidden">
                   <motion.div
-                    className={cn("h-full rounded-full", isSizeError ? "bg-red-500" : isSizeWarning ? "bg-yellow-500" : "bg-white")}
+                    className={cn("h-full rounded-full", isSizeError ? "bg-red-500" : isSizeWarning ? "bg-yellow-500" : "bg-primary")}
                     animate={{ width: `${bytePercent}%` }}
                     transition={{ type: "spring", stiffness: 120, damping: 20 }}
                   />
                 </div>
-                <div className={cn("text-[11px] font-mono shrink-0", isSizeError ? "text-red-400" : isSizeWarning ? "text-yellow-400" : "text-zinc-500/60")}>
+                <div className={cn("text-[11px] font-mono shrink-0", isSizeError ? "text-red-400" : isSizeWarning ? "text-yellow-400" : "text-muted-foreground")}>
                   {isSizeError && <AlertTriangle className="w-3 h-3 inline mr-1 -mt-0.5" />}
                   {formatBytes(byteSize)} / 50 KB
                 </div>
-                <div className="text-[11px] font-mono text-zinc-500/40 shrink-0">
+                <div className="text-[11px] font-mono text-muted-foreground/80 shrink-0">
                   {lineCount.toLocaleString()}L
                 </div>
               </div>
 
               {/* Actions */}
               <div className="flex items-center justify-between gap-2">
-                <div className="hidden sm:flex items-center gap-1 text-[10px] text-zinc-500/30">
+                <div className="hidden sm:flex items-center gap-1 text-[10px] text-muted-foreground/80">
                   <KeyboardIcon className="w-3 h-3" />
                   <kbd className="font-mono">Ctrl+Enter</kbd> to scan
                 </div>
@@ -701,7 +701,7 @@ function Scanner() {
                     disabled={isScanning || !code.trim() || isSizeError}
                     className={cn(
                       "touch-target flex items-center gap-2 px-5 py-2 rounded-xl font-bold text-sm transition-all",
-                      "bg-white text-black-foreground hover:bg-white/90",
+                      "bg-primary text-primary-foreground hover:bg-primary/90",
                       "active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed",
                       !isScanning && code.trim() && !isSizeError && "glow-border-pulse"
                     )}
@@ -742,7 +742,7 @@ function Scanner() {
                   {/* Phase pill */}
                   <div className={cn(
                     "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border shrink-0",
-                    phase === "streaming" ? "bg-white/10 border-primary/25 text-white"
+                    phase === "streaming" ? "bg-primary/10 border-primary/25 text-primary"
                       : phase === "done" ? "bg-green-500/10 border-green-500/25 text-green-400"
                       : "bg-red-500/10 border-red-500/25 text-red-400"
                   )}>
@@ -760,7 +760,7 @@ function Scanner() {
                         initial={{ opacity: 0, y: 5 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -5 }}
-                        className="text-xs text-zinc-500 truncate"
+                        className="text-xs text-muted-foreground truncate"
                       >
                         {stage}
                       </motion.p>
@@ -774,9 +774,9 @@ function Scanner() {
                         key={foundCount}
                         initial={{ scale: 1.25 }}
                         animate={{ scale: 1 }}
-                        className="text-sm font-mono font-bold text-zinc-500"
+                        className="text-sm font-mono font-bold text-muted-foreground"
                       >
-                        <span className="text-white text-base">{foundCount}</span> found
+                        <span className="text-foreground text-base">{foundCount}</span> found
                       </motion.div>
                       {riskScore !== null && (
                         <div className={cn("flex items-center gap-1 text-sm font-bold", riskColor)}>
@@ -810,9 +810,9 @@ function Scanner() {
                           {foundCount > 0 ? <ShieldAlert className="w-6 h-6" /> : <ShieldCheck className="w-6 h-6" />}
                         </div>
                         <div>
-                          <div className="text-[10px] text-zinc-500 font-medium uppercase tracking-wider">Risk Score</div>
+                          <div className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Risk Score</div>
                           <div className={cn("text-2xl font-display font-bold", riskColor)}>
-                            {riskScore ?? "…"}<span className="text-sm text-zinc-500 font-normal">/100</span>
+                            {riskScore ?? "…"}<span className="text-sm text-muted-foreground font-normal">/100</span>
                           </div>
                         </div>
                       </div>
@@ -824,12 +824,12 @@ function Scanner() {
                             key={sev}
                             animate={{ scale: sevCounts[sev] > 0 ? [1, 1.2, 1] : 1 }}
                             transition={{ duration: 0.3 }}
-                            className="flex flex-col items-center p-2 rounded-lg bg-[#0a0a0a] min-w-[44px]"
+                            className="flex flex-col items-center p-2 rounded-lg bg-background border border-border min-w-[44px]"
                           >
                             <span className={cn("font-bold text-lg leading-none", SEV_COLORS[sev])}>
                               {sevCounts[sev]}
                             </span>
-                            <span className="text-[8px] text-zinc-500 uppercase mt-1 tracking-wider">
+                            <span className="text-[8px] text-muted-foreground uppercase mt-1 tracking-wider">
                               {sev.slice(0, 4)}
                             </span>
                           </motion.div>
@@ -844,7 +844,7 @@ function Scanner() {
                         {result && (
                           <button
                             onClick={handleDownloadReport}
-                            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-primary/20 text-white text-xs font-bold transition-colors"
+                            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary/10 hover:bg-primary/20 border border-primary/20 text-primary text-xs font-bold transition-colors"
                           >
                             <Download className="w-3.5 h-3.5" />
                             <span>PDF Report</span>
@@ -863,11 +863,11 @@ function Scanner() {
                     {result?.summary && (
                       <motion.div
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                        className="p-4 rounded-xl bg-white/5 border border-primary/15"
+                        className="p-4 rounded-xl bg-card border border-primary/15"
                       >
                         <div className="flex items-start gap-3">
-                          <Layers className="w-4 h-4 text-white shrink-0 mt-0.5" />
-                          <p className="text-sm leading-relaxed text-slate-300">{result.summary}</p>
+                          <Layers className="w-4 h-4 text-foreground shrink-0 mt-0.5" />
+                          <p className="text-sm leading-relaxed text-muted-foreground">{result.summary}</p>
                         </div>
                       </motion.div>
                     )}
@@ -881,12 +881,12 @@ function Scanner() {
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                             className="glass-panel rounded-xl p-4 mb-4"
                           >
-                            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-3 text-center">
+                            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3 text-center">
                               Severity Distribution
                             </h3>
                             <Suspense
                               fallback={
-                                <div className="h-64 flex items-center justify-center text-zinc-500 border border-dashed border-white/5 rounded-xl">
+                                <div className="h-64 flex items-center justify-center text-muted-foreground border border-dashed border-border rounded-xl">
                                   Loading severity chart...
                                 </div>
                               }
@@ -905,7 +905,7 @@ function Scanner() {
                             key={partialVulns.length}
                             initial={{ scale: 1.3 }}
                             animate={{ scale: 1 }}
-                            className="bg-white/10 px-2 py-0.5 rounded-md text-sm font-bold"
+                            className="bg-primary/10 text-primary px-2 py-0.5 rounded-md text-sm font-bold"
                           >
                             {partialVulns.length}
                           </motion.span>
@@ -914,7 +914,7 @@ function Scanner() {
                               {[0, 1, 2].map((i) => (
                                 <motion.div
                                   key={i}
-                                  className="w-1.5 h-1.5 rounded-full bg-white"
+                                  className="w-1.5 h-1.5 rounded-full bg-foreground"
                                   animate={{ opacity: [0.2, 1, 0.2] }}
                                   transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2 }}
                                 />
@@ -964,7 +964,7 @@ function Scanner() {
                         </motion.div>
                         <div>
                           <h3 className="text-xl font-display font-bold text-green-400 mb-1">Contract Looks Clean!</h3>
-                          <p className="text-sm text-zinc-500 max-w-xs">
+                          <p className="text-sm text-muted-foreground max-w-xs">
                             No automated vulnerabilities detected. Always recommend a manual review before mainnet.
                           </p>
                         </div>
@@ -1018,7 +1018,7 @@ function Scanner() {
               <button
                 onClick={() => { setCode(""); setContractName(""); }}
                 disabled={!code && !contractName}
-                className="p-3 rounded-xl bg-[#0a0a0a]/80 border border-white/5 text-red-400/70 hover:text-red-300 disabled:opacity-25 transition-colors"
+                className="p-3 rounded-xl bg-card border border-border text-red-400/70 hover:text-red-300 disabled:opacity-25 transition-colors"
               >
                 <Trash2 className="w-5 h-5" />
               </button>
@@ -1027,7 +1027,7 @@ function Scanner() {
                 disabled={isScanning || !code.trim() || isSizeError}
                 className={cn(
                   "flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold text-base transition-all",
-                  "bg-white text-black-foreground hover:bg-white/90",
+                  "bg-primary text-primary-foreground hover:bg-primary/90",
                   "disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-primary/30",
                   !isScanning && code.trim() && !isSizeError && "glow-border"
                 )}
@@ -1051,10 +1051,10 @@ export default function Home() {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-[#0E1117]">
+      <div className="flex h-screen w-full items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
-          <Shield className="w-12 h-12 text-white animate-pulse" />
-          <p className="text-slate-400 font-medium animate-pulse">Loading VulnGuard...</p>
+          <Shield className="w-12 h-12 text-foreground animate-pulse" />
+          <p className="text-muted-foreground font-medium animate-pulse">Loading VulnGuard...</p>
         </div>
       </div>
     );
