@@ -39,9 +39,11 @@ export const authLimiter: RateLimitRequestHandler = rateLimit({
   },
   skipSuccessfulRequests: true, // Only count failed requests
   keyGenerator: (req: Request) => {
-    // Use email as key if available, otherwise IP
-    const email = (req.body?.email as string) || req.ip;
-    return email || "unknown";
+    // Use email as key (primary identifier for auth attempts)
+    const email = (req.body?.email as string);
+    if (email) return email;
+    // Fallback to a session-based identifier
+    return `${req.method}:${req.path}:${req.id || 'unknown'}`;
   },
   handler: (_req: Request, res: Response) => {
     res.status(429).json({
@@ -63,9 +65,11 @@ export const scanLimiter: RateLimitRequestHandler = rateLimit({
     retryAfter: "15 minutes",
   },
   keyGenerator: (req: Request) => {
-    // Use authenticated user ID if available, otherwise IP
+    // Use authenticated user ID if available
     const userId = (req.user as any)?.id;
-    return userId || req.ip || "unknown";
+    if (userId) return `user:${userId}`;
+    // Fallback to session identifier (not IP to avoid IPv6 issues)
+    return `session:${req.id || req.headers['x-request-id'] || 'unknown'}`;
   },
   skip: (req: Request) => {
     // Skip rate limiting for admin users
@@ -92,8 +96,11 @@ export const passwordResetLimiter: RateLimitRequestHandler = rateLimit({
     retryAfter: "1 hour",
   },
   keyGenerator: (req: Request) => {
-    // Use email as key
-    return (req.body?.email as string) || req.ip || "unknown";
+    // Use email as key (primary for password reset)
+    const email = (req.body?.email as string);
+    if (email) return email;
+    // Fallback to session identifier
+    return `session:${req.id || req.headers['x-request-id'] || 'unknown'}`;
   },
   handler: (_req: Request, res: Response) => {
     res.status(429).json({
@@ -115,9 +122,11 @@ export const generateFixLimiter: RateLimitRequestHandler = rateLimit({
     retryAfter: "15 minutes",
   },
   keyGenerator: (req: Request) => {
-    // Use user ID if authenticated, otherwise IP
+    // Use user ID if authenticated
     const userId = (req.user as any)?.id;
-    return userId || req.ip || "unknown";
+    if (userId) return `user:${userId}`;
+    // Fallback to session identifier
+    return `session:${req.id || req.headers['x-request-id'] || 'unknown'}`;
   },
   skip: (req: Request) => {
     // Skip for admin users
@@ -144,9 +153,11 @@ export const reportLimiter: RateLimitRequestHandler = rateLimit({
     retryAfter: "15 minutes",
   },
   keyGenerator: (req: Request) => {
-    // Use user ID if authenticated, otherwise IP
+    // Use user ID if authenticated
     const userId = (req.user as any)?.id;
-    return userId || req.ip || "unknown";
+    if (userId) return `user:${userId}`;
+    // Fallback to session identifier
+    return `session:${req.id || req.headers['x-request-id'] || 'unknown'}`;
   },
   skip: (req: Request) => {
     // Skip for admin users
