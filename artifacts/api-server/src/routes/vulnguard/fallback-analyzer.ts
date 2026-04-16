@@ -408,6 +408,502 @@ export function analyzeContractFallback(code: string, contractName?: string): Fa
   });
 
   // ════════════════════════════════════════════════════════════════════════════
+  // 9. SWC-118 – INCORRECT CONSTRUCTOR NAME
+  // ════════════════════════════════════════════════════════════════════════════
+  const constructorMatch = code.match(/contract\s+([A-Za-z0-9_]+)\s*\{/);
+  const contractNameFromCode = constructorMatch?.[1];
+  if (contractNameFromCode) {
+    sourceLines.forEach((line, i) => {
+      if (/\b(function)\s+[A-Za-z0-9_]*\s*\(.*\)/.test(line)) {
+        const fnNameMatch = line.match(/function\s+([A-Za-z0-9_]+)\s*\(/);
+        if (fnNameMatch) {
+          const fnName = fnNameMatch[1];
+          // Old Solidity: constructor was named same as contract
+          if (fnName === contractNameFromCode && !fnName.includes("constructor")) {
+            const lineNo = i + 1;
+            push({
+              type: "incorrect-constructor",
+              severity: "MEDIUM",
+              swc_id: "SWC-118",
+              line_number: lineNo,
+              affected_lines: `line ${lineNo}`,
+              affected_functions: fnName,
+              title: `Incorrect constructor name: ${fnName}()`,
+              description: "Function named after contract (old Solidity constructor syntax).",
+              technical_risk: "Constructor may not execute, leading to uninitialized state.",
+              attack_scenario: "If constructor doesn't run, contract state is uninitialized.",
+              impact: "Uninitialized state variables, broken contract logic.",
+              vulnerable_code: line.trim(),
+              fixed_code: null,
+              recommendation: "Use modern 'constructor()' keyword instead of contract name.",
+            });
+          }
+        }
+      }
+    });
+  }
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // 10. SWC-113 – DOS WITH FAILED CALL
+  // ════════════════════════════════════════════════════════════════════════════
+  sourceLines.forEach((line, i) => {
+    if (/\bfor\s*\(.*in|forEach|while\s*\(.*\.length|map\s*\(|filter\s*\(/.test(line) && /\.call|\.send|\.transfer/.test(sourceLines.slice(i, Math.min(i + 10, sourceLines.length)).join("\n"))) {
+      // Check if there's a loop with external calls
+      const context = sourceLines.slice(i, Math.min(i + 10, sourceLines.length)).join("\n");
+      if (/\.call|\.send|\.transfer/.test(context) && !/try|catch|require/.test(context)) {
+        const lineNo = i + 1;
+        push({
+          type: "dos-failed-call",
+          severity: "HIGH",
+          swc_id: "SWC-113",
+          line_number: lineNo,
+          affected_lines: `lines ${lineNo}-${Math.min(lineNo + 10, sourceLines.length)}`,
+          affected_functions: null,
+          title: "DoS with Failed Call in Loop",
+          description: "Loop contains external calls without proper failure handling.",
+          technical_risk: "Single failed call can revert entire transaction.",
+          attack_scenario: "Attacker adds themselves to array, causes their transfer to fail, blocking entire operation.",
+          impact: "Denial of service - function becomes unusable.",
+          vulnerable_code: line.trim(),
+          fixed_code: null,
+          recommendation: "Use pull-payment pattern or isolate each call with try-catch.",
+        });
+      }
+    }
+  });
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // 11. SWC-128 – DOS WITH BLOCK GAS LIMIT
+  // ════════════════════════════════════════════════════════════════════════════
+  sourceLines.forEach((line, i) => {
+    if (/\bfor\s*\(|while\s*\(|forEach\s*\(/.test(line) && /\.length|\.size|count/.test(sourceLines.slice(Math.max(0, i - 2), i + 5).join("\n"))) {
+      // Unbounded loop over dynamic array length
+      const context = sourceLines.slice(i, Math.min(i + 15, sourceLines.length)).join("\n");
+      if (/balances|users|tokens|holders|addresses/.test(context) && !/for\s*\(\s*uint\s+\w+\s*=\s*0\s*;\s*\w+\s*<\s*\d+/.test(context)) {
+        const lineNo = i + 1;
+        push({
+          type: "dos-block-gas",
+          severity: "MEDIUM",
+          swc_id: "SWC-128",
+          line_number: lineNo,
+          affected_lines: `lines ${lineNo}-${Math.min(lineNo + 10, sourceLines.length)}`,
+          affected_functions: null,
+          title: "DoS with Block Gas Limit",
+          description: "Unbounded loop over dynamic-sized data structure.",
+          technical_risk: "As array grows, transaction will exceed gas limit and revert.",
+          attack_scenario: "Attacker continuously adds entries, eventually blocking function execution.",
+          impact: "Function becomes permanently unusable when array exceeds gas limit.",
+          vulnerable_code: line.trim(),
+          fixed_code: null,
+          recommendation: "Limit loop iterations, use pagination, or external off-chain tracking.",
+        });
+      }
+    }
+  });
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // 12. SWC-117 – SIGNATURE MALLEABILITY
+  // ════════════════════════════════════════════════════════════════════════════
+  sourceLines.forEach((line, i) => {
+    if (/\becrecover\s*\(|ecrecover|ECDSA|signature/.test(line)) {
+      const context = sourceLines.slice(Math.max(0, i - 2), Math.min(i + 3, sourceLines.length)).join("\n");
+      if (!/require.*!=.*0x0|require.*!=.*address\(0\)|!= address/.test(context)) {
+        const lineNo = i + 1;
+        push({
+          type: "signature-malleability",
+          severity: "MEDIUM",
+          swc_id: "SWC-117",
+          line_number: lineNo,
+          affected_lines: `line ${lineNo}`,
+          affected_functions: null,
+          title: "Signature Malleability Risk",
+          description: "Signature validation without checking for zero address recovery.",
+          technical_risk: "Signature can be malleated, allowing signature reuse or modification.",
+          attack_scenario: "Attacker modifies signature (s value) to replay transactions.",
+          impact: "Unauthorized transaction execution.",
+          vulnerable_code: line.trim(),
+          fixed_code: null,
+          recommendation: "Use OpenZeppelin ECDSA or always verify(require) ecrecover != address(0).",
+        });
+      }
+    }
+  });
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // 13. SWC-119 – SHADOWING STATE VARIABLES
+  // ════════════════════════════════════════════════════════════════════════════
+  const stateVars = new Set<string>();
+  sourceLines.forEach((line) => {
+    const match = line.match(/^\s*(public|private|internal|protected)?\s*(uint|int|address|bool|string|bytes|mapping)\s+([A-Za-z0-9_]+)/);
+    if (match) stateVars.add(match[3]);
+  });
+
+  for (const fn of functions) {
+    const localVars = new Set<string>();
+    fn.lines.forEach((line) => {
+      const match = line.match(/^\s*(uint|int|address|bool|string|bytes)\s+([A-Za-z0-9_]+)/);
+      if (match) localVars.add(match[2]);
+    });
+
+    for (const localVar of localVars) {
+      if (stateVars.has(localVar)) {
+        push({
+          type: "shadowing-state-vars",
+          severity: "LOW",
+          swc_id: "SWC-119",
+          line_number: fn.startLine,
+          affected_lines: `${fn.startLine}`,
+          affected_functions: fn.name,
+          title: `Local variable '${localVar}' shadows state variable`,
+          description: "Local variable name same as state variable.",
+          technical_risk: "Code becomes confusing, may access wrong variable.",
+          attack_scenario: "Developer accidentally uses wrong variable, bypassing checks.",
+          impact: "Logic errors, potential state corruption.",
+          vulnerable_code: null,
+          fixed_code: null,
+          recommendation: "Rename local variables to avoid shadowing.",
+        });
+      }
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // 14. SWC-121 – SIGNATURE REPLAY PROTECTION
+  // ════════════════════════════════════════════════════════════════════════════
+  sourceLines.forEach((line, i) => {
+    if (/\bmessageHash\s*=|keccak256\s*\(|sha3\s*\(/.test(line) && /signature|sig|permit/.test(sourceLines.slice(i, Math.min(i + 10, sourceLines.length)).join("\n"))) {
+      const context = sourceLines.slice(Math.max(0, i - 2), Math.min(i + 10, sourceLines.length)).join("\n");
+      if (!/nonce|chainId|address\(this\)|domainSeparator/.test(context)) {
+        const lineNo = i + 1;
+        push({
+          type: "signature-replay",
+          severity: "CRITICAL",
+          swc_id: "SWC-121",
+          line_number: lineNo,
+          affected_lines: `line ${lineNo}`,
+          affected_functions: null,
+          title: "Missing Signature Replay Protection",
+          description: "Signature hash does not include nonce, chainId, or contract address.",
+          technical_risk: "Signature can be replayed across chains or multiple times.",
+          attack_scenario: "Attacker replays signature on different chain or multiple times.",
+          impact: "Unauthorized repeated executions, fund loss.",
+          vulnerable_code: line.trim(),
+          fixed_code: null,
+          recommendation: "Include chainId, nonce, and address(this) in signed message.",
+        });
+      }
+    }
+  });
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // 15. SWC-122 – LACK OF PROPER SIGNATURE VERIFICATION
+  // ════════════════════════════════════════════════════════════════════════════
+  sourceLines.forEach((line, i) => {
+    if (/\becrecover\s*\(|publicKey|publickey|pubkey/.test(line)) {
+      const context = sourceLines.slice(Math.max(0, i - 3), Math.min(i + 5, sourceLines.length)).join("\n");
+      if (!/require|assert|if/.test(context) || !/!=|==/.test(context)) {
+        const lineNo = i + 1;
+        push({
+          type: "signature-verification",
+          severity: "HIGH",
+          swc_id: "SWC-122",
+          line_number: lineNo,
+          affected_lines: `line ${lineNo}`,
+          affected_functions: null,
+          title: "Lack of Proper Signature Verification",
+          description: "Signature verification without proper validation.",
+          technical_risk: "Unverified signatures can be forged.",
+          attack_scenario: "Attacker forges signature to execute unauthorized actions.",
+          impact: "Privilege escalation, unauthorized execution.",
+          vulnerable_code: line.trim(),
+          fixed_code: null,
+          recommendation: "Always verify recovered address matches expected signer.",
+        });
+      }
+    }
+  });
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // 16. SWC-100 – FUNCTION DEFAULT VISIBILITY
+  // ════════════════════════════════════════════════════════════════════════════
+  for (const fn of functions) {
+    const fnDecl = fn.lines[0];
+    const hasVisibility = /\b(public|private|internal|external)\b/.test(fnDecl);
+    const isMagicFunc = /constructor|fallback|receive/.test(fnDecl);
+    
+    if (!hasVisibility && !isMagicFunc && !fn.name.startsWith("_")) {
+      push({
+        type: "function-visibility",
+        severity: "LOW",
+        swc_id: "SWC-100",
+        line_number: fn.startLine,
+        affected_lines: `line ${fn.startLine}`,
+        affected_functions: fn.name,
+        title: `Missing visibility modifier on ${fn.name}()`,
+        description: "Function lacks explicit visibility keyword.",
+        technical_risk: "Default visibility depends on Solidity version.",
+        attack_scenario: "Unintended function exposure based on compiler assumptions.",
+        impact: "Unexpected public/internal accessibility.",
+        vulnerable_code: fnDecl.trim(),
+        fixed_code: null,
+        recommendation: "Explicitly specify public, private, internal, or external.",
+      });
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // 17. SWC-108 – STATE VARIABLE DEFAULT VISIBILITY
+  // ════════════════════════════════════════════════════════════════════════════
+  sourceLines.forEach((line, i) => {
+    const match = line.match(/^\s*(uint|int|address|bool|string|bytes|mapping|struct)\s+([A-Za-z0-9_]+)/);
+    if (match) {
+      const hasVisibility = /\b(public|private|internal)\b/.test(line);
+      if (!hasVisibility) {
+        const lineNo = i + 1;
+        push({
+          type: "state-visibility",
+          severity: "LOW",
+          swc_id: "SWC-108",
+          line_number: lineNo,
+          affected_lines: `line ${lineNo}`,
+          affected_functions: null,
+          title: `Missing visibility on state variable '${match[2]}'`,
+          description: "State variable lacks explicit visibility.",
+          technical_risk: "State exposure depends on Solidity version.",
+          attack_scenario: "Unexpected internal/public state variable accessibility.",
+          impact: "Information disclosure or unintended access.",
+          vulnerable_code: line.trim(),
+          fixed_code: null,
+          recommendation: "Explicitly specify public, private, or internal.",
+        });
+      }
+    }
+  });
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // 18. SWC-111 – DEPRECATED SOLIDITY FUNCTIONS
+  // ════════════════════════════════════════════════════════════════════════════
+  const deprecatedFunctions = [
+    { name: "sha3", replacement: "keccak256", swc: "SWC-111" },
+    { name: "throw", replacement: "revert()", swc: "SWC-111" },
+    { name: "suicide", replacement: "selfdestruct", swc: "SWC-111" },
+    { name: "var ", replacement: "explicit type", swc: "SWC-111" },
+    { name: "callcode", replacement: "delegatecall", swc: "SWC-111" },
+  ];
+
+  deprecatedFunctions.forEach((deprecated) => {
+    sourceLines.forEach((line, i) => {
+      if (new RegExp(`\\b${deprecated.name}\\b`).test(line)) {
+        const lineNo = i + 1;
+        push({
+          type: "deprecated-function",
+          severity: "LOW",
+          swc_id: deprecated.swc,
+          line_number: lineNo,
+          affected_lines: `line ${lineNo}`,
+          affected_functions: null,
+          title: `Deprecated function: ${deprecated.name}()`,
+          description: `${deprecated.name}() is deprecated in modern Solidity.`,
+          technical_risk: "May cause unexpected behavior in newer compiler versions.",
+          attack_scenario: "Code fails to compile with new Solidity versions.",
+          impact: "Compatibility issues.",
+          vulnerable_code: line.trim(),
+          fixed_code: null,
+          recommendation: `Replace with ${deprecated.replacement}.`,
+        });
+      }
+    });
+  });
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // 19. SWC-137 – FLOATING PRAGMA
+  // ════════════════════════════════════════════════════════════════════════════
+  sourceLines.forEach((line, i) => {
+    if (/pragma\s+solidity\s+[\^><=!]+/.test(line)) {
+      // Floating pragma (not pinned to exact version)
+      if (!/pragma\s+solidity\s+(0\.\d+\.\d+|>=\d+\.\d+\.\d+\s+<\d+\.\d+\.\d+)/.test(line)) {
+        const lineNo = i + 1;
+        push({
+          type: "floating-pragma",
+          severity: "LOW",
+          swc_id: "SWC-137",
+          line_number: lineNo,
+          affected_lines: `line ${lineNo}`,
+          affected_functions: null,
+          title: "Floating Pragma",
+          description: "Pragma uses caret/tilde allowing version range.",
+          technical_risk: "Different compiler versions may produce different behavior.",
+          attack_scenario: "Code compiled with different Solidity version behaves unexpectedly.",
+          impact: "Inconsistent behavior across environments.",
+          vulnerable_code: line.trim(),
+          fixed_code: null,
+          recommendation: "Pin pragma to exact version: pragma solidity 0.8.x;",
+        });
+      }
+    }
+  });
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // 20. SWC-133 – HASH COLLISIONS WITH ABI.ENCODEPACKED
+  // ════════════════════════════════════════════════════════════════════════════
+  sourceLines.forEach((line, i) => {
+    if (/abi\.encodePacked\s*\(/.test(line) && /keccak256|sha3/.test(sourceLines.slice(Math.max(0, i - 1), Math.min(i + 2, sourceLines.length)).join("\n"))) {
+      const lineNo = i + 1;
+      push({
+        type: "hash-collision",
+        severity: "MEDIUM",
+        swc_id: "SWC-133",
+        line_number: lineNo,
+        affected_lines: `line ${lineNo}`,
+        affected_functions: null,
+        title: "Hash Collision Risk with abi.encodePacked",
+        description: "abi.encodePacked can cause hash collisions.",
+        technical_risk: "Different inputs can produce same hash.",
+        attack_scenario: "Attacker crafts collision to bypass hash-based checks.",
+        impact: "Access control bypass, state corruption.",
+        vulnerable_code: line.trim(),
+        fixed_code: null,
+        recommendation: "Use abi.encode() instead of abi.encodePacked().",
+      });
+    }
+  });
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // 21. SWC-110 – ASSERT VIOLATION
+  // ════════════════════════════════════════════════════════════════════════════
+  sourceLines.forEach((line, i) => {
+    if (/\bassert\s*\(/.test(line)) {
+      const context = sourceLines.slice(Math.max(0, i - 2), Math.min(i + 3, sourceLines.length)).join("\n");
+      if (!/condition|invariant|internal|private/.test(context)) {
+        const lineNo = i + 1;
+        push({
+          type: "assert-violation",
+          severity: "MEDIUM",
+          swc_id: "SWC-110",
+          line_number: lineNo,
+          affected_lines: `line ${lineNo}`,
+          affected_functions: null,
+          title: "Assert Used for Input Validation",
+          description: "assert() used instead of require() for validation.",
+          technical_risk: "Assert consumes all gas on failure (bad for production).",
+          attack_scenario: "Attacker triggers assert(), burning caller's gas.",
+          impact: "DoS via gas exhaustion.",
+          vulnerable_code: line.trim(),
+          fixed_code: null,
+          recommendation: "Use require() for input validation, assert() only for invariants.",
+        });
+      }
+    }
+  });
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // 22. SWC-114 – TRANSACTION ORDER DEPENDENCE (FRONT-RUNNING)
+  // ════════════════════════════════════════════════════════════════════════════
+  sourceLines.forEach((line, i) => {
+    if (/price|rate|amount|balance/.test(line) && /=\s*\w+\.|\.read\s*\(|\.call\s*\(/.test(sourceLines.slice(i, Math.min(i + 5, sourceLines.length)).join("\n"))) {
+      // Reading external price without timestamp/block check
+      const context = sourceLines.slice(i, Math.min(i + 10, sourceLines.length)).join("\n");
+      if (!/deadline|timestamp|block\.number|frontrun|MEV|slippage/.test(context)) {
+        const lineNo = i + 1;
+        push({
+          type: "front-running",
+          severity: "MEDIUM",
+          swc_id: "SWC-114",
+          line_number: lineNo,
+          affected_lines: `line ${lineNo}`,
+          affected_functions: null,
+          title: "Potential Front-Running Vulnerability",
+          description: "Transaction depends on external state without protection.",
+          technical_risk: "Attacker can front-run and change conditions.",
+          attack_scenario: "Attacker executes transaction before target, changing prices/balances.",
+          impact: "Economic loss, unfavorable execution.",
+          vulnerable_code: line.trim(),
+          fixed_code: null,
+          recommendation: "Implement slippage protection, commit-reveal scheme, or MEV protection.",
+        });
+      }
+    }
+  });
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // 23. SWC-132 – UNEXPECTED ETHER BALANCE
+  // ════════════════════════════════════════════════════════════════════════════
+  sourceLines.forEach((line, i) => {
+    if (/address\(this\)\.balance|this\.balance|balance\s*==|\.balance\s*>|\.balance\s*</.test(line)) {
+      const context = sourceLines.slice(Math.max(0, i - 2), Math.min(i + 3, sourceLines.length)).join("\n");
+      if (!/selfdestruct|receive|fallback/.test(context)) {
+        const lineNo = i + 1;
+        push({
+          type: "unexpected-ether",
+          severity: "MEDIUM",
+          swc_id: "SWC-132",
+          line_number: lineNo,
+          affected_lines: `line ${lineNo}`,
+          affected_functions: null,
+          title: "Unexpected Ether Balance",
+          description: "Code assumes specific Ether balance.",
+          technical_risk: "External parties can send Ether, breaking assumptions.",
+          attack_scenario: "Attacker sends Ether to contract, breaking logic.",
+          impact: "Logic bypass, funds trapped or lost.",
+          vulnerable_code: line.trim(),
+          fixed_code: null,
+          recommendation: "Track Ether internally, don't rely on balance() for tracking.",
+        });
+      }
+    }
+  });
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // 24. SWC-136 – UNENCRYPTED PRIVATE DATA ON-CHAIN
+  // ════════════════════════════════════════════════════════════════════════════
+  sourceLines.forEach((line, i) => {
+    if (/\bprivate\s+(uint|bytes|address|bool)\s+\w+|secret|password|key|private_key/.test(line)) {
+      const lineNo = i + 1;
+      push({
+        type: "unencrypted-private",
+        severity: "HIGH",
+        swc_id: "SWC-136",
+        line_number: lineNo,
+        affected_lines: `line ${lineNo}`,
+        affected_functions: null,
+        title: "Unencrypted Private Data On-Chain",
+        description: "Private state variables are readable from blockchain.",
+        technical_risk: "All blockchain data is public and can be read.",
+        attack_scenario: "Attacker reads contract storage to find secrets.",
+        impact: "Exposure of sensitive data.",
+        vulnerable_code: line.trim(),
+        fixed_code: null,
+        recommendation: "Never store secrets on-chain. Use commit-reveal or off-chain computation.",
+      });
+    }
+  });
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // 25. SWC-134 – MESSAGE CALL WITH HARDCODED GAS AMOUNT
+  // ════════════════════════════════════════════════════════════════════════════
+  sourceLines.forEach((line, i) => {
+    if (/\.call\s*\{[^}]*gas\s*:\s*\d+/.test(line)) {
+      const lineNo = i + 1;
+      push({
+        type: "hardcoded-gas",
+        severity: "MEDIUM",
+        swc_id: "SWC-134",
+        line_number: lineNo,
+        affected_lines: `line ${lineNo}`,
+        affected_functions: null,
+        title: "Hardcoded Gas Amount in Call",
+        description: "External call with hardcoded gas value.",
+        technical_risk: "Hardcoded gas can fail as gas costs change.",
+        attack_scenario: "Gas costs increase in future EVM versions, calls fail.",
+        impact: "Broken functionality in future versions.",
+        vulnerable_code: line.trim(),
+        fixed_code: null,
+        recommendation: "Use dynamic gas (gasleft() - buffer) or remove gas limit.",
+      });
+    }
+  });
+
+  // ════════════════════════════════════════════════════════════════════════════
   // CALCULATE RISK SCORE
   // ════════════════════════════════════════════════════════════════════════════
   const risk_score = calcRisk(vulnerabilities);

@@ -118,6 +118,93 @@ export default function Landing() {
 
       <div className="mt-8">
         <Panel
+          title="36+ SWC Vulnerabilities Across All Categories"
+          description="VulnGuard detects comprehensive Solidity vulnerabilities following the official SWC (Smart Contract Weakness) Registry standard."
+        >
+          <div className="space-y-6">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {[
+                {
+                  category: "🧮 Arithmetic & Math",
+                  vulns: ["SWC-101: Integer Overflow/Underflow"],
+                },
+                {
+                  category: "🔐 Access Control",
+                  vulns: ["SWC-105: Unprotected Ether Withdrawal", "SWC-106: Unprotected SELFDESTRUCT", "SWC-115: tx.origin Authorization", "SWC-118: Incorrect Constructor"],
+                },
+                {
+                  category: "🔁 Reentrancy",
+                  vulns: ["SWC-107: Reentrancy"],
+                },
+                {
+                  category: "📞 External Calls",
+                  vulns: ["SWC-104: Unchecked Call Return", "SWC-113: DoS with Failed Call"],
+                },
+                {
+                  category: "⛽ Denial of Service",
+                  vulns: ["SWC-128: Block Gas Limit DoS", "SWC-126: Gas Griefing"],
+                },
+                {
+                  category: "🎲 Randomness & Blockchain",
+                  vulns: ["SWC-120: Weak Randomness", "SWC-116: Timestamp Manipulation", "SWC-117: Signature Malleability"],
+                },
+                {
+                  category: "📊 State & Storage",
+                  vulns: ["SWC-109: Uninitialized Storage", "SWC-119: Shadowing State Variables", "SWC-125: Incorrect Inheritance", "SWC-124: Arbitrary Storage Write"],
+                },
+                {
+                  category: "⚙️ Code Quality",
+                  vulns: ["SWC-100: Function Visibility", "SWC-108: State Variable Visibility", "SWC-110: Assert Violation", "SWC-111: Deprecated Functions", "SWC-112: Unsafe Delegatecall"],
+                },
+                {
+                  category: "🔄 Transaction Ordering",
+                  vulns: ["SWC-114: Front-running"],
+                },
+                {
+                  category: "💣 Signature & Auth",
+                  vulns: ["SWC-121: Signature Replay", "SWC-122: Signature Verification"],
+                },
+                {
+                  category: "🧱 Advanced Design",
+                  vulns: ["SWC-133: Hash Collisions (encodePacked)", "SWC-134: Hardcoded Gas", "SWC-132: Unexpected Ether Balance", "SWC-136: Unencrypted Private Data", "SWC-137: Floating Pragma"],
+                },
+              ].map((item) => (
+                <div key={item.category} className="rounded-xl border border-border bg-card p-4">
+                  <p className="text-sm font-bold text-foreground mb-3">{item.category}</p>
+                  <ul className="space-y-2">
+                    {item.vulns.map((vuln) => (
+                      <li key={vuln} className="text-xs text-muted-foreground font-mono flex items-start gap-2">
+                        <ShieldAlert className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-primary" />
+                        <span>{vuln}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+
+            <div className="rounded-2xl border border-border/50 bg-gradient-to-br from-primary/5 to-primary/2 p-6">
+              <div className="grid gap-6 md:grid-cols-3">
+                <div>
+                  <p className="text-3xl font-bold text-foreground">36+</p>
+                  <p className="text-sm text-muted-foreground mt-1">Vulnerability types detected</p>
+                </div>
+                <div>
+                  <p className="text-3xl font-bold text-foreground">9</p>
+                  <p className="text-sm text-muted-foreground mt-1">Security categories covered</p>
+                </div>
+                <div>
+                  <p className="text-3xl font-bold text-foreground">SWC-Aligned</p>
+                  <p className="text-sm text-muted-foreground mt-1">Official registry standard</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Panel>
+      </div>
+
+      <div className="mt-8">
+        <Panel
           title="How VulnGuard detects real Solidity vulnerabilities"
           description="This is the same style of issue the platform detects in seconds, with precise fix guidance and severity scoring."
         >
