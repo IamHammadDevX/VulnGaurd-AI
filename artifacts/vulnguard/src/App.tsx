@@ -1,7 +1,6 @@
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Suspense, lazy, useEffect } from "react";
-import { Home } from "lucide-react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@workspace/replit-auth-web";
@@ -130,35 +129,12 @@ function AnalyticsTracker() {
   return <AppInitializer />;
 }
 
-function GlobalHomeShortcut() {
-  const [location] = useLocation();
-  const pathname = location.split(/[?#]/)[0];
-  const normalizedPath = pathname.replace(/\/+$/, "") || "/";
-  const isHomepage = normalizedPath === "/" || normalizedPath === "/home";
-
-  if (isHomepage) {
-    return null;
-  }
-
-  return (
-    <a
-      href="/"
-      className="fixed bottom-4 right-4 z-50 inline-flex items-center gap-2 rounded-full border border-border bg-card/95 px-4 py-2 text-sm font-semibold text-foreground shadow-lg backdrop-blur-md transition-colors hover:bg-muted/60"
-      aria-label="Back to homepage"
-    >
-      <Home className="h-4 w-4" />
-      Home
-    </a>
-  );
-}
-
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
           <AnalyticsTracker />
-          <GlobalHomeShortcut />
         </WouterRouter>
         <Toaster />
         <CookieConsent />

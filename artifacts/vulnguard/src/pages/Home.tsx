@@ -473,11 +473,6 @@ function Scanner() {
 
           {/* Right nav */}
           <div className="flex items-center gap-2 shrink-0">
-            <Link href="/">
-              <a className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card hover:bg-muted/40 border border-border text-muted-foreground hover:text-foreground text-xs font-medium transition-colors">
-                Home
-              </a>
-            </Link>
             <button
               type="button"
               onClick={() => setFocusMode((value) => !value)}
@@ -562,7 +557,8 @@ function Scanner() {
 
         {/* ── LEFT PANEL — Editor ── */}
         <div className={cn(
-          "flex flex-col gap-3 lg:h-[calc(100vh-5.5rem)]",
+          "flex flex-col gap-3",
+          focusMode ? "lg:h-[58vh]" : "lg:h-[calc(100vh-5.5rem)]",
           "lg:block",
           mobileTab !== "editor" && "hidden lg:flex"
         )}>
@@ -767,9 +763,9 @@ function Scanner() {
 
         {/* ── RIGHT PANEL — Results ── */}
         <div className={cn(
-          "flex flex-col gap-3 lg:h-[calc(100vh-5.5rem)]",
-          mobileTab !== "results" && "hidden lg:flex",
-          focusMode && "lg:hidden"
+          "flex flex-col gap-3",
+          focusMode ? "lg:h-[calc(100vh-5.5rem-58vh)]" : "lg:h-[calc(100vh-5.5rem)]",
+          mobileTab !== "results" && "hidden lg:flex"
         )}>
           <AnimatePresence mode="wait">
 
