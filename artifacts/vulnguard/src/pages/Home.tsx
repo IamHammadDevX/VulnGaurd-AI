@@ -312,6 +312,9 @@ function IdleState() {
 function Scanner() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [mobileTab, setMobileTab] = useState<"editor" | "results">("editor");
+  const [editorTheme, setEditorTheme] = useState<"vs" | "vs-dark">(
+    document.documentElement.classList.contains("dark") ? "vs-dark" : "vs"
+  );
 
   const {
     code, setCode,
@@ -338,6 +341,22 @@ function Scanner() {
   useEffect(() => {
     if (phase === "streaming") setMobileTab("results");
   }, [phase]);
+
+  useEffect(() => {
+    const updateTheme = () => {
+      setEditorTheme(document.documentElement.classList.contains("dark") ? "vs-dark" : "vs");
+    };
+
+    const observer = new MutationObserver(updateTheme);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    window.addEventListener("storage", updateTheme);
+
+    updateTheme();
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("storage", updateTheme);
+    };
+  }, []);
 
   // Ctrl+Enter to scan
   useEffect(() => {
@@ -434,7 +453,7 @@ function Scanner() {
       <header className="border-b border-border bg-background/80 backdrop-blur-2xl sticky top-0 z-50 shrink-0">
         <div className="max-w-[1600px] mx-auto px-4 h-14 flex items-center justify-between gap-4">
           {/* Logo */}
-          <Link href="/">
+          <Link href="/home">
             <a className="flex items-center gap-2.5 shrink-0 hover:opacity-80 transition-opacity cursor-pointer">
               <BrandLogo showTagline textClassName="glow-text" />
             </a>
@@ -453,7 +472,7 @@ function Scanner() {
 
           {/* Right nav */}
           <div className="flex items-center gap-2 shrink-0">
-            <Link href="/">
+            <Link href="/home">
               <a className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card hover:bg-muted/40 border border-border text-muted-foreground hover:text-foreground text-xs font-medium transition-colors">
                 Home
               </a>
@@ -533,10 +552,24 @@ function Scanner() {
           "lg:block",
           mobileTab !== "editor" && "hidden lg:flex"
         )}>
-          <div className="glass-panel rounded-xl flex flex-col h-full overflow-hidden">
+          <div className="rounded-xl border border-border bg-card shadow-[0_12px_40px_-28px_rgba(2,132,199,0.45)] flex flex-col h-full overflow-hidden">
 
             {/* Toolbar */}
             <div className="p-3 md:p-4 border-b border-border bg-card/60 flex flex-col gap-3 shrink-0">
+
+              <div className="flex items-center justify-between rounded-xl border border-border bg-background px-3 py-2">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1.5">
+                    <span className="h-2.5 w-2.5 rounded-full bg-red-500/80" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-yellow-500/80" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-green-500/80" />
+                  </div>
+                  <p className="text-xs font-semibold text-foreground">VulnGuard IDE Scanner</p>
+                </div>
+                <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">
+                  Solidity Security Workspace
+                </span>
+              </div>
 
               {/* Row: name + upload */}
               <div className="flex items-center gap-2">
@@ -612,7 +645,7 @@ function Scanner() {
             <div
               {...getRootProps()}
               className={cn(
-                "flex-1 relative min-h-[220px] transition-colors duration-300",
+                "flex-1 relative min-h-[220px] transition-colors duration-300 border-y border-border",
                 isDragActive ? "bg-primary/10" : "bg-background"
               )}
             >
@@ -638,7 +671,7 @@ function Scanner() {
                 <MonacoEditor
                   height="100%"
                   language="sol"
-                  theme="vs-dark"
+                  theme={editorTheme}
                   value={code}
                   onChange={(val) => setCode(val || "")}
                   options={{
