@@ -35,7 +35,7 @@ export default function ForgotPassword() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-card/60 border border-white/10 rounded-2xl p-6 space-y-4">
+      <div className="w-full max-w-md bg-card border border-border rounded-xl p-6 space-y-4">
         {/* Back Button */}
         <Link href="/login" className="inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground mb-2 transition-colors">
           <ArrowLeft className="w-3 h-3" />
@@ -45,8 +45,8 @@ export default function ForgotPassword() {
         {!submitted ? (
           <>
             <div className="text-center">
-              <div className="w-11 h-11 rounded-xl bg-primary/15 flex items-center justify-center mx-auto mb-2">
-                <Shield className="w-5 h-5 text-primary" />
+              <div className="w-11 h-11 rounded-xl bg-white/5 flex items-center justify-center mx-auto mb-2">
+                <Shield className="w-5 h-5 text-white" />
               </div>
               <h1 className="text-xl font-bold">Reset Password</h1>
               <p className="text-xs text-muted-foreground mt-1">Enter your email to receive a reset link</p>
@@ -64,7 +64,7 @@ export default function ForgotPassword() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className="mt-1 w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:bg-white/8 transition-colors"
+                  className="mt-1 w-full px-3 py-2 rounded-lg bg-background border border-input text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:bg-muted/20 transition-colors"
                   required
                 />
               </div>
@@ -72,7 +72,7 @@ export default function ForgotPassword() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 disabled:opacity-60 transition-colors"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-foreground text-background text-sm font-semibold hover:bg-foreground/90 disabled:opacity-60 transition-colors"
               >
                 <Mail className="w-4 h-4" />
                 {loading ? "Sending..." : "Send Reset Link"}
@@ -81,7 +81,7 @@ export default function ForgotPassword() {
 
             <p className="text-xs text-muted-foreground text-center">
               Remember your password?{" "}
-              <Link href="/login" className="text-primary hover:underline">
+              <Link href="/login" className="text-foreground hover:underline">
                 Sign in
               </Link>
             </p>
@@ -112,14 +112,14 @@ export default function ForgotPassword() {
                 setEmail("");
                 setSubmitted(false);
               }}
-              className="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-sm font-semibold hover:bg-white/8 transition-colors"
+              className="w-full px-4 py-2 rounded-lg bg-background border border-input text-sm font-semibold hover:bg-muted/40 transition-colors"
             >
               Try Another Email
             </button>
 
             <Link
               href="/login"
-              className="block px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors text-center"
+              className="block px-4 py-2 rounded-lg bg-foreground text-background text-sm font-semibold hover:bg-foreground/90 transition-colors text-center"
             >
               Back to Login
             </Link>

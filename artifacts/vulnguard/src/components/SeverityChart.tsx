@@ -29,7 +29,7 @@ export function SeverityChart({ vulnerabilities }: SeverityChartProps) {
 
   if (data.length === 0) {
     return (
-      <div className="h-64 flex items-center justify-center text-muted-foreground border border-dashed border-white/10 rounded-xl">
+      <div className="h-64 flex items-center justify-center text-zinc-500 border border-dashed border-white/5 rounded-xl">
         No vulnerabilities found
       </div>
     );
@@ -55,10 +55,11 @@ export function SeverityChart({ vulnerabilities }: SeverityChartProps) {
           </Pie>
           <RechartsTooltip 
             contentStyle={{ 
-              backgroundColor: 'hsl(240 8% 8%)', 
-              border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: '0.5rem',
-              color: '#fff'
+              backgroundColor: '#000000', 
+              border: '1px solid rgba(255,255,255,0.05)',
+              borderRadius: '0.75rem',
+              color: '#d4d4d8', 
+              fontSize: '0.875rem'
             }}
             itemStyle={{ color: '#fff' }}
           />

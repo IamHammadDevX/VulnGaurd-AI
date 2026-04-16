@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
-import { Link } from "wouter";
-import { Shield, ChevronRight, Mail, Phone, MapPin, Loader2, CheckCircle2 } from "lucide-react";
+import { ChevronRight, Mail, MapPin, Phone, Loader2, CheckCircle2 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { MarketingShell } from "@/components/marketing/MarketingShell";
+import { Panel } from "@/components/marketing/SaasBlocks";
 import { engagementEvents } from "@/lib/analytics";
 
 export default function Contact() {
@@ -44,90 +45,52 @@ export default function Contact() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0E1117] text-slate-200 overflow-hidden font-sans selection:bg-primary/30 flex flex-col">
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-[#0E1117]/80 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/">
-            <a className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                <Shield className="w-5 h-5 text-white" />
+    <MarketingShell
+      eyebrow="Contact"
+      title="Talk to the VulnGuard team"
+      subtitle="Get architecture guidance, pricing support, and implementation help from security specialists."
+    >
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4 }}>
+          <Panel title="Contact information" description="We respond quickly for product and security questions.">
+            <div className="space-y-6">
+              <div className="flex items-start gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-background">
+                  <Mail className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Email us</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">For sales, support, and partnerships.</p>
+                  <a href="mailto:iamhammaddev@gmai.com" className="mt-2 inline-block text-sm text-foreground">
+                    iamhammaddev@gmai.com
+                  </a>
+                </div>
               </div>
-              <span className="font-bold text-lg tracking-tight text-white">VulnGuard</span>
-            </a>
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link href="/login">
-              <a className="text-sm font-medium text-slate-300 hover:text-white transition-colors duration-200">Log In</a>
-            </Link>
-          </div>
-        </div>
-      </nav>
-
-      <main className="flex-grow pt-32 pb-20 px-6 max-w-4xl mx-auto w-full relative">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
-        
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-16 relative z-10"
-        >
-          <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-6">Get in Touch</h1>
-          <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-            Have questions about VulnGuard AI? Our team is here to help you secure your smart contracts.
-          </p>
-        </motion.div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="space-y-8"
-          >
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-8 backdrop-blur-sm">
-              <h2 className="text-2xl font-bold text-white mb-6">Contact Information</h2>
-              <div className="space-y-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-                    <Mail className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-white">Email Us</h3>
-                    <p className="text-slate-400 text-sm mt-1">For general inquiries and support.</p>
-                    <a href="mailto:iamhammaddev@gmai.com" className="text-primary hover:text-primary/80 transition-colors mt-2 inline-block">iamhammaddev@gmai.com</a>
-                  </div>
+              <div className="flex items-start gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-background">
+                  <Phone className="h-5 w-5" />
                 </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center shrink-0">
-                    <Phone className="w-5 h-5 text-accent" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-white">Call Us</h3>
-                    <p className="text-slate-400 text-sm mt-1">Available during business hours.</p>
-                    <p className="text-slate-300 mt-2">+923278147376</p>
-                  </div>
+                <div>
+                  <h3 className="font-semibold">Phone</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">Business hours support line.</p>
+                  <p className="mt-2 text-sm">+92 327 814 7376</p>
                 </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
-                    <MapPin className="w-5 h-5 text-emerald-400" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-white">Location</h3>
-                    <p className="text-slate-400 text-sm mt-1">We operate entirely online.</p>
-                    <p className="text-slate-300 mt-2">REMOTE</p>
-                  </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-background">
+                  <MapPin className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Operations</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">Distributed team with global coverage.</p>
                 </div>
               </div>
             </div>
-          </motion.div>
+          </Panel>
+        </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
-            <form className="bg-white/5 border border-white/10 rounded-2xl p-8 backdrop-blur-sm space-y-6" onSubmit={handleSubmit}>
+        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4, delay: 0.05 }}>
+          <form className="space-y-6 rounded-3xl border border-border bg-card p-8" onSubmit={handleSubmit}>
               
               {/* FormSubmit Configuration Fields */}
               <input type="hidden" name="_subject" value="New Submission on VulnGuard AI" />
@@ -135,33 +98,33 @@ export default function Contact() {
               <input type="hidden" name="_autoresponse" value="Thank you for contacting VulnGuard AI. We have received your message and will get back to you shortly." />
 
               {isSuccess && (
-                <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-4 rounded-lg flex items-center justify-center gap-2 font-medium">
+                <div className="flex items-center justify-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4 font-medium text-emerald-600 dark:text-emerald-400">
                   <CheckCircle2 className="w-5 h-5" />
                   Message sent successfully!
                 </div>
               )}
               {error && (
-                <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-lg font-medium text-center">
+                <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-center font-medium text-red-600 dark:text-red-400">
                   {error}
                 </div>
               )}
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Name</label>
-                <input required type="text" name="name" className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all" placeholder="John Doe" />
+                <label className="mb-2 block text-sm font-medium">Name</label>
+                <input required type="text" name="name" className="w-full rounded-lg border border-border bg-background px-4 py-3 text-sm outline-none ring-offset-background placeholder:text-muted-foreground focus:ring-2 focus:ring-foreground/20" placeholder="John Doe" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Email</label>
-                <input required type="email" name="email" className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all" placeholder="john@example.com" />
+                <label className="mb-2 block text-sm font-medium">Email</label>
+                <input required type="email" name="email" className="w-full rounded-lg border border-border bg-background px-4 py-3 text-sm outline-none ring-offset-background placeholder:text-muted-foreground focus:ring-2 focus:ring-foreground/20" placeholder="john@example.com" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Message</label>
-                <textarea required name="message" rows={5} className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all resize-none" placeholder="How can we help you?"></textarea>
+                <label className="mb-2 block text-sm font-medium">Message</label>
+                <textarea required name="message" rows={5} className="w-full resize-none rounded-lg border border-border bg-background px-4 py-3 text-sm outline-none ring-offset-background placeholder:text-muted-foreground focus:ring-2 focus:ring-foreground/20" placeholder="How can we help you?" />
               </div>
               <button 
                 type="submit" 
                 disabled={isSubmitting}
-                className="w-full bg-primary disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/90 text-primary-foreground font-semibold py-3 rounded-lg transition-all flex items-center justify-center gap-2"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-foreground py-3 font-semibold text-background transition-all hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isSubmitting ? (
                   <>
@@ -174,15 +137,8 @@ export default function Contact() {
                 )}
               </button>
             </form>
-          </motion.div>
-        </div>
-      </main>
-
-      <footer className="border-t border-white/10 py-8 text-center text-slate-500 text-sm bg-black/20 z-10">
-        <div className="max-w-7xl mx-auto px-6">
-          <p>© {new Date().getFullYear()} VulnGuard AI. All rights reserved.</p>
-        </div>
-      </footer>
-    </div>
+        </motion.div>
+      </div>
+    </MarketingShell>
   );
 }

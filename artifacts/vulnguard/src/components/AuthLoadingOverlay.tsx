@@ -26,8 +26,8 @@ export function AuthLoadingOverlay() {
           }}
           className="relative"
         >
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border border-primary/30">
-            <Shield className="w-8 h-8 text-primary" />
+          <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border border-primary/30">
+            <Shield className="w-8 h-8 text-white" />
           </div>
           
           {/* Pulsing ring around icon */}
@@ -41,7 +41,7 @@ export function AuthLoadingOverlay() {
               repeat: Infinity,
               ease: "easeOut"
             }}
-            className="absolute inset-0 rounded-2xl border border-primary/40"
+            className="absolute inset-0 rounded-xl border border-primary/40"
           />
         </motion.div>
 
@@ -52,7 +52,7 @@ export function AuthLoadingOverlay() {
           className="text-center"
         >
           <p className="text-sm font-semibold text-foreground">Authenticating</p>
-          <p className="text-xs text-muted-foreground mt-1">Please wait...</p>
+          <p className="text-xs text-zinc-500 mt-1">Please wait...</p>
         </motion.div>
 
         {/* Animated dots */}

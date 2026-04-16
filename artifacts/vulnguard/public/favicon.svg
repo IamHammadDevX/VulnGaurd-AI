@@ -1,43 +1,32 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <style>
+    :root {
+      --edge: #cbd5e1;
+      --frame: #0f172a;
+      --mark: #ffffff;
+      --soft: rgba(15, 23, 42, 0.2);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --edge: #1e293b;
+        --frame: #020617;
+        --mark: #e2e8f0;
+        --soft: rgba(14, 165, 233, 0.2);
+      }
+    }
+  </style>
+
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#0f172a"/>
-      <stop offset="100%" stop-color="#1e293b"/>
+    <linearGradient id="ring" x1="10" y1="8" x2="56" y2="58" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#22d3ee" />
+      <stop offset="52%" stop-color="#0ea5e9" />
+      <stop offset="100%" stop-color="#2563eb" />
     </linearGradient>
-    <linearGradient id="sf" x1="32" y1="6" x2="32" y2="58" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#60a5fa"/>
-      <stop offset="100%" stop-color="#1d4ed8"/>
-    </linearGradient>
-    <filter id="glow">
-      <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#3b82f6" flood-opacity="0.7"/>
-    </filter>
   </defs>
 
-  <!-- Dark rounded background -->
-  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
-
-  <!-- Shield -->
-  <path
-    d="M32 7 L51 15.5 L51 31.5 C51 42.5 42.5 51.5 32 57 C21.5 51.5 13 42.5 13 31.5 L13 15.5 Z"
-    fill="url(#sf)"
-    filter="url(#glow)"
-  />
-
-  <!-- Shield inner edge highlight -->
-  <path
-    d="M32 10.5 L48 18.2 L48 31.5 C48 40.5 41 48.5 32 53.2 C23 48.5 16 40.5 16 31.5 L16 18.2 Z"
-    fill="none"
-    stroke="rgba(255,255,255,0.18)"
-    stroke-width="1"
-  />
-
-  <!-- Bold V checkmark -->
-  <polyline
-    points="22,31 28.5,40 42,22"
-    fill="none"
-    stroke="white"
-    stroke-width="4"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  />
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#ring)" />
+  <rect x="6.5" y="6.5" width="51" height="51" rx="13" fill="var(--frame)" stroke="var(--edge)" stroke-width="1" />
+  <path d="M32 14L45.4 20.2V31.1C45.4 38.4 40.9 44.5 32 49.1C23.1 44.5 18.6 38.4 18.6 31.1V20.2L32 14Z" stroke="var(--mark)" stroke-width="2" stroke-linejoin="round" />
+  <path d="M25.4 30.5L30.1 36.1L38.9 26.6" stroke="var(--mark)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="49.5" cy="14.5" r="2.2" fill="var(--soft)" />
 </svg>

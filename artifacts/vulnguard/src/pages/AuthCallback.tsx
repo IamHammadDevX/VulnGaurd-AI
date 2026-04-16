@@ -58,7 +58,7 @@ export default function AuthCallback() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-sm rounded-xl border border-white/10 bg-card/60 p-6 text-center space-y-2">
+      <div className="w-full max-w-sm rounded-xl border border-border bg-card p-6 text-center space-y-2">
         {error ? (
           <>
             <h1 className="text-lg font-bold">Authentication failed</h1>

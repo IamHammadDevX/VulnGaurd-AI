@@ -12,7 +12,7 @@ const buttonVariants = cva(
       variant: {
         default:
            // @replit: no hover, and add primary border
-           "bg-primary text-primary-foreground border border-primary-border",
+           "bg-white text-black-foreground border border-primary-border",
         destructive:
           "bg-destructive text-destructive-foreground shadow-sm border-destructive-border",
         outline:
@@ -25,7 +25,7 @@ const buttonVariants = cva(
           "border bg-secondary text-secondary-foreground border border-secondary-border ",
         // @replit no hover, transparent border
         ghost: "border border-transparent",
-        link: "text-primary underline-offset-4 hover:underline",
+        link: "text-white underline-offset-4 hover:underline",
       },
       size: {
         // @replit changed sizes

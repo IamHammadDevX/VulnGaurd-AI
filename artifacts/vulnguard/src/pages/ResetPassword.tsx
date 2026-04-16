@@ -56,12 +56,12 @@ export default function ResetPassword() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-card/60 border border-white/10 rounded-2xl p-6 space-y-4">
+      <div className="w-full max-w-md bg-card border border-border rounded-xl p-6 space-y-4">
         {!success ? (
           <>
             <div className="text-center">
-              <div className="w-11 h-11 rounded-xl bg-primary/15 flex items-center justify-center mx-auto mb-2">
-                <Shield className="w-5 h-5 text-primary" />
+              <div className="w-11 h-11 rounded-xl bg-white/5 flex items-center justify-center mx-auto mb-2">
+                <Shield className="w-5 h-5 text-white" />
               </div>
               <h1 className="text-xl font-bold">Create New Password</h1>
               <p className="text-xs text-muted-foreground mt-1">Enter your new password below</p>
@@ -83,13 +83,13 @@ export default function ResetPassword() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="mt-1 w-full pl-3 pr-10 py-2 rounded-lg bg-white/5 border border-white/10 text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:bg-white/8 transition-colors"
+                    className="mt-1 w-full pl-3 pr-10 py-2 rounded-lg bg-background border border-input text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:bg-muted/20 transition-colors"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 mt-1 text-muted-foreground hover:text-white transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 mt-1 text-muted-foreground hover:text-foreground transition-colors"
                   >
                     {showPassword ? (
                       <EyeOff className="w-4 h-4" />
@@ -108,13 +108,13 @@ export default function ResetPassword() {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="mt-1 w-full pl-3 pr-10 py-2 rounded-lg bg-white/5 border border-white/10 text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:bg-white/8 transition-colors"
+                    className="mt-1 w-full pl-3 pr-10 py-2 rounded-lg bg-background border border-input text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:bg-muted/20 transition-colors"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 mt-1 text-muted-foreground hover:text-white transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 mt-1 text-muted-foreground hover:text-foreground transition-colors"
                   >
                     {showConfirmPassword ? (
                       <EyeOff className="w-4 h-4" />
@@ -126,7 +126,7 @@ export default function ResetPassword() {
               </div>
 
               {/* Password Requirements */}
-              <div className="bg-white/3 border border-white/10 rounded-lg p-3 space-y-1">
+              <div className="bg-muted/30 border border-border rounded-lg p-3 space-y-1">
                 <p className="text-xs font-semibold text-muted-foreground">Password requirements:</p>
                 <ul className="text-xs text-muted-foreground space-y-0.5">
                   <li className={password.length >= 8 ? "text-green-400" : ""}>
@@ -150,7 +150,7 @@ export default function ResetPassword() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full px-4 py-2.5 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 disabled:opacity-60 transition-colors"
+                className="w-full px-4 py-2.5 rounded-lg bg-foreground text-background text-sm font-semibold hover:bg-foreground/90 disabled:opacity-60 transition-colors"
               >
                 {loading ? "Resetting..." : "Reset Password"}
               </button>

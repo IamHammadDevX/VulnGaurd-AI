@@ -46,13 +46,50 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes("node_modules")) {
+            return;
+          }
+
+          if (id.includes("@monaco-editor") || id.includes("monaco-editor")) {
+            return "vendor-monaco";
+          }
+
+          if (id.includes("recharts") || id.includes("d3-")) {
+            return "vendor-charts";
+          }
+
+          if (id.includes("framer-motion")) {
+            return "vendor-motion";
+          }
+
+          if (id.includes("@radix-ui")) {
+            return "vendor-radix";
+          }
+
+          if (id.includes("@tanstack/react-query")) {
+            return "vendor-query";
+          }
+
+          if (id.includes("@supabase")) {
+            return "vendor-supabase";
+          }
+
+          if (id.includes("lucide-react")) {
+            return "vendor-icons";
+          }
+        },
+      },
+    },
   },
   server: {
     port,
     host: "0.0.0.0",
     allowedHosts: true,
     proxy: {
-      "/api": {
+      "^/api(?!-docs)": {
         target: "http://localhost:8080",
         changeOrigin: true,
       },
