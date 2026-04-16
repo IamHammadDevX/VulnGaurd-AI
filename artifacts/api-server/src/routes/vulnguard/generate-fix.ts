@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { anthropic } from "@workspace/integrations-anthropic-ai";
 import { OPENROUTER_MODEL } from "@workspace/integrations-anthropic-ai";
 import { GenerateFixBody } from "@workspace/api-zod";
+import { generateFixLimiter } from "../../middlewares/rateLimitMiddleware.js";
 import * as zod from "zod";
 
 const router: IRouter = Router();
@@ -31,7 +32,7 @@ const DEFAULT_RESOURCES = [
   "https://secureum.substack.com/",
 ];
 
-router.post("/generate-fix", async (req, res) => {
+router.post("/generate-fix", generateFixLimiter, async (req, res) => {
   const parseResult = GenerateFixBody.safeParse(req.body);
   if (!parseResult.success) {
     res.status(400).json({ error: "Invalid request body" });

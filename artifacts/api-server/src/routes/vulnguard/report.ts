@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import PDFDocument from "pdfkit";
 import { GetReportParams } from "@workspace/api-zod";
+import { reportLimiter } from "../../middlewares/rateLimitMiddleware.js";
 import { getScan } from "./store.js";
 
 const router: IRouter = Router();
@@ -222,7 +223,7 @@ function codeBlock(
 }
 
 // ── Main route ────────────────────────────────────────────────────────────────
-router.get("/report/:scanId", (req, res) => {
+router.get("/report/:scanId", reportLimiter, (req, res) => {
   const parseResult = GetReportParams.safeParse(req.params);
   if (!parseResult.success) {
     res.status(400).json({ error: "Invalid scan ID" });
