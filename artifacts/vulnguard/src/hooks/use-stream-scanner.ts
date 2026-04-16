@@ -12,6 +12,7 @@ interface StreamState {
   errorMessage: string | null;
   foundCount: number;
   riskScore: number | null;
+  isGeneratingFix: boolean;
 }
 
 function getErrorMessage(err: unknown): string {
@@ -62,6 +63,7 @@ export function useStreamScanner() {
     errorMessage: null,
     foundCount: 0,
     riskScore: null,
+    isGeneratingFix: false,
   });
 
   const resetState = () =>
@@ -73,6 +75,7 @@ export function useStreamScanner() {
       errorMessage: null,
       foundCount: 0,
       riskScore: null,
+      isGeneratingFix: false,
     });
 
   const handleScan = useCallback(async () => {
@@ -193,6 +196,7 @@ export function useStreamScanner() {
   }, [state.result, toast]);
 
   const handleGenerateFix = useCallback(async (vulnerability: Vulnerability) => {
+    setState((s) => ({ ...s, isGeneratingFix: true }));
     try {
       const response = await fetch(`${import.meta.env.BASE_URL}api/generate-fix`, {
         method: "POST",
@@ -203,7 +207,7 @@ export function useStreamScanner() {
       const data = await response.json() as { fixed_code: string; explanation: string };
 
       setState((s) => {
-        if (!s.result) return s;
+        if (!s.result) return { ...s, isGeneratingFix: false };
         const updatedVulns = s.result.vulnerabilities.map((v) =>
           v.id === vulnerability.id ? { ...v, fixed_code: data.fixed_code } : v
         );
@@ -211,11 +215,13 @@ export function useStreamScanner() {
           ...s,
           partialVulns: updatedVulns,
           result: { ...s.result, vulnerabilities: updatedVulns },
+          isGeneratingFix: false,
         };
       });
 
       toast({ title: "Fix Generated", description: "Enhanced fix and explanation have been applied." });
     } catch (err: unknown) {
+      setState((s) => ({ ...s, isGeneratingFix: false }));
       toast({ title: "Generation Failed", description: getErrorMessage(err), variant: "destructive" });
     }
   }, [code, toast]);
@@ -234,7 +240,7 @@ export function useStreamScanner() {
     result: state.result,
     errorMessage: state.errorMessage,
     isScanning: state.phase === "streaming",
-    isGeneratingFix: false,
+    isGeneratingFix: state.isGeneratingFix,
     // Actions
     handleScan,
     handleDownloadReport,
