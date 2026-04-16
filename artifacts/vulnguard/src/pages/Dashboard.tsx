@@ -9,6 +9,7 @@ import {
   ArrowUpDown, Download, Filter, X, TrendingUp,
   UserPlus, Eye, Trash2,
 } from "lucide-react";
+import { ThemeToggleButton } from "@/components/ThemeToggleButton";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Legend,
@@ -115,9 +116,9 @@ function StatCard({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: delay * 0.05 }}
-      className="bg-card/50 border border-white/6 rounded-xl p-4 flex items-center gap-3.5"
+      className="bg-card border border-border rounded-xl p-4 flex items-center gap-3.5"
     >
-      <div className={`p-2.5 rounded-lg bg-white/5 shrink-0`}>
+      <div className="p-2.5 rounded-lg bg-background shrink-0">
         <Icon className={`w-5 h-5 ${color}`} />
       </div>
       <div className="min-w-0">
@@ -134,7 +135,7 @@ function StatCard({
 function CustomTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ name: string; value: number; color: string }>; label?: string }) {
   if (!active || !payload) return null;
   return (
-    <div className="bg-card border border-white/10 rounded-lg p-3 shadow-xl text-xs">
+    <div className="bg-card border border-border rounded-lg p-3 shadow-xl text-xs">
       <p className="text-muted-foreground mb-1.5 font-medium">{label}</p>
       {payload.map((entry) => (
         <div key={entry.name} className="flex items-center gap-2 py-0.5">
@@ -142,8 +143,8 @@ function CustomTooltip({ active, payload, label }: { active?: boolean; payload?:
             className="w-2.5 h-2.5 rounded-full"
             style={{ backgroundColor: entry.color }}
           />
-          <span className="text-white/80 capitalize">{entry.name}:</span>
-          <span className="font-semibold text-white">{entry.value}</span>
+          <span className="text-muted-foreground capitalize">{entry.name}:</span>
+          <span className="font-semibold text-foreground">{entry.value}</span>
         </div>
       ))}
     </div>
@@ -284,20 +285,21 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-white/6 bg-card/40 backdrop-blur-2xl sticky top-0 z-50">
+      <header className="border-b border-border bg-background/80 backdrop-blur-2xl sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-white transition text-sm">
+            <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition text-sm">
               Home
             </Link>
-            <span className="text-white/20">/</span>
-            <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-white transition text-sm">
+            <span className="text-border">/</span>
+            <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition text-sm">
               Scanner
             </Link>
-            <span className="text-white/20">/</span>
+            <span className="text-border">/</span>
             <span className="text-sm font-semibold">Dashboard</span>
           </div>
           <div className="flex items-center gap-2">
+            <ThemeToggleButton />
             {user?.profileImageUrl && (
               <img src={user.profileImageUrl} alt="" className="w-7 h-7 rounded-full" />
             )}
@@ -398,9 +400,9 @@ export default function Dashboard() {
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 }}
-                className="bg-card/50 border border-white/6 rounded-xl overflow-hidden"
+                className="bg-card border border-border rounded-xl overflow-hidden"
               >
-                <div className="px-5 py-4 border-b border-white/6 flex items-center gap-2">
+                <div className="px-5 py-4 border-b border-border flex items-center gap-2">
                   <TrendingUp className="w-4 h-4 text-primary" />
                   <h2 className="font-semibold text-sm">Vulnerability Trend (30 Days)</h2>
                 </div>
@@ -504,9 +506,9 @@ export default function Dashboard() {
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="lg:col-span-2 bg-card/50 border border-white/6 rounded-xl overflow-hidden"
+                className="lg:col-span-2 bg-card border border-border rounded-xl overflow-hidden"
               >
-                <div className="px-5 py-4 border-b border-white/6">
+                <div className="px-5 py-4 border-b border-border">
                   <div className="flex items-center justify-between mb-3">
                     <h2 className="font-semibold text-sm flex items-center gap-2">
                       <BarChart3 className="w-4 h-4 text-primary" />
@@ -515,7 +517,7 @@ export default function Dashboard() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={handleExport}
-                        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-white transition px-2.5 py-1.5 rounded-lg border border-white/8 hover:border-white/15"
+                        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition px-2.5 py-1.5 rounded-lg border border-border hover:bg-muted/40"
                       >
                         <Download className="w-3.5 h-3.5" />
                         Export CSV
@@ -537,7 +539,7 @@ export default function Dashboard() {
                         value={searchInput}
                         onChange={(e) => setSearchInput(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                        className="w-full pl-8 pr-8 py-2 bg-white/5 border border-white/8 rounded-lg text-xs text-white placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/40"
+                        className="w-full pl-8 pr-8 py-2 bg-background border border-input rounded-lg text-xs text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:border-primary/40"
                       />
                       {searchInput && (
                         <button
@@ -545,7 +547,7 @@ export default function Dashboard() {
                             setSearchInput("");
                             setSearch("");
                           }}
-                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white"
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                         >
                           <X className="w-3.5 h-3.5" />
                         </button>
@@ -561,11 +563,11 @@ export default function Dashboard() {
                 </div>
 
                 {/* Table Header */}
-                <div className="grid grid-cols-[1fr_auto_auto_auto] gap-4 px-5 py-2.5 text-[11px] text-muted-foreground uppercase tracking-wider border-b border-white/4 bg-white/[0.02]">
+                <div className="grid grid-cols-[1fr_auto_auto_auto] gap-4 px-5 py-2.5 text-[11px] text-muted-foreground uppercase tracking-wider border-b border-border bg-muted/20">
                   <span>Contract</span>
                   <button
                     onClick={() => toggleSort("date")}
-                    className="flex items-center gap-1 hover:text-white transition"
+                    className="flex items-center gap-1 hover:text-foreground transition"
                   >
                     Date
                     <ArrowUpDown className={`w-3 h-3 ${sortBy === "date" ? "text-primary" : ""}`} />
@@ -573,7 +575,7 @@ export default function Dashboard() {
                   <span className="text-center">Issues</span>
                   <button
                     onClick={() => toggleSort("risk")}
-                    className="flex items-center gap-1 hover:text-white transition"
+                    className="flex items-center gap-1 hover:text-foreground transition"
                   >
                     Risk
                     <ArrowUpDown className={`w-3 h-3 ${sortBy === "risk" ? "text-primary" : ""}`} />
@@ -594,7 +596,7 @@ export default function Dashboard() {
                     )}
                   </div>
                 ) : (
-                  <div className="divide-y divide-white/4">
+                  <div className="divide-y divide-border">
                     <AnimatePresence>
                       {scans.map((scan, i) => (
                         <motion.div
@@ -603,11 +605,11 @@ export default function Dashboard() {
                           animate={{ opacity: 1 }}
                           exit={{ opacity: 0 }}
                           transition={{ delay: i * 0.02 }}
-                          className="grid grid-cols-[1fr_auto_auto_auto] gap-4 items-center px-5 py-3 hover:bg-white/3 transition group"
+                          className="grid grid-cols-[1fr_auto_auto_auto] gap-4 items-center px-5 py-3 hover:bg-muted/30 transition group"
                         >
                           <div className="min-w-0">
                             <div className="flex items-center gap-2">
-                              <div className="p-1 rounded bg-white/5 shrink-0">
+                              <div className="p-1 rounded bg-background shrink-0">
                                 {scan.riskScore >= 70 ? (
                                   <ShieldAlert className="w-3.5 h-3.5 text-red-400" />
                                 ) : (
@@ -659,7 +661,7 @@ export default function Dashboard() {
 
                 {/* Pagination */}
                 {pagination.totalPages > 1 && (
-                  <div className="px-5 py-3 border-t border-white/6 flex items-center justify-between">
+                  <div className="px-5 py-3 border-t border-border flex items-center justify-between">
                     <p className="text-xs text-muted-foreground">
                       Showing {(pagination.page - 1) * pagination.limit + 1}–
                       {Math.min(pagination.page * pagination.limit, pagination.total)} of{" "}
@@ -669,7 +671,7 @@ export default function Dashboard() {
                       <button
                         onClick={() => fetchScans(pagination.page - 1)}
                         disabled={pagination.page <= 1}
-                        className="p-1.5 rounded-lg hover:bg-white/5 transition disabled:opacity-30 disabled:cursor-not-allowed"
+                        className="p-1.5 rounded-lg hover:bg-muted/40 transition disabled:opacity-30 disabled:cursor-not-allowed"
                       >
                         <ChevronLeft className="w-4 h-4" />
                       </button>
@@ -691,7 +693,7 @@ export default function Dashboard() {
                             className={`w-8 h-8 rounded-lg text-xs font-medium transition ${
                               pageNum === pagination.page
                                 ? "bg-primary text-white"
-                                : "hover:bg-white/5 text-muted-foreground"
+                                : "hover:bg-muted/40 text-muted-foreground"
                             }`}
                           >
                             {pageNum}
@@ -701,7 +703,7 @@ export default function Dashboard() {
                       <button
                         onClick={() => fetchScans(pagination.page + 1)}
                         disabled={pagination.page >= pagination.totalPages}
-                        className="p-1.5 rounded-lg hover:bg-white/5 transition disabled:opacity-30 disabled:cursor-not-allowed"
+                        className="p-1.5 rounded-lg hover:bg-muted/40 transition disabled:opacity-30 disabled:cursor-not-allowed"
                       >
                         <ChevronRight className="w-4 h-4" />
                       </button>
@@ -715,9 +717,9 @@ export default function Dashboard() {
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.25 }}
-                className="bg-card/50 border border-white/6 rounded-xl overflow-hidden"
+                className="bg-card border border-border rounded-xl overflow-hidden"
               >
-                <div className="px-5 py-4 border-b border-white/6">
+                <div className="px-5 py-4 border-b border-border">
                   <h2 className="font-semibold text-sm flex items-center gap-2">
                     <Activity className="w-4 h-4 text-primary" />
                     Activity Log
@@ -729,7 +731,7 @@ export default function Dashboard() {
                     <p className="text-muted-foreground text-xs">No recent activity</p>
                   </div>
                 ) : (
-                  <div className="divide-y divide-white/4 max-h-[480px] overflow-y-auto">
+                  <div className="divide-y divide-border max-h-[480px] overflow-y-auto">
                     {activities.map((activity, i) => {
                       const Icon = ACTIVITY_ICON[activity.type] ?? Activity;
                       const isRisky =
@@ -741,12 +743,12 @@ export default function Dashboard() {
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           transition={{ delay: i * 0.02 }}
-                          className="px-4 py-3 hover:bg-white/3 transition"
+                          className="px-4 py-3 hover:bg-muted/30 transition"
                         >
                           <div className="flex items-start gap-2.5">
                             <div
                               className={`p-1.5 rounded-lg shrink-0 mt-0.5 ${
-                                isRisky ? "bg-red-500/10" : "bg-white/5"
+                                isRisky ? "bg-red-500/10" : "bg-background"
                               }`}
                             >
                               <Icon
@@ -756,7 +758,7 @@ export default function Dashboard() {
                               />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p className="text-xs text-white/80 leading-relaxed">
+                              <p className="text-xs text-muted-foreground leading-relaxed">
                                 {activity.message}
                               </p>
                               <p className="text-[10px] text-muted-foreground/50 mt-0.5 flex items-center gap-1">
