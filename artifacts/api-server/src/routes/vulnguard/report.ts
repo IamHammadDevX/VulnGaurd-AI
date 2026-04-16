@@ -241,46 +241,56 @@ router.get("/report/:scanId", reportLimiter, (req, res) => {
     return;
   }
 
-  // Sort vulnerabilities by severity
-  const SEV_RANK: Record<string, number> = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3 };
-  const vulns = (scan.vulnerabilities as Array<{
-    id: number;
-    severity: string;
-    type: string;
-    swc_id?: string | null;
-    line_number?: number | null;
-    affected_lines?: string | null;
-    affected_functions?: string | null;
-    title: string;
-    description: string;
-    technical_risk: string;
-    attack_scenario?: string | null;
-    impact?: string | null;
-    gas_impact?: string | null;
-    vulnerable_code?: string | null;
-    fixed_code?: string | null;
-    recommendation: string;
-  }>).slice().sort((a, b) => (SEV_RANK[a.severity] ?? 9) - (SEV_RANK[b.severity] ?? 9));
+  try {
+    // Sort vulnerabilities by severity
+    const SEV_RANK: Record<string, number> = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3 };
+    const vulns = (scan.vulnerabilities as Array<{
+      id: number;
+      severity: string;
+      type: string;
+      swc_id?: string | null;
+      line_number?: number | null;
+      affected_lines?: string | null;
+      affected_functions?: string | null;
+      title: string;
+      description: string;
+      technical_risk: string;
+      attack_scenario?: string | null;
+      impact?: string | null;
+      gas_impact?: string | null;
+      vulnerable_code?: string | null;
+      fixed_code?: string | null;
+      recommendation: string;
+    }>).slice().sort((a, b) => (SEV_RANK[a.severity] ?? 9) - (SEV_RANK[b.severity] ?? 9));
 
-  const counts: Record<string, number> = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
-  vulns.forEach((v) => { if (v.severity in counts) counts[v.severity]++; });
+    const counts: Record<string, number> = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
+    vulns.forEach((v) => { if (v.severity in counts) counts[v.severity]++; });
 
-  const riskColor = scan.risk_score >= 70 ? C.CRITICAL : scan.risk_score >= 40 ? C.HIGH : C.LOW;
-  const scanDate = new Date(scan.timestamp).toUTCString();
-  const scanDateShort = new Date(scan.timestamp).toLocaleDateString("en-US", {
-    year: "numeric", month: "long", day: "numeric",
-  });
+    const riskColor = scan.risk_score >= 70 ? C.CRITICAL : scan.risk_score >= 40 ? C.HIGH : C.LOW;
+    const scanDate = new Date(scan.timestamp).toUTCString();
+    const scanDateShort = new Date(scan.timestamp).toLocaleDateString("en-US", {
+      year: "numeric", month: "long", day: "numeric",
+    });
 
-  // We'll track pages to add headers/footers
-  // PDFKit approach: collect pages, add header/footer via pageAdded event
-  const totalEstPages = 5 + Math.ceil(vulns.length / 1.5);
+    // We'll track pages to add headers/footers
+    // PDFKit approach: collect pages, add header/footer via pageAdded event
+    const totalEstPages = 5 + Math.ceil(vulns.length / 1.5);
 
-  const doc = new PDFDocument({ margin: 0, size: "A4", autoFirstPage: false });
-  const filename = `${scan.contract_name.replace(/[^a-zA-Z0-9]/g, "_")}-audit-report.pdf`;
+    const doc = new PDFDocument({ margin: 0, size: "A4", autoFirstPage: false });
+    const filename = `${scan.contract_name.replace(/[^a-zA-Z0-9]/g, "_")}-audit-report.pdf`;
 
-  res.setHeader("Content-Type", "application/pdf");
-  res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
-  doc.pipe(res);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+    
+    // Handle errors during PDF generation
+    doc.on("error", (err) => {
+      req.log.error({ err }, "Error generating PDF");
+      if (!res.headersSent) {
+        res.status(500).json({ error: "Failed to generate PDF report" });
+      }
+    });
+
+    doc.pipe(res);
 
   let currentPage = 0;
   let currentPageTitle = "Cover";
@@ -1180,6 +1190,12 @@ router.get("/report/:scanId", reportLimiter, (req, res) => {
     .restore();
 
   doc.end();
+  } catch (err) {
+    req.log.error({ err }, "Error generating PDF report");
+    if (!res.headersSent) {
+      res.status(500).json({ error: "Failed to generate PDF report" });
+    }
+  }
 });
 
 export default router;

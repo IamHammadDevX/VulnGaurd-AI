@@ -106,8 +106,17 @@ Provide the fix with explanation and resources.`,
       resources: parsed.resources?.length ? parsed.resources : DEFAULT_RESOURCES,
     });
   } catch (err) {
-    req.log.error({ err }, "Error generating AI fix");
-    res.status(500).json({ error: "Failed to generate fix. Please try again." });
+    const errMsg = err instanceof Error ? err.message : String(err);
+    req.log.error({ err, errMsg }, "Error generating AI fix");
+    
+    // More detailed error for debugging
+    if (errMsg.includes("401") || errMsg.includes("Unauthorized")) {
+      res.status(401).json({ error: "OpenRouter API authentication failed. Check OPENROUTER_API_KEY." });
+    } else if (errMsg.includes("rate")) {
+      res.status(429).json({ error: "Rate limited by AI service. Please wait before retrying." });
+    } else {
+      res.status(500).json({ error: `Failed to generate fix: ${errMsg}` });
+    }
   }
 });
 

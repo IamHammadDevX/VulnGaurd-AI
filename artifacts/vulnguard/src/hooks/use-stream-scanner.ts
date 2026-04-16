@@ -182,16 +182,31 @@ export function useStreamScanner() {
     if (!state.result) return;
     try {
       const response = await fetch(`${import.meta.env.BASE_URL}api/report/${state.result.scanId}`);
-      if (!response.ok) throw new Error("Failed to generate report");
+      
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => "Unknown error");
+        console.error("Report download error:", { status: response.status, error: errorText });
+        throw new Error(`Failed to generate report (${response.status}): ${errorText}`);
+      }
+      
       const blob = await response.blob();
+      
+      if (blob.size === 0) {
+        console.error("Report blob is empty");
+        throw new Error("PDF report is empty. Please try again.");
+      }
+      
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
       a.download = `${state.result.contract_name || "vulnguard"}-audit-report.pdf`;
       a.click();
       URL.revokeObjectURL(url);
-    } catch {
-      toast({ title: "Download Failed", description: "Could not generate PDF report.", variant: "destructive" });
+      toast({ title: "Report Downloaded", description: "Your audit report has been downloaded successfully." });
+    } catch (err) {
+      const errMsg = getErrorMessage(err);
+      console.error("Report download failed:", errMsg);
+      toast({ title: "Download Failed", description: errMsg, variant: "destructive" });
     }
   }, [state.result, toast]);
 
