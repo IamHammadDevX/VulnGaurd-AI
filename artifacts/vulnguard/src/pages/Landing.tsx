@@ -1,9 +1,74 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Bot, Building2, FileCode2, ShieldAlert, ShieldCheck, Workflow } from "lucide-react";
+import { Bot, Building2, ChevronLeft, ChevronRight, FileCode2, MessageSquareQuote, ShieldAlert, ShieldCheck, Workflow } from "lucide-react";
 import { MarketingShell } from "@/components/marketing/MarketingShell";
 import { FeatureGrid, Panel, StatsStrip } from "@/components/marketing/SaasBlocks";
 
 export default function Landing() {
+  const testimonials = [
+    {
+      name: "Cris Sierra",
+      role: "Community Reviewer",
+      message:
+        "I really like this project, smart, efficient and helpful. Congratulations to the developer, this is an awesome project.",
+    },
+    {
+      name: "Shipra M",
+      role: "Web3 Builder",
+      message: "Great product direction. It makes smart contract security understandable and actionable for fast-moving teams.",
+    },
+    {
+      name: "Cesar Ulloa",
+      role: "Community Supporter",
+      message: "The workflow feels practical, not academic. It helps teams move from finding issues to fixing them quickly.",
+    },
+    {
+      name: "B Gunduz",
+      role: "Security Advocate",
+      message: "Strong value for projects that cannot afford delayed audits. The speed-to-feedback is a major advantage.",
+    },
+    {
+      name: "Jamilu Adamu",
+      role: "Smart Contract Developer",
+      message: "Useful for pre-deployment checks. It gives clarity on where risk is and what to prioritize first.",
+    },
+    {
+      name: "Alek Nikolic",
+      role: "Web3 Community Member",
+      message: "Promising security product with real utility. It addresses real pain points builders face before launch.",
+    },
+    {
+      name: "Jessica L",
+      role: "Product Enthusiast",
+      message: "Clean concept and helpful execution. This is the type of tooling Web3 teams need to scale responsibly.",
+    },
+    {
+      name: "Sameer YG",
+      role: "Early Adopter",
+      message: "A high-impact project. It saves engineering time while increasing confidence in smart contract releases.",
+    },
+    {
+      name: "Eric Jivraj",
+      role: "Community Contributor",
+      message: "The platform is smart and efficient. It can become a core part of secure development workflows.",
+    },
+    {
+      name: "Deekshita Kaki",
+      role: "Web3 Community Member",
+      message: "Very strong potential. It simplifies complex security tasks into a workflow teams can actually adopt.",
+    },
+    {
+      name: "Leon Williams",
+      role: "Builder",
+      message: "Great momentum and great vision. VulnGuard solves a meaningful security gap in the ecosystem.",
+    },
+  ];
+  const [activeTestimonial, setActiveTestimonial] = useState(0);
+
+  const goPrev = () =>
+    setActiveTestimonial((current) => (current - 1 + testimonials.length) % testimonials.length);
+  const goNext = () => setActiveTestimonial((current) => (current + 1) % testimonials.length);
+
   return (
     <MarketingShell
       eyebrow="VulnGuard Platform"
@@ -168,6 +233,119 @@ contract VulnerableBank {
             <p className="mt-2 text-sm text-muted-foreground">{item.text}</p>
           </div>
         ))}
+      </div>
+
+      <div className="mt-8">
+        <Panel
+          title="Loved by the Web3 builder community"
+          description="VulnGuard was showcased during the Replit Agent 4 Hackathon and received strong positive response from builders and security-minded teams."
+        >
+          <div className="rounded-2xl border border-border bg-card p-4 sm:p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1 text-xs font-semibold text-muted-foreground">
+                <MessageSquareQuote className="h-3.5 w-3.5" />
+                Community Testimonials
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={goPrev}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition-colors hover:text-foreground"
+                  aria-label="Previous testimonial"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={goNext}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition-colors hover:text-foreground"
+                  aria-label="Next testimonial"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+
+            <motion.div
+              key={testimonials[activeTestimonial].name}
+              initial={{ opacity: 0, x: 12 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.25 }}
+              className="rounded-xl border border-border bg-background p-4"
+            >
+              <p className="text-base font-semibold leading-relaxed text-foreground sm:text-lg">"{testimonials[activeTestimonial].message}"</p>
+              <div className="mt-4 flex items-center justify-between">
+                <p className="text-sm font-semibold">{testimonials[activeTestimonial].name}</p>
+                <span className="rounded-full border border-border bg-card px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  {testimonials[activeTestimonial].role}
+                </span>
+              </div>
+            </motion.div>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              {testimonials.map((item, idx) => (
+                <button
+                  key={item.name}
+                  type="button"
+                  onClick={() => setActiveTestimonial(idx)}
+                  className={`h-2.5 rounded-full transition-all ${
+                    idx === activeTestimonial ? "w-7 bg-foreground" : "w-2.5 bg-border hover:bg-muted-foreground/40"
+                  }`}
+                  aria-label={`View testimonial from ${item.name}`}
+                />
+              ))}
+            </div>
+          </div>
+        </Panel>
+      </div>
+
+      <div className="mt-8">
+        <Panel
+          title="Problems VulnGuard solves in the real world"
+          description="The platform targets the most expensive security bottlenecks faced by global Web3 teams shipping to production."
+        >
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {[
+              {
+                problem: "Exploit-first releases",
+                impact: "Protocols discover critical bugs after deployment when TVL and user trust are already at risk.",
+                solve: "VulnGuard scans pre-release and flags high-severity vulnerabilities before mainnet launch.",
+              },
+              {
+                problem: "Slow audit feedback cycles",
+                impact: "Teams lose sprint velocity while waiting for manual findings and unclear remediation paths.",
+                solve: "AI-assisted analysis provides rapid findings with fix direction, so engineers can patch fast.",
+              },
+              {
+                problem: "Security talent bottleneck",
+                impact: "Not every startup can afford full-time in-house auditors across every release train.",
+                solve: "VulnGuard gives smaller teams enterprise-grade triage and risk prioritization workflows.",
+              },
+              {
+                problem: "Fragmented security tooling",
+                impact: "Context gets lost between scanners, dashboards, and PDF reporting tools.",
+                solve: "One SaaS workflow for scan, triage, report export, and team collaboration.",
+              },
+              {
+                problem: "Compliance and stakeholder visibility",
+                impact: "Leaders and partners struggle to track risk posture across contracts and releases.",
+                solve: "VulnGuard produces auditor-ready outputs and clear severity distribution reporting.",
+              },
+              {
+                problem: "False confidence from checklist-only reviews",
+                impact: "Passing basic checks can still miss exploitable business logic vulnerabilities.",
+                solve: "Hybrid static + reasoning analysis helps surface nuanced exploit paths earlier.",
+              },
+            ].map((item) => (
+              <div key={item.problem} className="rounded-2xl border border-border bg-card p-4">
+                <p className="text-sm font-semibold">{item.problem}</p>
+                <p className="mt-2 text-sm text-muted-foreground">{item.impact}</p>
+                <p className="mt-3 text-sm font-medium text-foreground">How VulnGuard solves it</p>
+                <p className="mt-1 text-sm text-muted-foreground">{item.solve}</p>
+              </div>
+            ))}
+          </div>
+        </Panel>
       </div>
     </MarketingShell>
   );

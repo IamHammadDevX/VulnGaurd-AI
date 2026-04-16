@@ -126,8 +126,11 @@ function AnalyticsTracker() {
 
 function GlobalHomeShortcut() {
   const [location] = useLocation();
+  const pathname = location.split(/[?#]/)[0];
+  const normalizedPath = pathname.replace(/\/+$/, "") || "/";
+  const isHomepage = normalizedPath === "/" || normalizedPath === "/home";
 
-  if (location === "/home") {
+  if (isHomepage) {
     return null;
   }
 
