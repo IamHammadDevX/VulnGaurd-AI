@@ -18,7 +18,12 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   // Still loading auth state
   if (isLoading) {
-    return <AuthLoadingOverlay />;
+    return (
+      <AuthLoadingOverlay
+        title={isAuthenticated ? "Authenticating session" : "Loading secure route"}
+        subtitle={isAuthenticated ? "Confirming your account access..." : "Checking account status..."}
+      />
+    );
   }
 
   // Not authenticated, redirect to login

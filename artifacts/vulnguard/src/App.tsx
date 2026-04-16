@@ -94,11 +94,16 @@ function AppRouter() {
  * Shows spinner if loading, otherwise renders router.
  */
 function AppInitializer() {
-  const { isLoading } = useAuth();
+  const { isLoading, isAuthenticated } = useAuth();
 
   // Show full-screen loading spinner during initial auth check
   if (isLoading) {
-    return <AuthLoadingOverlay />;
+    return (
+      <AuthLoadingOverlay
+        title={isAuthenticated ? "Authenticating session" : "Loading platform"}
+        subtitle={isAuthenticated ? "Verifying secure access..." : "Getting everything ready..."}
+      />
+    );
   }
 
   return <AppRouter />;

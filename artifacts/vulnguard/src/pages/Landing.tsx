@@ -64,6 +64,7 @@ export default function Landing() {
     },
   ];
   const [activeTestimonial, setActiveTestimonial] = useState(0);
+  const [codeView, setCodeView] = useState<"vulnerable" | "fixed">("vulnerable");
 
   const goPrev = () =>
     setActiveTestimonial((current) => (current - 1 + testimonials.length) % testimonials.length);
@@ -120,44 +121,173 @@ export default function Landing() {
           title="How VulnGuard detects real Solidity vulnerabilities"
           description="This is the same style of issue the platform detects in seconds, with precise fix guidance and severity scoring."
         >
-          <div className="overflow-hidden rounded-2xl border border-border bg-background">
-            <div className="flex items-center justify-between border-b border-border px-4 py-3">
-              <p className="text-sm font-semibold">VulnerableBank.sol</p>
-              <span className="rounded-full border border-red-500/40 bg-red-500/10 px-2 py-1 text-xs font-semibold text-red-600 dark:text-red-400">
-                High Severity: Reentrancy
-              </span>
+          <div className="overflow-hidden rounded-2xl border border-border bg-card">
+            <div className="flex items-center justify-between border-b border-border bg-background/80 px-4 py-3">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 rounded-full bg-red-500/80" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-yellow-500/80" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-green-500/80" />
+                </div>
+                <p className="text-sm font-semibold">VulnerableBank.sol</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="inline-flex rounded-full border border-border bg-card p-1 text-[11px] font-semibold">
+                  <button
+                    type="button"
+                    onClick={() => setCodeView("vulnerable")}
+                    className={`rounded-full px-2.5 py-1 transition-colors ${
+                      codeView === "vulnerable" ? "bg-red-500/20 text-red-700 dark:text-red-300" : "text-muted-foreground"
+                    }`}
+                  >
+                    Vulnerable
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCodeView("fixed")}
+                    className={`rounded-full px-2.5 py-1 transition-colors ${
+                      codeView === "fixed" ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300" : "text-muted-foreground"
+                    }`}
+                  >
+                    Fixed
+                  </button>
+                </div>
+                <span
+                  className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                    codeView === "vulnerable"
+                      ? "border border-red-500/40 bg-red-500/10 text-red-600 dark:text-red-400"
+                      : "border border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                  }`}
+                >
+                  {codeView === "vulnerable" ? "High Severity: Reentrancy" : "Patched: CEI Applied"}
+                </span>
+              </div>
             </div>
+
             <div className="grid gap-0 lg:grid-cols-[2fr_1fr]">
-              <pre className="overflow-x-auto border-r border-border p-4 text-xs leading-6 text-muted-foreground lg:text-sm">
-{`pragma solidity ^0.8.20;
+              <div className="overflow-x-auto border-r border-border bg-slate-100 dark:bg-slate-950">
+                <div className="min-w-[700px] p-4 font-mono text-[12px] leading-6 sm:text-[13px]">
+                  <div className="grid grid-cols-[34px_1fr] text-slate-500 dark:text-slate-400">
+                    <span className="select-none text-right pr-3">1</span>
+                    <span><span className="text-fuchsia-700 dark:text-fuchsia-300">pragma</span> <span className="text-sky-700 dark:text-sky-300">solidity</span> <span className="text-amber-700 dark:text-amber-300">^0.8.20</span>;</span>
+                  </div>
+                  <div className="grid grid-cols-[34px_1fr] text-slate-500 dark:text-slate-400">
+                    <span className="select-none text-right pr-3">2</span>
+                    <span> </span>
+                  </div>
+                  <div className="grid grid-cols-[34px_1fr] text-slate-500 dark:text-slate-400">
+                    <span className="select-none text-right pr-3">3</span>
+                    <span><span className="text-fuchsia-700 dark:text-fuchsia-300">contract</span> <span className="text-cyan-700 dark:text-cyan-300">VulnerableBank</span> {'{'}</span>
+                  </div>
+                  <div className="grid grid-cols-[34px_1fr] text-slate-500 dark:text-slate-400">
+                    <span className="select-none text-right pr-3">4</span>
+                    <span>  <span className="text-fuchsia-700 dark:text-fuchsia-300">mapping</span>(<span className="text-sky-700 dark:text-sky-300">address</span> =&gt; <span className="text-sky-700 dark:text-sky-300">uint256</span>) <span className="text-fuchsia-700 dark:text-fuchsia-300">public</span> balances;</span>
+                  </div>
+                  <div className="grid grid-cols-[34px_1fr] text-slate-500 dark:text-slate-400">
+                    <span className="select-none text-right pr-3">5</span>
+                    <span> </span>
+                  </div>
+                  <div className="grid grid-cols-[34px_1fr] text-slate-500 dark:text-slate-400">
+                    <span className="select-none text-right pr-3">6</span>
+                    <span>  <span className="text-fuchsia-700 dark:text-fuchsia-300">function</span> <span className="text-cyan-700 dark:text-cyan-300">withdraw</span>() <span className="text-fuchsia-700 dark:text-fuchsia-300">external</span> {'{'}</span>
+                  </div>
+                  <div className="grid grid-cols-[34px_1fr] text-slate-500 dark:text-slate-400">
+                    <span className="select-none text-right pr-3">7</span>
+                    <span>    <span className="text-sky-700 dark:text-sky-300">uint256</span> amount = balances[msg.sender];</span>
+                  </div>
+                  <div className="grid grid-cols-[34px_1fr] text-slate-500 dark:text-slate-400">
+                    <span className="select-none text-right pr-3">8</span>
+                    <span>    <span className="text-cyan-700 dark:text-cyan-300">require</span>(amount &gt; <span className="text-amber-700 dark:text-amber-300">0</span>, <span className="text-emerald-700 dark:text-emerald-300">&quot;No funds&quot;</span>);</span>
+                  </div>
+                  <div className="grid grid-cols-[34px_1fr] text-slate-500 dark:text-slate-400">
+                    <span className="select-none text-right pr-3">9</span>
+                    <span> </span>
+                  </div>
+                  {codeView === "vulnerable" ? (
+                    <>
+                      <div className="grid grid-cols-[34px_1fr] rounded-md bg-red-500/12 text-slate-600 dark:text-slate-300">
+                        <span className="select-none text-right pr-3 text-red-600 dark:text-red-300">10</span>
+                        <span><span className="text-red-700 dark:text-red-300">// Unsafe external call before state update</span></span>
+                      </div>
+                      <div className="grid grid-cols-[34px_1fr] rounded-md bg-red-500/12 text-slate-600 dark:text-slate-300">
+                        <span className="select-none text-right pr-3 text-red-600 dark:text-red-300">11</span>
+                        <span>    (<span className="text-fuchsia-700 dark:text-fuchsia-300">bool</span> ok,) = msg.sender.call{'{'} <span className="text-fuchsia-700 dark:text-fuchsia-300">value</span>: amount {'}'}(<span className="text-emerald-700 dark:text-emerald-300">&quot;&quot;</span>);</span>
+                      </div>
+                      <div className="grid grid-cols-[34px_1fr] text-slate-500 dark:text-slate-400">
+                        <span className="select-none text-right pr-3">12</span>
+                        <span>    <span className="text-cyan-700 dark:text-cyan-300">require</span>(ok, <span className="text-emerald-700 dark:text-emerald-300">&quot;Transfer failed&quot;</span>);</span>
+                      </div>
+                      <div className="grid grid-cols-[34px_1fr] text-slate-500 dark:text-slate-400">
+                        <span className="select-none text-right pr-3">13</span>
+                        <span> </span>
+                      </div>
+                      <div className="grid grid-cols-[34px_1fr] text-slate-500 dark:text-slate-400">
+                        <span className="select-none text-right pr-3">14</span>
+                        <span>    balances[msg.sender] = <span className="text-amber-700 dark:text-amber-300">0</span>;</span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="grid grid-cols-[34px_1fr] rounded-md bg-emerald-500/12 text-slate-600 dark:text-slate-300">
+                        <span className="select-none text-right pr-3 text-emerald-700 dark:text-emerald-300">10</span>
+                        <span><span className="text-emerald-700 dark:text-emerald-300">// Fixed: update state first (checks-effects-interactions)</span></span>
+                      </div>
+                      <div className="grid grid-cols-[34px_1fr] rounded-md bg-emerald-500/12 text-slate-600 dark:text-slate-300">
+                        <span className="select-none text-right pr-3 text-emerald-700 dark:text-emerald-300">11</span>
+                        <span>    balances[msg.sender] = <span className="text-amber-700 dark:text-amber-300">0</span>;</span>
+                      </div>
+                      <div className="grid grid-cols-[34px_1fr] rounded-md bg-emerald-500/12 text-slate-600 dark:text-slate-300">
+                        <span className="select-none text-right pr-3 text-emerald-700 dark:text-emerald-300">12</span>
+                        <span>    (<span className="text-fuchsia-700 dark:text-fuchsia-300">bool</span> ok,) = msg.sender.call{'{'} <span className="text-fuchsia-700 dark:text-fuchsia-300">value</span>: amount {'}'}(<span className="text-emerald-700 dark:text-emerald-300">&quot;&quot;</span>);</span>
+                      </div>
+                      <div className="grid grid-cols-[34px_1fr] text-slate-500 dark:text-slate-400">
+                        <span className="select-none text-right pr-3">13</span>
+                        <span>    <span className="text-cyan-700 dark:text-cyan-300">require</span>(ok, <span className="text-emerald-700 dark:text-emerald-300">&quot;Transfer failed&quot;</span>);</span>
+                      </div>
+                      <div className="grid grid-cols-[34px_1fr] text-slate-500 dark:text-slate-400">
+                        <span className="select-none text-right pr-3">14</span>
+                        <span> </span>
+                      </div>
+                    </>
+                  )}
+                  <div className="grid grid-cols-[34px_1fr] text-slate-500 dark:text-slate-400">
+                    <span className="select-none text-right pr-3">15</span>
+                    <span>  {'}'}</span>
+                  </div>
+                  <div className="grid grid-cols-[34px_1fr] text-slate-500 dark:text-slate-400">
+                    <span className="select-none text-right pr-3">16</span>
+                    <span>{'}'}</span>
+                  </div>
+                </div>
+              </div>
 
-contract VulnerableBank {
-  mapping(address => uint256) public balances;
-
-  function withdraw() external {
-    uint256 amount = balances[msg.sender];
-    require(amount > 0, "No funds");
-
-    // Unsafe external call before state update
-    (bool ok,) = msg.sender.call{ value: amount }("");
-    require(ok, "Transfer failed");
-
-    balances[msg.sender] = 0;
-  }
-}`}
-              </pre>
               <div className="space-y-3 p-4">
-                <div className="rounded-xl border border-border bg-card p-3 text-sm">
-                  <p className="font-semibold">Detected issue</p>
-                  <p className="mt-1 text-muted-foreground">External interaction happens before internal state update, enabling recursive drains.</p>
-                </div>
-                <div className="rounded-xl border border-border bg-card p-3 text-sm">
+                {codeView === "vulnerable" ? (
+                  <div className="rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-sm">
+                    <p className="font-semibold text-red-700 dark:text-red-300">Detected vulnerability</p>
+                    <p className="mt-1 text-red-700/90 dark:text-red-200/90">External interaction happens before internal state update, enabling recursive drains.</p>
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-3 text-sm">
+                    <p className="font-semibold text-emerald-700 dark:text-emerald-300">Fixed implementation</p>
+                    <p className="mt-1 text-emerald-700/90 dark:text-emerald-200/90">State is updated before the external call, blocking reentrancy recursion paths.</p>
+                  </div>
+                )}
+                <div className="rounded-xl border border-border bg-background p-3 text-sm">
                   <p className="font-semibold">Suggested fix</p>
-                  <p className="mt-1 text-muted-foreground">Apply checks-effects-interactions: set balance to zero before the external call.</p>
+                  <p className="mt-1 text-muted-foreground">
+                    {codeView === "vulnerable"
+                      ? "Apply checks-effects-interactions: set balance to zero before the external call."
+                      : "CEI is applied: internal state transitions complete before external interaction."}
+                  </p>
                 </div>
-                <div className="rounded-xl border border-border bg-card p-3 text-sm">
+                <div className="rounded-xl border border-border bg-background p-3 text-sm">
                   <p className="font-semibold">Business impact</p>
-                  <p className="mt-1 text-muted-foreground">Potential total value locked drain in production environments.</p>
+                  <p className="mt-1 text-muted-foreground">
+                    {codeView === "vulnerable"
+                      ? "Potential total value locked drain in production environments."
+                      : "Significantly lowers exploitability risk and improves production safety posture."}
+                  </p>
                 </div>
               </div>
             </div>

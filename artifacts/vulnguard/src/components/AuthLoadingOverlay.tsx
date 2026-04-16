@@ -1,10 +1,18 @@
 import { motion } from "framer-motion";
 import { Shield } from "lucide-react";
 
+type AuthLoadingOverlayProps = {
+  title?: string;
+  subtitle?: string;
+};
+
 /**
  * Beautiful loading spinner shown during auth flow
  */
-export function AuthLoadingOverlay() {
+export function AuthLoadingOverlay({
+  title = "Loading VulnGuard",
+  subtitle = "Preparing your secure workspace...",
+}: AuthLoadingOverlayProps) {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center">
       <motion.div
@@ -51,8 +59,8 @@ export function AuthLoadingOverlay() {
           transition={{ duration: 1.5, repeat: Infinity }}
           className="text-center"
         >
-          <p className="text-sm font-semibold text-foreground">Authenticating</p>
-          <p className="text-xs text-zinc-500 mt-1">Please wait...</p>
+          <p className="text-sm font-semibold text-foreground">{title}</p>
+          <p className="text-xs text-zinc-500 mt-1">{subtitle}</p>
         </motion.div>
 
         {/* Animated dots */}
