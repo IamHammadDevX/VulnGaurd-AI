@@ -213,15 +213,39 @@ router.post("/scan-stream", async (req, res) => {
 
   const stageTimers: ReturnType<typeof setTimeout>[] = [];
   let completed = false;
+  let streamClosed = false;
+
+  // Handle client disconnect
+  const onClientClose = () => {
+    streamClosed = true;
+    clearTimers();
+    req.log.info("Client disconnected from scan stream");
+  };
+  res.on("close", onClientClose);
+  res.on("finish", onClientClose);
+
+  // Request timeout (60 seconds max)
+  const timeoutTimer = setTimeout(() => {
+    if (!completed && !streamClosed) {
+      streamClosed = true;
+      clearTimers();
+      req.log.warn("Scan request timeout after 60 seconds");
+      if (!res.headersSent) res.status(504).json({ error: "Scan timeout" });
+      else if (!res.writableEnded) res.end();
+    }
+  }, 60000);
 
   for (const stage of STAGES) {
     const timer = setTimeout(() => {
-      if (!completed) sseWrite(res, "stage", { message: stage.msg });
+      if (!completed && !streamClosed) sseWrite(res, "stage", { message: stage.msg });
     }, stage.ms);
     stageTimers.push(timer);
   }
 
-  const clearTimers = () => stageTimers.forEach(clearTimeout);
+  const clearTimers = () => {
+    stageTimers.forEach(clearTimeout);
+    clearTimeout(timeoutTimer);
+  };
 
   try {
     const claudeStream = anthropic.messages.stream({
@@ -240,6 +264,7 @@ router.post("/scan-stream", async (req, res) => {
       rawParsed = tryParseAiJson(fullText);
     } catch (err) {
       req.log.warn({ err: String(err) }, "AI JSON parse failed, using fallback analysis");
+      if (streamClosed) return;
       const analysis_time_ms = Date.now() - startTime;
       const code_hash = createHash("sha256").update(code).digest("hex");
       const vulnerabilities = normalizeFallbackVulns(fallback.vulnerabilities);
@@ -284,6 +309,8 @@ router.post("/scan-stream", async (req, res) => {
     const parsedResult = AIResponseSchema.safeParse(rawParsed);
     const analysis_time_ms = Date.now() - startTime;
     const code_hash = createHash("sha256").update(code).digest("hex");
+    
+    if (streamClosed) return;
 
     let contract_name = contractName ?? "Unknown Contract";
     let vulnerabilities: Array<Record<string, unknown>> = [];
@@ -369,6 +396,8 @@ router.post("/scan-stream", async (req, res) => {
       analysisTimeMs: analysis_time_ms,
     });
 
+    if (streamClosed) return;
+
     sseWrite(res, "meta", {
       contract_name: scanData.contract_name,
       total_vulnerabilities: scanData.total_vulnerabilities,
@@ -379,15 +408,20 @@ router.post("/scan-stream", async (req, res) => {
     });
 
     for (const vuln of vulnerabilities) {
+      if (streamClosed) return;
       await new Promise<void>((resolve) => setTimeout(resolve, 120));
       sseWrite(res, "vulnerability", vuln);
     }
 
-    sseWrite(res, "complete", { ...scanData, scanId });
-    res.end();
+    if (!streamClosed) {
+      sseWrite(res, "complete", { ...scanData, scanId });
+      res.end();
+    }
   } catch (err: unknown) {
     clearTimers();
     completed = true;
+    if (streamClosed) return;
+    
     req.log.error({ err }, "Error calling OpenRouter API, using fallback analysis");
 
     const analysis_time_ms = Date.now() - startTime;
