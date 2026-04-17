@@ -3,6 +3,8 @@ import PDFDocument from "pdfkit";
 import { GetReportParams } from "@workspace/api-zod";
 import { reportLimiter } from "../../middlewares/rateLimitMiddleware.js";
 import { getScan } from "./store.js";
+import { db, scansTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
 
 const router: IRouter = Router();
 
@@ -224,7 +226,7 @@ function codeBlock(
 }
 
 // ── Main route ────────────────────────────────────────────────────────────────
-router.get("/report/:scanId", reportLimiter, (req, res) => {
+router.get("/report/:scanId", reportLimiter, async (req, res) => {
   const parseResult = GetReportParams.safeParse(req.params);
   if (!parseResult.success) {
     res.status(400).json({ error: "Invalid scan ID" });
@@ -232,7 +234,32 @@ router.get("/report/:scanId", reportLimiter, (req, res) => {
   }
 
   const { scanId } = parseResult.data;
-  const scan = getScan(scanId);
+  let scan = getScan(scanId);
+
+  // Fallback to database if not in memory
+  if (!scan) {
+    try {
+      const dbScan = await db.select().from(scansTable).where(eq(scansTable.id, scanId)).limit(1);
+      if (dbScan.length > 0) {
+        const row = dbScan[0];
+        const vulns = Array.isArray(row.vulnerabilities) ? row.vulnerabilities : [];
+        scan = {
+          scanId: row.id,
+          success: true,
+          contract_name: row.contractName,
+          code_hash: row.contractHash,
+          total_vulnerabilities: vulns.length,
+          risk_score: row.riskScore,
+          vulnerabilities: vulns,
+          summary: row.summary || "",
+          analysis_time_ms: row.executionTime || 0,
+          timestamp: row.createdAt.toISOString(),
+        };
+      }
+    } catch (err) {
+      req.log?.warn({ err }, "Failed to load scan from database");
+    }
+  }
 
   if (!scan) {
     res.status(404).json({
