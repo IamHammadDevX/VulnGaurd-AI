@@ -21,15 +21,16 @@ export default function Contact() {
     setError(null);
 
     const formData = new FormData(e.currentTarget);
+    const payload = Object.fromEntries(formData);
     
     try {
-      const response = await fetch("https://formsubmit.co/ajax/iamhammaddev@gmail.com", {
+      const response = await fetch("/api/support/contact", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Accept": "application/json"
+          "Accept": "application/json",
         },
-        body: JSON.stringify(Object.fromEntries(formData)),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) throw new Error("Failed to send message");
@@ -61,8 +62,8 @@ export default function Contact() {
                 <div>
                   <h3 className="font-semibold">Email us</h3>
                   <p className="mt-1 text-sm text-muted-foreground">For sales, support, and partnerships.</p>
-                  <a href="mailto:iamhammaddev@gmai.com" className="mt-2 inline-block text-sm text-foreground">
-                    iamhammaddev@gmai.com
+                  <a href="mailto:support@thevulnguardai.tech" className="mt-2 inline-block text-sm text-foreground">
+                    support@thevulnguardai.tech
                   </a>
                 </div>
               </div>
@@ -92,10 +93,8 @@ export default function Contact() {
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4, delay: 0.05 }}>
           <form className="space-y-6 rounded-3xl border border-border bg-card p-8" onSubmit={handleSubmit}>
               
-              {/* FormSubmit Configuration Fields */}
-              <input type="hidden" name="_subject" value="New Submission on VulnGuard AI" />
-              <input type="hidden" name="_template" value="box" />
-              <input type="hidden" name="_autoresponse" value="Thank you for contacting VulnGuard AI. We have received your message and will get back to you shortly." />
+              <input type="hidden" name="company" value="" />
+              <input type="hidden" name="website" value="" />
 
               {isSuccess && (
                 <div className="flex items-center justify-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4 font-medium text-emerald-600 dark:text-emerald-400">

@@ -7,6 +7,7 @@ import generateFixRouter from "./vulnguard/generate-fix.js";
 import reportRouter from "./vulnguard/report.js";
 import teamsRouter from "./teams.js";
 import dashboardRouter from "./dashboard.js";
+import supportRouter from "./support.js";
 
 const router: IRouter = Router();
 
@@ -18,5 +19,6 @@ router.use(generateFixRouter);
 router.use(reportRouter);
 router.use(dashboardRouter);
 router.use(teamsRouter);
+router.use(supportRouter);
 
 export default router;
