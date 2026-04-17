@@ -238,6 +238,21 @@ This project is built to run natively on [Replit](https://replit.com). Add your 
 
 ---
 
+## Backend Sleep Prevention (Free Render Instances)
+
+If running on **Render's free tier**, the backend spins down after ~15 minutes of inactivity, causing next request to take 50+ seconds (cold start).
+
+**Solution:** Keep backend alive with periodic health check pings.
+
+📖 **Setup Guide:** See [KEEP_ALIVE_SETUP.md](./KEEP_ALIVE_SETUP.md)
+
+**Quick Summary:**
+- Use UptimeRobot (free) to ping `/api/healthz` every 5 minutes
+- Prevents cold starts entirely
+- Takes 2 minutes to set up
+
+---
+
 ## Environment Variables Reference
 
 | Variable | Required | Description |

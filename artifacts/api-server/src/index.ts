@@ -26,6 +26,7 @@ if (Number.isNaN(port) || port <= 0) {
 
 const { default: app } = await import("./app");
 const { logger } = await import("./lib/logger");
+const { startKeepAlive } = await import("./lib/keepAlive.js");
 
 app.listen(port, (err) => {
   if (err) {
@@ -34,4 +35,10 @@ app.listen(port, (err) => {
   }
 
   logger.info({ port }, "Server listening");
+  
+  // Start keep-alive pinger if enabled (Render free tier protection)
+  const protocol = process.env["HTTPS"] === "true" ? "https" : "http";
+  const host = process.env["RENDER_EXTERNAL_HOSTNAME"] || `localhost:${port}`;
+  const baseUrl = `${protocol}://${host}`;
+  startKeepAlive(baseUrl);
 });
