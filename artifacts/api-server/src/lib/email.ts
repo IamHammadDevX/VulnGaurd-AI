@@ -111,22 +111,53 @@ export async function sendTransactionalEmail(params: {
 }
 
 export function buildSupportAutoReplyTemplate(input: { name: string; topic: string }): EmailTemplate {
-  return buildBaseTemplate({
-    eyebrow: "Support",
-    title: "We received your message",
-    intro: `Thanks${input.name ? `, ${input.name}` : ""}. Our team got your request and will review it soon.`,
-    body: [
-      `Topic: ${input.topic}`,
-      "",
-      "What happens next:",
-      "- We review your message",
-      "- We reply from support@thevulnguardai.tech",
-      "- Critical security issues get priority handling",
-    ].join("\n"),
-    ctaLabel: "Open VulnGuard AI",
-    ctaUrl: appBaseUrl,
-    footerNote: "For urgent security issues, reply directly to this email.",
-  });
+  const safeName = escapeHtml(input.name);
+  const safeTopic = escapeHtml(input.topic);
+
+  const html = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>We received your message</title>
+  </head>
+  <body style="margin:0;padding:0;background:#f4f7fb;font-family:Arial,sans-serif;color:#111827;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f4f7fb;padding:24px 0;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="max-width:600px;width:100%;background:#ffffff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;">
+            <tr>
+              <td style="padding:28px 28px 18px 28px;background:#0f172a;color:#ffffff;">
+                <p style="margin:0;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#93c5fd;">Support</p>
+                <h1 style="margin:10px 0 0 0;font-size:26px;line-height:1.2;">We received your message</h1>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:28px;">
+                <p style="margin:0 0 14px 0;font-size:16px;line-height:1.6;">Hi ${safeName},</p>
+                <p style="margin:0 0 10px 0;font-size:15px;line-height:1.7;color:#374151;">Thanks for contacting VulnGuard AI.</p>
+                <p style="margin:0 0 18px 0;font-size:15px;line-height:1.7;color:#374151;">Topic: <strong>${safeTopic}</strong></p>
+                <p style="margin:0 0 20px 0;font-size:14px;line-height:1.7;color:#4b5563;">Our team will reply as soon as possible from support@thevulnguardai.tech.</p>
+                <p style="margin:0;font-size:13px;line-height:1.7;color:#6b7280;">For urgent security issues, reply directly to this email.</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:18px 28px;background:#f9fafb;border-top:1px solid #e5e7eb;">
+                <p style="margin:0;font-size:12px;line-height:1.7;color:#6b7280;">VulnGuard AI Support Team<br/>https://www.thevulnguardai.tech</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
+
+  return {
+    subject: "We received your message",
+    html,
+    text: `Hi ${safeName},\nThanks for contacting VulnGuard AI.\nTopic: ${safeTopic}\nOur team will reply as soon as possible from support@thevulnguardai.tech.`,
+  };
 }
 
 export function buildSupportInboxTemplate(input: {
@@ -135,20 +166,60 @@ export function buildSupportInboxTemplate(input: {
   topic: string;
   message: string;
 }): EmailTemplate {
-  return buildBaseTemplate({
-    eyebrow: "Support Inbox",
-    title: `New support request: ${input.topic}`,
-    intro: "A new message arrived through VulnGuard AI contact form.",
-    body: [
-      `Name: ${input.name}`,
-      `Email: ${input.email}`,
-      `Topic: ${input.topic}`,
-      "",
-      "Message:",
-      input.message,
-    ].join("\n"),
-    footerNote: `Reply-to is set to ${input.email}.`,
-  });
+  const safeName = escapeHtml(input.name);
+  const safeEmail = escapeHtml(input.email);
+  const safeTopic = escapeHtml(input.topic);
+  const safeMessage = escapeHtml(input.message);
+
+  const html = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>New support request</title>
+  </head>
+  <body style="margin:0;padding:0;background:#f4f7fb;font-family:Arial,sans-serif;color:#111827;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f4f7fb;padding:24px 0;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="max-width:600px;width:100%;background:#ffffff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;">
+            <tr>
+              <td style="padding:28px 28px 18px 28px;background:#7f1d1d;color:#ffffff;">
+                <p style="margin:0;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#fecaca;">Support Inbox</p>
+                <h1 style="margin:10px 0 0 0;font-size:26px;line-height:1.2;">New support request: ${safeTopic}</h1>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:28px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
+                  <tr>
+                    <td style="padding:8px 0;font-size:14px;color:#6b7280;width:120px;">Name</td>
+                    <td style="padding:8px 0;font-size:14px;color:#111827;">${safeName}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:8px 0;font-size:14px;color:#6b7280;">Email</td>
+                    <td style="padding:8px 0;font-size:14px;color:#111827;">${safeEmail}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:8px 0;font-size:14px;color:#6b7280;">Topic</td>
+                    <td style="padding:8px 0;font-size:14px;color:#111827;">${safeTopic}</td>
+                  </tr>
+                </table>
+                <div style="margin-top:16px;padding:16px;border:1px solid #e5e7eb;border-radius:10px;background:#f9fafb;white-space:pre-line;font-size:14px;line-height:1.7;color:#1f2937;">${safeMessage}</div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
+
+  return {
+    subject: `New support request: ${input.topic}`,
+    html,
+    text: `Name: ${input.name}\nEmail: ${input.email}\nTopic: ${input.topic}\nMessage: ${input.message}`,
+  };
 }
 
 export function buildPasswordResetTemplate(input: { resetUrl: string; email: string }): EmailTemplate {
