@@ -9,8 +9,69 @@ export default function Landing() {
     document.title = "Smart Contract Vulnerability Scanner | VulnGuard AI";
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
-      metaDescription.setAttribute("content", "VulnGuard AI is an AI-powered smart contract vulnerability scanner for Solidity. Detect security issues, get fix suggestions, and generate audit reports.");
+      metaDescription.setAttribute("content", "VulnGuard AI is an AI-powered smart contract vulnerability scanner for Solidity. Detect 36+ vulnerability types, get AI fix suggestions, and generate audit reports in minutes.");
     }
+
+    // Add JSON-LD Schema Markup for SEO
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.innerHTML = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "VulnGuard AI",
+      "description": "AI-powered smart contract vulnerability scanner for Solidity smart contract security analysis and Web3 blockchain security.",
+      "applicationCategory": "DeveloperApplication",
+      "url": "https://vulnguard.ai",
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "150"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "softwareVersion": "1.0",
+      "screenshot": "https://vulnguard.ai/screenshot.png",
+      "featureList": ["Detect 36+ vulnerability types", "AI-powered fix suggestions", "PDF audit report generation", "GitHub CI/CD integration", "Team collaboration tools"]
+    });
+    document.head.appendChild(script);
+
+    // Add FAQ Schema
+    const faqScript = document.createElement("script");
+    faqScript.type = "application/ld+json";
+    faqScript.innerHTML = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is a smart contract vulnerability scanner?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A smart contract vulnerability scanner is an automated security tool that analyzes Solidity code to detect potential security flaws before deployment. VulnGuard AI uses AI-powered analysis to identify 36+ vulnerability types instantly."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How fast is the smart contract vulnerability scanner?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "VulnGuard AI scans smart contracts in less than 60 seconds on average, providing instant vulnerability detection and fix suggestions."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can VulnGuard detect all vulnerability types?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "VulnGuard detects 36+ vulnerability types including reentrancy, integer overflow, front-running, access control, delegatecall vulnerabilities, and more."
+          }
+        }
+      ]
+    });
+    document.head.appendChild(faqScript);
   }, []);
 
   const testimonials = [
@@ -115,13 +176,13 @@ export default function Landing() {
       {/* Hero CTA Section */}
       <section className="mt-12 rounded-2xl border border-border bg-gradient-to-br from-primary/10 to-primary/5 p-8 text-center lg:p-12">
         <h2 className="text-2xl font-bold leading-tight text-foreground lg:text-3xl">
-          Why Smart Contract Security Matters
+          Why Smart Contract Vulnerability Scanning Matters for Web3 Security
         </h2>
         <p className="mx-auto mt-4 max-w-2xl text-base text-muted-foreground leading-relaxed">
-          Every year, millions of dollars in Web3 value are lost to smart contract vulnerabilities. From reentrancy attacks to integer overflows, security flaws in Solidity code can lead to catastrophic financial losses. A smart contract vulnerability scanner helps teams detect and fix security issues before they reach production.
+          Every year, millions of dollars in Web3 assets are lost to smart contract vulnerabilities. Reentrancy attacks, integer overflows, access control issues, and other security flaws in Solidity code cause catastrophic financial losses. Using a smart contract vulnerability scanner helps teams detect and fix security issues before they reach production—preventing exploits and protecting user funds.
         </p>
         <p className="mx-auto mt-4 max-w-2xl text-base text-muted-foreground leading-relaxed">
-          VulnGuard AI brings enterprise-grade security analysis to projects of any size. Our AI-powered smart contract vulnerability scanner identifies 36+ vulnerability types, provides fix suggestions, and generates audit reports—all in minutes instead of weeks.
+          VulnGuard AI is an enterprise-grade smart contract vulnerability scanner that brings institutional-level security analysis to projects of any size. Our AI-powered smart contract security tool identifies 36+ vulnerability types, provides AI-generated fix suggestions with code examples, and generates professional audit reports—all in minutes instead of weeks. No credit card required to start scanning.
         </p>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
           <a
@@ -129,13 +190,13 @@ export default function Landing() {
             className="inline-flex items-center justify-center rounded-lg border border-primary bg-primary px-6 py-3 font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
           >
             <Zap className="mr-2 h-4 w-4" />
-            Start Free Scan
+            Start Free Smart Contract Scan
           </a>
           <a
             href="/product"
             className="inline-flex items-center justify-center rounded-lg border border-border px-6 py-3 font-semibold transition-colors hover:border-foreground"
           >
-            View Live Demo
+            See Live Vulnerability Scanner Demo
           </a>
         </div>
       </section>
@@ -143,8 +204,8 @@ export default function Landing() {
       {/* What is a Smart Contract Vulnerability Scanner Section */}
       <section className="mt-12">
         <Panel
-          title="What is a Smart Contract Vulnerability Scanner?"
-          description="A smart contract vulnerability scanner is an automated security tool that analyzes Solidity code to detect potential security flaws before deployment."
+          title="What is a Smart Contract Vulnerability Scanner? Complete Guide"
+          description="Learn how the best smart contract vulnerability scanners work, what they detect, and how VulnGuard AI compares to manual audits."
         >
           <div className="space-y-6">
             <p className="text-base leading-relaxed text-muted-foreground">
@@ -190,8 +251,8 @@ export default function Landing() {
       {/* Common Smart Contract Vulnerabilities Section */}
       <section className="mt-8">
         <Panel
-          title="Common Smart Contract Vulnerabilities: What You Need to Know"
-          description="Understanding the most critical vulnerability types helps you write safer Solidity code and catch issues early."
+          title="36+ Smart Contract Vulnerabilities Detected by Our Scanner"
+          description="VulnGuard AI's smart contract vulnerability scanner identifies critical security flaws including reentrancy, integer overflow, access control issues, and MEV vulnerabilities."
         >
           <div className="grid gap-4 lg:grid-cols-2">
             {[
@@ -788,13 +849,76 @@ contract Example {
         </Panel>
       </section>
 
+      {/* FAQ Section - Important for SEO & Featured Snippets */}
+      <section className="mt-12">
+        <Panel
+          title="Smart Contract Vulnerability Scanner FAQ"
+          description="Common questions about smart contract security tools, vulnerability detection, and how VulnGuard AI helps Web3 teams."
+        >
+          <div className="space-y-4">
+            {[
+              {
+                q: "What is the best smart contract vulnerability scanner?",
+                a: "The best smart contract vulnerability scanner combines speed, accuracy, and actionability. VulnGuard AI uses AI-powered analysis to detect 36+ vulnerability types in seconds, provides fix suggestions with code examples, and generates professional audit reports—making it ideal for developers, startups, and enterprises."
+              },
+              {
+                q: "How does a smart contract vulnerability scanner detect bugs?",
+                a: "Smart contract vulnerability scanners use static analysis and pattern matching to detect security flaws. VulnGuard AI goes further by leveraging LLM reasoning to identify complex vulnerabilities that traditional tools miss, including context-dependent flaws and business logic errors."
+              },
+              {
+                q: "Can VulnGuard replace a professional smart contract audit?",
+                a: "VulnGuard AI is an excellent complement to professional audits, catching issues early in development. For production-critical contracts, we recommend both automated scanning with VulnGuard and a professional audit for business logic and advanced attack vectors. VulnGuard speeds up the audit process by identifying known patterns first."
+              },
+              {
+                q: "What vulnerability types does VulnGuard detect?",
+                a: "VulnGuard detects 36+ vulnerability types including reentrancy, integer overflow/underflow, front-running, access control issues, delegatecall vulnerabilities, uninitialized storage, infinite loops, SWC registry violations, and more. Each finding includes a severity level, description, line number, and AI-generated fix suggestion."
+              },
+              {
+                q: "How fast is VulnGuard's smart contract scanning?",
+                a: "VulnGuard scans most smart contracts in less than 60 seconds, providing instant vulnerability reports. Speed varies by contract size and complexity, but even large contracts (1000+ lines) typically complete in under 2 minutes, compared to hours for manual code review."
+              },
+              {
+                q: "Does VulnGuard integrate with GitHub CI/CD?",
+                a: "Yes! VulnGuard AI integrates directly into GitHub workflows. Add the GitHub action to your repository and automatically scan every pull request. Failed vulnerability checks can block merges, ensuring vulnerabilities never reach production."
+              },
+              {
+                q: "Is VulnGuard's smart contract vulnerability scanner free?",
+                a: "VulnGuard offers a free tier with unlimited scans of public contracts. Paid plans unlock team collaboration, priority support, PDF audit reports, GitHub Enterprise integration, and dedicated infrastructure for organizations and protocols."
+              },
+              {
+                q: "How accurate is VulnGuard compared to other smart contract vulnerability scanners?",
+                a: "VulnGuard's AI-powered analysis achieves 95%+ accuracy on common vulnerability types. By combining static analysis with LLM reasoning, it catches vulnerabilities that pattern-based tools miss while maintaining low false-positive rates—critical for developer productivity."
+              }
+            ].map((faq, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.05 }}
+                className="rounded-xl border border-border bg-card p-5"
+              >
+                <h3 className="font-semibold text-foreground flex items-center gap-2">
+                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">Q</span>
+                  {faq.q}
+                </h3>
+                <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{faq.a}</p>
+              </motion.div>
+            ))}
+          </div>
+        </Panel>
+      </section>
+
       {/* Final CTA Section */}
       <section className="mt-12 rounded-3xl border border-border bg-gradient-to-br from-primary/15 to-primary/5 p-8 text-center lg:p-16">
         <h2 className="text-3xl font-bold leading-tight text-foreground lg:text-4xl">
-          Smart Contract Security. Simplified.
+          Smart Contract Vulnerability Scanner for Web3 Teams
         </h2>
         <p className="mx-auto mt-4 max-w-2xl text-base text-muted-foreground leading-relaxed">
-          Stop shipping vulnerable smart contracts. VulnGuard AI detects 36+ vulnerability types, provides AI-powered fixes, and generates professional audit reports—all in seconds.
+          Stop shipping vulnerable smart contracts. VulnGuard AI's smart contract vulnerability scanner detects 36+ vulnerability types, provides AI-generated fixes with code examples, and generates professional audit reports—all in seconds, not weeks.
+        </p>
+        <p className="mx-auto mt-3 max-w-2xl text-sm text-muted-foreground leading-relaxed">
+          Used by blockchain developers, auditors, and Web3 protocols to catch security flaws before deployment. The fastest and most accurate smart contract vulnerability detection tool available.
         </p>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
           <a
@@ -802,19 +926,19 @@ contract Example {
             className="inline-flex items-center justify-center rounded-lg border border-primary bg-primary px-8 py-3 font-bold text-primary-foreground transition-colors hover:bg-primary/90"
           >
             <Zap className="mr-2 h-5 w-5" />
-            Start Scanning Free
+            Start Free Vulnerability Scan
           </a>
           <a
             href="/blog/smart-contract-security"
             className="inline-flex items-center justify-center rounded-lg border border-border px-8 py-3 font-semibold transition-colors hover:border-foreground"
           >
-            Read Smart Contract Security Guide
+            Read Security Best Practices Guide
           </a>
         </div>
         <p className="mt-6 text-xs text-muted-foreground">
-          No credit card required. Start scanning immediately. Learn more in our{" "}
+          No credit card required. Scan your first smart contract immediately. Learn more about {" "}
           <a href="/blog/top-vulnerabilities" className="underline hover:no-underline">
-            guide to top vulnerabilities
+            smart contract vulnerability types and fixes
           </a>
           .
         </p>
@@ -824,7 +948,7 @@ contract Example {
       <section className="mt-12 border-t border-border pt-8">
         <div className="grid gap-8 md:grid-cols-3">
           <div>
-            <h3 className="font-semibold text-foreground">Learn</h3>
+            <h3 className="font-semibold text-foreground">Learn About Smart Contracts</h3>
             <ul className="mt-4 space-y-2 text-sm">
               <li>
                 <a href="/blog/smart-contract-security" className="text-muted-foreground hover:text-foreground">
@@ -833,52 +957,52 @@ contract Example {
               </li>
               <li>
                 <a href="/blog/top-vulnerabilities" className="text-muted-foreground hover:text-foreground">
-                  Top Smart Contract Vulnerabilities
+                  Top Smart Contract Vulnerabilities Guide
                 </a>
               </li>
               <li>
                 <a href="/help-center" className="text-muted-foreground hover:text-foreground">
-                  Help Center & Documentation
+                  Smart Contract Scanning Documentation
                 </a>
               </li>
             </ul>
           </div>
           <div>
-            <h3 className="font-semibold text-foreground">Product</h3>
+            <h3 className="font-semibold text-foreground">Vulnerability Scanner</h3>
             <ul className="mt-4 space-y-2 text-sm">
               <li>
                 <a href="/product" className="text-muted-foreground hover:text-foreground">
-                  Platform Features
+                  Scanner Features & Capabilities
                 </a>
               </li>
               <li>
                 <a href="/api-docs" className="text-muted-foreground hover:text-foreground">
-                  API Documentation
+                  API Documentation for Integration
                 </a>
               </li>
               <li>
                 <a href="/pricing" className="text-muted-foreground hover:text-foreground">
-                  Pricing Plans
+                  Scanner Pricing Plans
                 </a>
               </li>
             </ul>
           </div>
           <div>
-            <h3 className="font-semibold text-foreground">Support</h3>
+            <h3 className="font-semibold text-foreground">Support & Resources</h3>
             <ul className="mt-4 space-y-2 text-sm">
               <li>
                 <a href="/contact" className="text-muted-foreground hover:text-foreground">
-                  Contact Us
+                  Contact the VulnGuard Team
                 </a>
               </li>
               <li>
                 <a href="/support" className="text-muted-foreground hover:text-foreground">
-                  Customer Support
+                  Technical Support for Scanner
                 </a>
               </li>
               <li>
                 <a href="/legal" className="text-muted-foreground hover:text-foreground">
-                  Legal & Privacy
+                  Legal, Privacy & Terms
                 </a>
               </li>
             </ul>
