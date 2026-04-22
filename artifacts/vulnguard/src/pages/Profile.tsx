@@ -1,12 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@workspace/replit-auth-web";
-import { Link } from "wouter";
-import { motion } from "framer-motion";
-import { ThemeToggleButton } from "@/components/ThemeToggleButton";
-import {
-  ArrowLeft, User, Mail, Shield, Calendar,
-  FileCode, LogOut,
-} from "lucide-react";
+import { Calendar, FileCode, LogOut, Mail, Shield, User } from "lucide-react";
 
 interface ProfileData {
   id: string;
@@ -31,7 +25,7 @@ export default function Profile() {
   useEffect(() => {
     if (!isAuthenticated) return;
     fetch("/api/user/profile", { credentials: "include" })
-      .then((r) => r.json())
+      .then((response) => response.json())
       .then((data) => {
         const next = data.user as ProfileData;
         setProfile(next);
@@ -63,26 +57,29 @@ export default function Profile() {
 
     setStatus("Profile updated. If you changed email, verify it from your inbox.");
     fetch("/api/user/profile", { credentials: "include" })
-      .then((r) => r.json())
+      .then((response) => response.json())
       .then((data) => setProfile(data.user))
       .catch(() => null);
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full" />
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <div className="h-9 w-9 animate-spin rounded-full border-2 border-emerald-400/30 border-t-emerald-300" />
       </div>
     );
   }
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="text-center space-y-4 max-w-sm">
-          <User className="w-16 h-16 text-foreground mx-auto" />
-          <h1 className="text-2xl font-bold">Sign in to view your profile</h1>
-          <button onClick={login} className="px-6 py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition">
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <div className="max-w-sm rounded-[32px] border border-zinc-800 bg-[linear-gradient(180deg,rgba(24,24,27,0.78),rgba(9,9,11,0.72))] p-8 text-center">
+          <User className="mx-auto h-12 w-12 text-zinc-200" />
+          <h2 className="mt-4 text-2xl font-semibold text-zinc-50">Sign in to view your profile</h2>
+          <button
+            onClick={login}
+            className="mt-6 rounded-full border border-emerald-500/30 bg-emerald-500/14 px-5 py-3 text-sm font-semibold text-emerald-200 transition-all hover:-translate-y-0.5"
+          >
             Log in
           </button>
         </div>
@@ -91,165 +88,147 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-background/80 backdrop-blur-2xl sticky top-0 z-50">
-        <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/scanner" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition text-sm">
-              Scanner
-            </Link>
-            <span className="text-border">/</span>
-            <span className="text-sm font-semibold">Profile</span>
-          </div>
-          <ThemeToggleButton />
-        </div>
-      </header>
-
-      <main className="max-w-3xl mx-auto px-4 py-8 space-y-6">
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-card border border-border rounded-xl p-6"
-        >
-          <div className="flex items-center gap-5">
+    <div className="space-y-6">
+      <section className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+        <div className="rounded-[32px] border border-zinc-800/80 bg-[linear-gradient(180deg,rgba(24,24,27,0.78),rgba(9,9,11,0.72))] p-6 shadow-[0_32px_100px_-58px_rgba(0,0,0,1)] backdrop-blur-2xl sm:p-8">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">Identity summary</p>
+          <div className="mt-5 flex flex-col gap-5 sm:flex-row sm:items-center">
             {user?.profileImageUrl ? (
-              <img src={user.profileImageUrl} alt="" className="w-20 h-20 rounded-full border-2 border-primary/30" />
+              <img src={user.profileImageUrl} alt="" className="h-24 w-24 rounded-[28px] border border-zinc-800 object-cover" />
             ) : (
-              <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center">
-                <User className="w-10 h-10 text-foreground" />
+              <div className="grid h-24 w-24 place-items-center rounded-[28px] border border-zinc-800 bg-zinc-950 text-zinc-100">
+                <User className="h-10 w-10" />
               </div>
             )}
-            <div>
-              <h1 className="text-xl font-bold">
-                {user?.firstName} {user?.lastName}
+            <div className="min-w-0">
+              <h1 className="text-3xl font-semibold tracking-tight text-zinc-50">
+                {user?.firstName ?? "Security"} {user?.lastName ?? "Operator"}
               </h1>
-              <p className="text-sm text-muted-foreground flex items-center gap-1.5 mt-0.5">
-                <Mail className="w-3.5 h-3.5" />
+              <p className="mt-2 inline-flex max-w-full items-start gap-2 break-all text-sm text-zinc-400">
+                <Mail className="h-4 w-4" />
                 {user?.email ?? "No email"}
               </p>
             </div>
           </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05 }}
-          className="bg-card border border-border rounded-xl p-5 space-y-3"
-        >
-          <h2 className="text-sm font-semibold">Edit Profile</h2>
-          {status && <p className="text-xs text-foreground">{status}</p>}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="text-[11px] text-muted-foreground">First name</label>
-              <input
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                className="mt-1 w-full px-3 py-2 rounded-lg bg-background border border-input text-sm"
-              />
+          <div className="mt-6 grid gap-4 sm:grid-cols-3">
+            <div className="rounded-2xl border border-zinc-800 bg-white/[0.03] p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">Scans run</p>
+              <p className="mt-2 text-2xl font-semibold text-zinc-50">{profile?.totalScans ?? 0}</p>
             </div>
-            <div>
-              <label className="text-[11px] text-muted-foreground">Last name</label>
-              <input
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                className="mt-1 w-full px-3 py-2 rounded-lg bg-background border border-input text-sm"
-              />
+            <div className="rounded-2xl border border-zinc-800 bg-white/[0.03] p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">Member since</p>
+              <p className="mt-2 text-lg font-semibold text-zinc-100">
+                {profile?.createdAt
+                  ? new Date(profile.createdAt).toLocaleDateString("en-US", { month: "long", year: "numeric" })
+                  : "--"}
+              </p>
+            </div>
+            <div className="rounded-2xl border border-zinc-800 bg-white/[0.03] p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">Plan</p>
+              <p className="mt-2 text-lg font-semibold text-emerald-300">Free tier</p>
             </div>
           </div>
+        </div>
 
+        <div className="rounded-[32px] border border-zinc-800/80 bg-[linear-gradient(180deg,rgba(24,24,27,0.78),rgba(9,9,11,0.72))] p-6 shadow-[0_32px_100px_-58px_rgba(0,0,0,1)] backdrop-blur-2xl sm:p-8">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">Access status</p>
+          <div className="mt-5 space-y-4">
+            <div className="rounded-2xl border border-zinc-800 bg-white/[0.03] p-4">
+              <div className="flex items-center gap-3">
+                <div className="grid h-11 w-11 place-items-center rounded-2xl border border-zinc-800 bg-zinc-950 text-emerald-300">
+                  <Shield className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-base font-semibold text-zinc-50">Subscription status</p>
+                  <p className="text-sm text-zinc-400">Free plan with secure account access enabled.</p>
+                </div>
+              </div>
+            </div>
+            <div className="rounded-2xl border border-zinc-800 bg-white/[0.03] p-4">
+              <div className="flex items-center gap-3">
+                <div className="grid h-11 w-11 place-items-center rounded-2xl border border-zinc-800 bg-zinc-950 text-zinc-100">
+                  <Calendar className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-base font-semibold text-zinc-50">Account lifecycle</p>
+                  <p className="text-sm text-zinc-400">Keep email and identity data current for team invites and reports.</p>
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={logout}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-rose-500/25 bg-rose-500/10 px-4 py-3 text-sm font-semibold text-rose-200 transition-all hover:-translate-y-0.5"
+            >
+              <LogOut className="h-4 w-4" />
+              Log out
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-[32px] border border-zinc-800/80 bg-[linear-gradient(180deg,rgba(24,24,27,0.78),rgba(9,9,11,0.72))] p-6 shadow-[0_32px_100px_-58px_rgba(0,0,0,1)] backdrop-blur-2xl sm:p-8">
+        <div className="flex items-center gap-3">
+          <div className="grid h-11 w-11 place-items-center rounded-2xl border border-zinc-800 bg-zinc-950 text-zinc-100">
+            <FileCode className="h-5 w-5" />
+          </div>
           <div>
-            <label className="text-[11px] text-muted-foreground">Email</label>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">Edit profile</p>
+            <h2 className="text-xl font-semibold text-zinc-50">Update account details</h2>
+          </div>
+        </div>
+
+        {status && (
+          <p className="mt-5 rounded-2xl border border-zinc-800 bg-white/[0.03] px-4 py-3 text-sm text-zinc-300">
+            {status}
+          </p>
+        )}
+
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="text-xs font-medium text-zinc-400">First name</label>
+            <input
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              className="mt-2 w-full rounded-2xl border border-zinc-800 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-emerald-500/30"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-zinc-400">Last name</label>
+            <input
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              className="mt-2 w-full rounded-2xl border border-zinc-800 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-emerald-500/30"
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="text-xs font-medium text-zinc-400">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 w-full px-3 py-2 rounded-lg bg-background border border-input text-sm"
+              className="mt-2 w-full rounded-2xl border border-zinc-800 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-emerald-500/30"
             />
           </div>
-
-          <div>
-            <label className="text-[11px] text-muted-foreground">Photo URL</label>
+          <div className="sm:col-span-2">
+            <label className="text-xs font-medium text-zinc-400">Profile image URL</label>
             <input
               value={profileImageUrl}
               onChange={(e) => setProfileImageUrl(e.target.value)}
-              className="mt-1 w-full px-3 py-2 rounded-lg bg-background border border-input text-sm"
+              className="mt-2 w-full rounded-2xl border border-zinc-800 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-emerald-500/30"
             />
           </div>
-
-          <div className="flex justify-end">
-            <button
-              onClick={handleSaveProfile}
-              disabled={saving}
-              className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 disabled:opacity-50"
-            >
-              {saving ? "Saving..." : "Save profile"}
-            </button>
-          </div>
-        </motion.div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-card border border-border rounded-xl p-5"
-          >
-            <div className="flex items-center gap-3 mb-3">
-              <FileCode className="w-5 h-5 text-foreground" />
-              <span className="text-sm font-semibold">Total Scans</span>
-            </div>
-            <p className="text-3xl font-bold">{profile?.totalScans ?? 0}</p>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="bg-card border border-border rounded-xl p-5"
-          >
-            <div className="flex items-center gap-3 mb-3">
-              <Calendar className="w-5 h-5 text-foreground" />
-              <span className="text-sm font-semibold">Member Since</span>
-            </div>
-            <p className="text-lg font-medium">
-              {profile?.createdAt
-                ? new Date(profile.createdAt).toLocaleDateString("en-US", {
-                    month: "long",
-                    year: "numeric",
-                  })
-                : "—"}
-            </p>
-          </motion.div>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-card border border-border rounded-xl p-5 flex items-center justify-between"
-        >
-          <div className="flex items-center gap-3">
-            <Shield className="w-5 h-5 text-foreground" />
-            <div>
-              <p className="text-sm font-semibold">Subscription</p>
-              <p className="text-xs text-muted-foreground">Free tier</p>
-            </div>
-          </div>
-          <span className="text-xs font-bold px-3 py-1.5 rounded-lg bg-primary/10 text-primary border border-primary/20">
-            FREE
-          </span>
-        </motion.div>
-
-        <div className="pt-4 border-t border-border">
+        <div className="mt-6 flex justify-end">
           <button
-            onClick={logout}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 text-sm font-medium transition"
+            onClick={handleSaveProfile}
+            disabled={saving}
+            className="w-full rounded-full border border-emerald-500/30 bg-emerald-500/14 px-5 py-3 text-sm font-semibold text-emerald-200 transition-all hover:-translate-y-0.5 disabled:opacity-50 sm:w-auto"
           >
-            <LogOut className="w-4 h-4" />
-            Log out
+            {saving ? "Saving..." : "Save profile"}
           </button>
         </div>
-      </main>
+      </section>
     </div>
   );
 }

@@ -1,17 +1,16 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { Link, useLocation } from "wouter";
-import { UserPlus, Eye, EyeOff, Chrome, Moon, Sun } from "lucide-react";
+import { Chrome, Eye, EyeOff, UserPlus } from "lucide-react";
 import { useAuth } from "@workspace/replit-auth-web";
-import { userEvents } from "@/lib/analytics";        
-import { BrandLogo } from "@/components/branding/BrandLogo";
+import { userEvents } from "@/lib/analytics";
+import { AuthShell } from "@/components/layout/AuthShell";
 
 export default function Signup() {
   const [, navigate] = useLocation();
-  const { signUpWithPassword, signInWithGoogle, isAuthenticated } = useAuth(); 
+  const { signUpWithPassword, signInWithGoogle, isAuthenticated } = useAuth();
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [theme, setTheme] = useState<"light" | "dark">("dark");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -21,22 +20,19 @@ export default function Signup() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
 
-  useEffect(() => {
-    const storedTheme = localStorage.getItem("theme");
-    const initialTheme = storedTheme === "light" ? "light" : "dark";
-    setTheme(initialTheme);
-    document.documentElement.classList.toggle("dark", initialTheme === "dark");
-  }, []);
-
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", theme === "dark");
-    localStorage.setItem("theme", theme);
-  }, [theme]);
-
   if (isAuthenticated) {
     navigate("/dashboard", { replace: true });
     return null;
   }
+
+  const validatePassword = (pass: string) => {
+    if (pass.length < 8) return "Password must be at least 8 characters.";
+    if (!/[A-Z]/.test(pass)) return "Password must contain at least one uppercase letter.";
+    if (!/[a-z]/.test(pass)) return "Password must contain at least one lowercase letter.";
+    if (!/[0-9]/.test(pass)) return "Password must contain at least one number.";
+    if (!/[!@#$%^&*()_+\-=[\]{};':\"\\|,.<>/?]+/.test(pass)) return "Password must contain at least one special character.";
+    return null;
+  };
 
   const handleGoogle = async () => {
     setError("");
@@ -47,15 +43,6 @@ export default function Signup() {
       setError(result.error);
       setLoading(false);
     }
-  };
-
-  const validatePassword = (pass: string) => {
-    if (pass.length < 8) return "Password must be at least 8 characters.";
-    if (!/[A-Z]/.test(pass)) return "Password must contain at least one uppercase letter.";
-    if (!/[a-z]/.test(pass)) return "Password must contain at least one lowercase letter.";
-    if (!/[0-9]/.test(pass)) return "Password must contain at least one number.";
-    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(pass)) return "Password must contain at least one special character.";
-    return null;
   };
 
   const handleSignup = async (e: FormEvent) => {
@@ -93,120 +80,109 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-card border border-border rounded-xl p-6 space-y-4">
-        <div className="flex items-start justify-between gap-3">
-          <Link href="/home" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-            Back to homepage
-          </Link>
-          <button
-            type="button"
-            onClick={() => setTheme((value) => (value === "dark" ? "light" : "dark"))}
-            aria-label="Toggle light and dark mode"
-            className="rounded-full border border-border bg-background p-2 text-muted-foreground transition-colors hover:text-foreground"
-          >
-            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </button>
+    <AuthShell
+      title="Create a secure VulnGuard account"
+      subtitle="Start scanning faster with the same dark, premium experience across onboarding and the product workspace."
+      backHref="/"
+      backLabel="Back to homepage"
+    >
+      <div className="space-y-5">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">Create account</p>
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-50">Launch your security workspace</h2>
+          <p className="mt-2 text-sm text-zinc-400">Use Google or create credentials with email verification.</p>
         </div>
 
-        <div className="text-center">
-          <div className="mx-auto mb-2 w-fit">
-            <BrandLogo />
-          </div>
-          <h1 className="text-xl font-bold">Create your account</h1>
-          <p className="text-xs text-muted-foreground mt-1">Google or email/password with verification</p>
-        </div>
-
-        {error && <p className="text-xs text-red-400">{error}</p>}
-        {notice && <p className="text-xs text-green-400">{notice}</p>}
+        {error && <p className="rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">{error}</p>}
+        {notice && <p className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">{notice}</p>}
 
         <button
           onClick={handleGoogle}
           disabled={loading}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-foreground text-background text-sm font-semibold hover:bg-foreground/90 disabled:opacity-60"
+          className="flex w-full items-center justify-center gap-2 rounded-2xl border border-zinc-800 bg-white/[0.05] px-4 py-3 text-sm font-semibold text-zinc-100 transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/[0.08] disabled:opacity-60"
         >
-          <Chrome className="w-4 h-4" />
+          <Chrome className="h-4 w-4" />
           Sign up with Google
         </button>
 
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-white/5" />
+            <div className="w-full border-t border-zinc-800" />
           </div>
-          <div className="relative flex justify-center text-[10px] uppercase text-muted-foreground">
-            <span className="bg-card px-2">or</span>
+          <div className="relative flex justify-center text-[10px] font-semibold uppercase tracking-[0.24em] text-zinc-500">
+            <span className="bg-zinc-950 px-3">or continue with email</span>
           </div>
         </div>
 
-        <form onSubmit={handleSignup} className="space-y-3">
-          <div className="grid grid-cols-2 gap-2">
+        <form onSubmit={handleSignup} className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="text-xs text-muted-foreground">First name</label>
+              <label className="text-xs font-medium text-zinc-400">First name</label>
               <input
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
-                className="mt-1 w-full px-3 py-2 rounded-lg bg-background border border-input text-sm"
+                className="mt-2 w-full rounded-2xl border border-zinc-800 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-emerald-500/30"
               />
             </div>
             <div>
-              <label className="text-xs text-muted-foreground">Last name</label>
+              <label className="text-xs font-medium text-zinc-400">Last name</label>
               <input
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
-                className="mt-1 w-full px-3 py-2 rounded-lg bg-background border border-input text-sm"
+                className="mt-2 w-full rounded-2xl border border-zinc-800 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-emerald-500/30"
               />
             </div>
           </div>
 
           <div>
-            <label className="text-xs text-muted-foreground">Email</label>
+            <label className="text-xs font-medium text-zinc-400">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 w-full px-3 py-2 rounded-lg bg-background border border-input text-sm"
+              className="mt-2 w-full rounded-2xl border border-zinc-800 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-emerald-500/30"
               required
             />
           </div>
 
           <div>
-            <label className="text-xs text-muted-foreground">Password</label>
+            <label className="text-xs font-medium text-zinc-400">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 w-full pl-3 pr-10 py-2 rounded-lg bg-background border border-input text-sm"
+                className="mt-2 w-full rounded-2xl border border-zinc-800 bg-white/[0.03] px-4 py-3 pr-11 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-emerald-500/30"
                 required
               />
               <button
                 type="button"
-                className="absolute right-3 top-1/2 -translate-y-1/2 mt-[2px] text-muted-foreground hover:text-foreground"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 transition-colors hover:text-zinc-100"
                 onClick={() => setShowPassword((value) => !value)}
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
           </div>
 
           <div>
-            <label className="text-xs text-muted-foreground">Confirm password</label>
+            <label className="text-xs font-medium text-zinc-400">Confirm password</label>
             <div className="relative">
               <input
                 type={showConfirmPassword ? "text" : "password"}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="mt-1 w-full pl-3 pr-10 py-2 rounded-lg bg-background border border-input text-sm"
+                className="mt-2 w-full rounded-2xl border border-zinc-800 bg-white/[0.03] px-4 py-3 pr-11 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-emerald-500/30"
                 required
               />
               <button
                 type="button"
-                className="absolute right-3 top-1/2 -translate-y-1/2 mt-[2px] text-muted-foreground hover:text-foreground"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 transition-colors hover:text-zinc-100"
                 onClick={() => setShowConfirmPassword((value) => !value)}
                 aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
               >
-                {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
           </div>
@@ -214,17 +190,20 @@ export default function Signup() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-foreground text-background text-sm font-semibold hover:bg-foreground/90 disabled:opacity-60"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-emerald-500/30 bg-emerald-500/14 px-4 py-3 text-sm font-semibold text-emerald-200 transition-all duration-300 hover:-translate-y-0.5 hover:bg-emerald-500/18 disabled:opacity-60"
           >
-            <UserPlus className="w-4 h-4" />
+            <UserPlus className="h-4 w-4" />
             Create account
           </button>
         </form>
 
-        <p className="text-xs text-muted-foreground text-center">
-          Already have an account? <Link href="/login" className="text-foreground hover:underline">Sign in</Link>
+        <p className="text-center text-sm text-zinc-500">
+          Already have an account?{" "}
+          <Link href="/login" className="font-medium text-zinc-100 transition-colors hover:text-emerald-300">
+            Sign in
+          </Link>
         </p>
       </div>
-    </div>
+    </AuthShell>
   );
 }

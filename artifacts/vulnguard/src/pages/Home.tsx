@@ -18,6 +18,7 @@ import { UserMenu } from "@/components/UserMenu";
 import { TeamSwitcher } from "@/components/TeamSwitcher";
 import { BrandLogo } from "@/components/branding/BrandLogo";
 import { ThemeToggleButton } from "@/components/ThemeToggleButton";
+import { DynamicIsland } from "@/components/ui/dynamic-island";
 import { scanEvents, reportEvents, engagementEvents } from "@/lib/analytics";
 
 const MAX_BYTES = 50 * 1024;
@@ -440,20 +441,29 @@ function Scanner() {
     : "text-green-400";
 
   return (
-    <div className="min-h-screen flex flex-col relative bg-background text-foreground">
-      {/* Ambient background glow */}
-      <div className="fixed inset-0 z-[-1] pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-foreground/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/4 rounded-full blur-3xl" />
-        <div className="cyber-grid absolute inset-0 opacity-50" />
+    <div className="min-h-screen flex flex-col relative text-foreground">
+      <div className="fixed inset-0 z-[-1] pointer-events-none overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.11),transparent_28%),radial-gradient(circle_at_82%_16%,rgba(245,158,11,0.08),transparent_18%),linear-gradient(180deg,#09090b_0%,#09090b_42%,#050506_100%)]" />
+        <div className="absolute left-[10%] top-10 h-72 w-72 rounded-full bg-emerald-500/10 blur-[120px]" />
+        <div className="absolute bottom-[-6rem] right-[8%] h-80 w-80 rounded-full bg-amber-500/8 blur-[140px]" />
+        <div className="cyber-grid absolute inset-0 opacity-30" />
       </div>
 
+      <DynamicIsland
+        phase={phase}
+        stage={stage}
+        foundCount={foundCount}
+        riskScore={riskScore}
+        canDownload={!!result}
+        onDownload={result ? handleDownloadReport : undefined}
+      />
+
       {/* ── Header ── */}
-      <header className="border-b border-border bg-background/80 backdrop-blur-2xl sticky top-0 z-50 shrink-0">
-        <div className="max-w-[1600px] mx-auto px-4 h-14 flex items-center justify-between gap-4">
+      <header className="border-b border-zinc-800/80 bg-zinc-950/72 backdrop-blur-2xl sticky top-0 z-50 shrink-0">
+        <div className="max-w-[1600px] mx-auto px-4 h-16 flex items-center justify-between gap-4">
           {/* Logo */}
           <Link href="/">
-            <a className="flex items-center gap-2.5 shrink-0 hover:opacity-80 transition-opacity cursor-pointer">
+            <a className="flex items-center gap-2.5 shrink-0 rounded-2xl border border-zinc-800 bg-white/[0.03] px-3 py-2 transition-colors hover:bg-white/[0.05] cursor-pointer">
               <BrandLogo showTagline textClassName="glow-text" />
             </a>
           </Link>
@@ -474,7 +484,7 @@ function Scanner() {
             <button
               type="button"
               onClick={() => setFocusMode((value) => !value)}
-              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card hover:bg-muted/40 border border-border text-muted-foreground hover:text-foreground text-xs font-medium transition-colors"
+              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-zinc-800 bg-white/[0.04] text-zinc-300 hover:bg-white/[0.07] hover:text-zinc-100 text-xs font-medium transition-all hover:-translate-y-0.5"
             >
               <Terminal className="w-3.5 h-3.5" />
               {focusMode ? "Exit Focus" : "Focus Mode"}
@@ -484,7 +494,7 @@ function Scanner() {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 onClick={handleDownloadReport}
-                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/20 text-primary text-xs font-bold transition-colors"
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 text-emerald-300 text-xs font-semibold transition-all hover:-translate-y-0.5 hover:bg-emerald-500/16"
               >
                 <Download className="w-3.5 h-3.5" />
                 Download PDF
@@ -494,7 +504,7 @@ function Scanner() {
             <a
               href="https://github.com/IamHammadDevX/VulnGaurd-AI"
               target="_blank" rel="noreferrer"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card hover:bg-muted/40 border border-border text-muted-foreground hover:text-foreground text-xs font-medium transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-zinc-800 bg-white/[0.04] text-zinc-300 hover:bg-white/[0.07] hover:text-zinc-100 text-xs font-medium transition-all hover:-translate-y-0.5"
             >
               <Github className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">GitHub</span>
@@ -513,7 +523,7 @@ function Scanner() {
       </header>
 
       {/* ── Mobile Tab Bar ── */}
-      <div className="lg:hidden sticky top-14 z-40 bg-background/90 backdrop-blur-xl border-b border-border">
+      <div className="lg:hidden sticky top-16 z-40 bg-zinc-950/78 backdrop-blur-xl border-b border-zinc-800/80">
         <div className="flex">
           {(["editor", "results"] as const).map((tab) => (
             <button
@@ -528,7 +538,7 @@ function Scanner() {
                 ? <><Terminal className="w-4 h-4" />Editor</>
                 : <><ListChecks className="w-4 h-4" />Results
                     {foundCount > 0 && (
-                      <span className="ml-1 px-1.5 py-0.5 rounded-full bg-primary/20 text-primary text-[10px] font-bold">
+                      <span className="ml-1 px-1.5 py-0.5 rounded-full bg-emerald-500/14 text-emerald-300 text-[10px] font-bold">
                         {foundCount}
                       </span>
                     )}
@@ -537,7 +547,7 @@ function Scanner() {
               {mobileTab === tab && (
                 <motion.div
                   layoutId="mobile-tab-indicator"
-                  className="absolute bottom-0 inset-x-0 h-0.5 bg-foreground rounded-full"
+                  className="absolute bottom-0 inset-x-0 h-0.5 bg-emerald-400 rounded-full"
                 />
               )}
             </button>
@@ -548,7 +558,7 @@ function Scanner() {
       {/* ── Main Layout ── */}
       <main
         className={cn(
-          "flex-1 max-w-[1600px] w-full mx-auto p-3 md:p-5 flex flex-col gap-4 relative z-10 pb-4 lg:grid",
+          "flex-1 max-w-[1600px] w-full mx-auto p-3 md:p-5 flex flex-col gap-4 relative z-10 pb-28 lg:grid lg:pb-4",
           focusMode ? "lg:grid-cols-1 lg:grid-rows-[1fr_auto]" : "lg:grid-cols-2 lg:auto-rows-max",
           focusMode && "lg:h-[calc(100vh-5.5rem)]"
         )}
@@ -566,22 +576,22 @@ function Scanner() {
             {/* Toolbar */}
             <div className="p-3 md:p-4 border-b border-border bg-card/60 flex flex-col gap-3 shrink-0">
 
-              <div className="flex items-center justify-between rounded-xl border border-border bg-background px-3 py-2">
-                <div className="flex items-center gap-3">
+              <div className="flex flex-col gap-2 rounded-xl border border-border bg-background px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex min-w-0 items-center gap-3">
                   <div className="flex items-center gap-1.5">
                     <span className="h-2.5 w-2.5 rounded-full bg-red-500/80" />
                     <span className="h-2.5 w-2.5 rounded-full bg-yellow-500/80" />
                     <span className="h-2.5 w-2.5 rounded-full bg-green-500/80" />
                   </div>
-                  <p className="text-xs font-semibold text-foreground">VulnGuard IDE Scanner</p>
+                  <p className="truncate text-xs font-semibold text-foreground">VulnGuard IDE Scanner</p>
                 </div>
-                <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">
+                <span className="w-fit rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">
                   Solidity Security Workspace
                 </span>
               </div>
 
               {/* Row: name + upload */}
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                 <div className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl bg-background border border-input focus-within:border-primary/40 transition-colors min-w-0">
                   <FileCode className="w-4 h-4 text-muted-foreground shrink-0" />
                   <input
@@ -598,10 +608,11 @@ function Scanner() {
                 <input ref={fileInputRef} type="file" accept=".sol" className="hidden" onChange={handleFileInputChange} />
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="touch-target flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border bg-card hover:bg-muted/40 hover:border-primary/30 text-muted-foreground hover:text-foreground transition-all text-sm font-medium shrink-0"
+                  className="touch-target flex w-full items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-border bg-card hover:bg-muted/40 hover:border-primary/30 text-muted-foreground hover:text-foreground transition-all text-sm font-medium shrink-0 sm:w-auto"
                 >
                   <UploadCloud className="w-4 h-4" />
                   <span className="hidden sm:inline text-xs">Upload .sol</span>
+                  <span className="sm:hidden text-xs">Upload Solidity file</span>
                 </button>
               </div>
 
@@ -724,12 +735,12 @@ function Scanner() {
               </div>
 
               {/* Actions */}
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="hidden sm:flex items-center gap-1 text-[10px] text-muted-foreground/80">
                   <KeyboardIcon className="w-3 h-3" />
                   <kbd className="font-mono">Ctrl+Enter</kbd> to scan
                 </div>
-                <div className="flex items-center gap-2 ml-auto">
+                <div className="flex items-center justify-end gap-2 sm:ml-auto">
                   <button
                     onClick={() => { setCode(""); setContractName(""); }}
                     disabled={!code && !contractName}
@@ -742,7 +753,7 @@ function Scanner() {
                     onClick={handleScan}
                     disabled={isScanning || !code.trim() || isSizeError}
                     className={cn(
-                      "touch-target flex items-center gap-2 px-5 py-2 rounded-xl font-bold text-sm transition-all",
+                      "touch-target flex items-center gap-2 px-5 py-2 rounded-xl font-bold text-sm transition-all sm:w-auto",
                       "bg-primary text-primary-foreground hover:bg-primary/90",
                       "active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed",
                       !isScanning && code.trim() && !isSizeError && "glow-border-pulse"
@@ -813,7 +824,7 @@ function Scanner() {
 
                   {/* Live counter + risk */}
                   {(phase === "streaming" || phase === "done") && (
-                    <div className="flex items-center gap-3 shrink-0">
+                    <div className="flex flex-wrap items-center gap-3 shrink-0">
                       <motion.div
                         key={foundCount}
                         initial={{ scale: 1.25 }}
@@ -862,7 +873,7 @@ function Scanner() {
                       </div>
 
                       {/* Severity counts */}
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2">
                         {(["CRITICAL", "HIGH", "MEDIUM", "LOW"] as const).map((sev) => (
                           <motion.div
                             key={sev}
@@ -881,7 +892,7 @@ function Scanner() {
                       </div>
 
                       {/* Actions */}
-                      <div className="flex items-center gap-2 ml-auto">
+                      <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
                         {result?.scanId && (
                           <MiniCopy text={result.scanId} label="ID" />
                         )}

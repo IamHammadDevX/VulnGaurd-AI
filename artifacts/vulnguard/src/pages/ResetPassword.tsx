@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
-import { Shield, Eye, EyeOff, CheckCircle2, AlertCircle } from "lucide-react";
+import { AlertCircle, CheckCircle2, Eye, EyeOff, Shield } from "lucide-react";
 import { useAuth } from "@workspace/replit-auth-web";
+import { AuthShell } from "@/components/layout/AuthShell";
 
 export default function ResetPassword() {
   const [, navigate] = useLocation();
@@ -20,7 +21,7 @@ export default function ResetPassword() {
     if (!/[A-Z]/.test(pass)) return "Must contain at least one uppercase letter.";
     if (!/[a-z]/.test(pass)) return "Must contain at least one lowercase letter.";
     if (!/[0-9]/.test(pass)) return "Must contain at least one number.";
-    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(pass)) return "Must contain at least one special character.";
+    if (!/[!@#$%^&*()_+\-=[\]{};':\"\\|,.<>/?]+/.test(pass)) return "Must contain at least one special character.";
     return null;
   };
 
@@ -55,124 +56,101 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-card border border-border rounded-xl p-6 space-y-4">
-        {!success ? (
-          <>
-            <div className="text-center">
-              <div className="w-11 h-11 rounded-xl bg-white/5 flex items-center justify-center mx-auto mb-2">
-                <Shield className="w-5 h-5 text-white" />
-              </div>
-              <h1 className="text-xl font-bold">Create New Password</h1>
-              <p className="text-xs text-muted-foreground mt-1">Enter your new password below</p>
+    <AuthShell
+      title="Set a new password with confidence"
+      subtitle="Update credentials inside the same secure visual flow used for the rest of the platform."
+      backHref="/login"
+      backLabel="Back to login"
+    >
+      {!success ? (
+        <div className="space-y-5">
+          <div>
+            <div className="mb-4 inline-flex rounded-2xl border border-zinc-800 bg-white/[0.04] p-3 text-zinc-100">
+              <Shield className="h-5 w-5" />
             </div>
+            <h2 className="text-2xl font-semibold tracking-tight text-zinc-50">Create a new password</h2>
+            <p className="mt-2 text-sm text-zinc-400">Make it strong enough for a high-trust security workspace.</p>
+          </div>
 
-            {error && (
-              <div className="flex gap-2 text-xs text-red-500 bg-red-500/10 p-2 rounded">
-                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                <span>{error}</span>
-              </div>
-            )}
+          {error && (
+            <div className="flex gap-2 rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
 
-            <form onSubmit={handleSubmit} className="space-y-3">
-              <div>
-                <label className="text-xs text-muted-foreground">New Password</label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="mt-1 w-full pl-3 pr-10 py-2 rounded-lg bg-background border border-input text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:bg-muted/20 transition-colors"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 mt-1 text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="w-4 h-4" />
-                    ) : (
-                      <Eye className="w-4 h-4" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <label className="text-xs text-muted-foreground">Confirm Password</label>
-                <div className="relative">
-                  <input
-                    type={showConfirmPassword ? "text" : "password"}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="mt-1 w-full pl-3 pr-10 py-2 rounded-lg bg-background border border-input text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:bg-muted/20 transition-colors"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 mt-1 text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff className="w-4 h-4" />
-                    ) : (
-                      <Eye className="w-4 h-4" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {/* Password Requirements */}
-              <div className="bg-muted/30 border border-border rounded-lg p-3 space-y-1">
-                <p className="text-xs font-semibold text-muted-foreground">Password requirements:</p>
-                <ul className="text-xs text-muted-foreground space-y-0.5">
-                  <li className={password.length >= 8 ? "text-green-400" : ""}>
-                    ✓ At least 8 characters
-                  </li>
-                  <li className={/[A-Z]/.test(password) ? "text-green-400" : ""}>
-                    ✓ One uppercase letter (A-Z)
-                  </li>
-                  <li className={/[a-z]/.test(password) ? "text-green-400" : ""}>
-                    ✓ One lowercase letter (a-z)
-                  </li>
-                  <li className={/[0-9]/.test(password) ? "text-green-400" : ""}>
-                    ✓ One number (0-9)
-                  </li>
-                  <li className={/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(password) ? "text-green-400" : ""}>
-                    ✓ One special character (!@#$%^&*, etc.)
-                  </li>
-                </ul>
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full px-4 py-2.5 rounded-lg bg-foreground text-background text-sm font-semibold hover:bg-foreground/90 disabled:opacity-60 transition-colors"
-              >
-                {loading ? "Resetting..." : "Reset Password"}
-              </button>
-            </form>
-          </>
-        ) : (
-          <div className="text-center space-y-4 py-6">
-            <div className="flex justify-center">
-              <div className="w-14 h-14 rounded-full bg-green-500/20 border border-green-500/30 flex items-center justify-center animate-in">
-                <CheckCircle2 className="w-7 h-7 text-green-400" />
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="text-xs font-medium text-zinc-400">New password</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="mt-2 w-full rounded-2xl border border-zinc-800 bg-white/[0.03] px-4 py-3 pr-11 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-emerald-500/30"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 transition-colors hover:text-zinc-100"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
             </div>
 
             <div>
-              <h2 className="text-lg font-bold">Password Reset Successful!</h2>
-              <p className="text-xs text-muted-foreground mt-2">
-                Your password has been updated. Redirecting to login...
-              </p>
+              <label className="text-xs font-medium text-zinc-400">Confirm password</label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="mt-2 w-full rounded-2xl border border-zinc-800 bg-white/[0.03] px-4 py-3 pr-11 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-emerald-500/30"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 transition-colors hover:text-zinc-100"
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
+
+            <div className="rounded-2xl border border-zinc-800 bg-white/[0.03] p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-zinc-500">Password requirements</p>
+              <ul className="mt-3 space-y-2 text-sm text-zinc-400">
+                <li className={password.length >= 8 ? "text-emerald-300" : ""}>At least 8 characters</li>
+                <li className={/[A-Z]/.test(password) ? "text-emerald-300" : ""}>One uppercase letter</li>
+                <li className={/[a-z]/.test(password) ? "text-emerald-300" : ""}>One lowercase letter</li>
+                <li className={/[0-9]/.test(password) ? "text-emerald-300" : ""}>One number</li>
+                <li className={/[!@#$%^&*()_+\-=[\]{};':\"\\|,.<>/?]+/.test(password) ? "text-emerald-300" : ""}>One special character</li>
+              </ul>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-2xl border border-emerald-500/30 bg-emerald-500/14 px-4 py-3 text-sm font-semibold text-emerald-200 transition-all duration-300 hover:-translate-y-0.5 hover:bg-emerald-500/18 disabled:opacity-60"
+            >
+              {loading ? "Resetting..." : "Reset password"}
+            </button>
+          </form>
+        </div>
+      ) : (
+        <div className="space-y-5 text-center">
+          <div className="mx-auto grid h-16 w-16 place-items-center rounded-full border border-emerald-500/25 bg-emerald-500/12">
+            <CheckCircle2 className="h-8 w-8 text-emerald-300" />
           </div>
-        )}
-      </div>
-    </div>
+          <div>
+            <h2 className="text-2xl font-semibold tracking-tight text-zinc-50">Password updated</h2>
+            <p className="mt-2 text-sm text-zinc-400">Your credentials are ready. Redirecting to login now.</p>
+          </div>
+        </div>
+      )}
+    </AuthShell>
   );
 }

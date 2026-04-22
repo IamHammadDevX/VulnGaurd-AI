@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
+import { initializeThemeMode } from "@/lib/theme";
 
 declare global {
 	interface Window {
@@ -22,5 +23,7 @@ window.__VULNGUARD_SUPABASE__ = {
 	url: import.meta.env.VITE_SUPABASE_URL,
 	anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY,
 };
+
+initializeThemeMode();
 
 createRoot(document.getElementById("root")!).render(<App />);

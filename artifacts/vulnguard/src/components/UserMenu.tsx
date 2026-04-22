@@ -22,7 +22,7 @@ export function UserMenu() {
     return (
       <button
         onClick={login}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/20 text-primary text-xs font-bold transition-colors"
+        className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-300 transition-all hover:-translate-y-0.5 hover:bg-emerald-500/15"
       >
         <LogIn className="w-3.5 h-3.5" />
         <span className="hidden sm:inline">Log in</span>
@@ -34,29 +34,31 @@ export function UserMenu() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-card hover:bg-muted/40 border border-border transition-colors"
+        className="flex items-center gap-2 rounded-full border border-zinc-800 bg-white/[0.04] px-2 py-1.5 shadow-[0_16px_36px_-28px_rgba(0,0,0,1)] backdrop-blur-md transition-all hover:-translate-y-0.5 hover:bg-white/[0.07]"
       >
         {user?.profileImageUrl ? (
-          <img src={user.profileImageUrl} alt="" className="w-5 h-5 rounded-full ring-1 ring-border" />
+          <img src={user.profileImageUrl} alt="" className="h-7 w-7 rounded-full border border-zinc-800 object-cover" />
         ) : (
-          <User className="w-4 h-4 text-muted-foreground" />
+          <span className="grid h-7 w-7 place-items-center rounded-full border border-zinc-800 bg-zinc-950 text-zinc-300">
+            <User className="h-3.5 w-3.5" />
+          </span>
         )}
-        <span className="text-xs font-medium text-muted-foreground hidden sm:inline max-w-[100px] truncate">
+        <span className="hidden max-w-[120px] truncate text-xs font-medium text-zinc-300 sm:inline">
           {user?.firstName ?? user?.email ?? "User"}
         </span>
-        <ChevronDown className="w-3 h-3 text-muted-foreground" />
+        <ChevronDown className="h-3 w-3 text-zinc-500" />
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-1.5 w-48 bg-popover border border-border rounded-xl shadow-xl z-[99] py-1 overflow-hidden">
-          <div className="px-3 py-2 border-b border-border">
-            <p className="text-xs font-semibold truncate">{user?.firstName} {user?.lastName}</p>
-            <p className="text-[10px] text-muted-foreground truncate">{user?.email}</p>
+        <div className="absolute right-0 top-full z-[99] mt-2 w-56 overflow-hidden rounded-3xl border border-zinc-800/90 bg-zinc-950/96 py-2 shadow-[0_30px_90px_-44px_rgba(0,0,0,1)] backdrop-blur-xl">
+          <div className="border-b border-zinc-800 px-4 py-3">
+            <p className="truncate text-sm font-semibold text-zinc-100">{user?.firstName} {user?.lastName}</p>
+            <p className="truncate text-xs text-zinc-500">{user?.email}</p>
           </div>
           <Link
             href="/dashboard"
             onClick={() => setOpen(false)}
-            className="flex items-center gap-2 px-3 py-2 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/40 transition"
+            className="flex items-center gap-2 px-4 py-2.5 text-xs font-medium text-zinc-400 transition hover:bg-white/[0.04] hover:text-zinc-100"
           >
             <BarChart3 className="w-3.5 h-3.5" />
             Dashboard
@@ -64,7 +66,7 @@ export function UserMenu() {
           <Link
             href="/profile"
             onClick={() => setOpen(false)}
-            className="flex items-center gap-2 px-3 py-2 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/40 transition"
+            className="flex items-center gap-2 px-4 py-2.5 text-xs font-medium text-zinc-400 transition hover:bg-white/[0.04] hover:text-zinc-100"
           >
             <User className="w-3.5 h-3.5" />
             Profile
@@ -72,15 +74,15 @@ export function UserMenu() {
           <Link
             href="/teams"
             onClick={() => setOpen(false)}
-            className="flex items-center gap-2 px-3 py-2 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/40 transition"
+            className="flex items-center gap-2 px-4 py-2.5 text-xs font-medium text-zinc-400 transition hover:bg-white/[0.04] hover:text-zinc-100"
           >
             <Users className="w-3.5 h-3.5" />
             Teams
           </Link>
-          <div className="border-t border-border mt-1">
+          <div className="mt-1 border-t border-zinc-800">
             <button
               onClick={() => { setOpen(false); logout(); }}
-              className="flex items-center gap-2 px-3 py-2 text-xs text-red-400 hover:bg-red-500/10 w-full transition"
+              className="flex w-full items-center gap-2 px-4 py-2.5 text-xs font-medium text-rose-300 transition hover:bg-rose-500/10"
             >
               <LogOut className="w-3.5 h-3.5" />
               Log out

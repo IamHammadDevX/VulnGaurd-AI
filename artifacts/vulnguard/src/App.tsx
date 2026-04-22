@@ -7,6 +7,7 @@ import { useAuth } from "@workspace/replit-auth-web";
 import { AuthLoadingOverlay } from "@/components/AuthLoadingOverlay";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { CookieConsent } from "@/components/CookieConsent";
+import { AppShell } from "@/components/layout/AppShell";
 import { initUmami, trackPageView } from "@/lib/analytics";
 
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
@@ -41,6 +42,25 @@ const queryClient = new QueryClient({
 });
 
 function AppRouter() {
+  const [location] = useLocation();
+  const isWorkspaceRoute = location === "/dashboard" || location === "/profile" || location === "/teams";
+
+  if (isWorkspaceRoute) {
+    return (
+      <Suspense fallback={<AuthLoadingOverlay />}>
+        <ProtectedRoute>
+          <AppShell>
+            <Switch>
+              <Route path="/dashboard" component={Dashboard} />
+              <Route path="/profile" component={Profile} />
+              <Route path="/teams" component={Teams} />
+            </Switch>
+          </AppShell>
+        </ProtectedRoute>
+      </Suspense>
+    );
+  }
+
   return (
     <Suspense fallback={<AuthLoadingOverlay />}>
       <Switch>
@@ -58,27 +78,6 @@ function AppRouter() {
         <Route path="/forgot-password" component={ForgotPassword} />
         <Route path="/reset-password" component={ResetPassword} />
         <Route path="/auth/callback" component={AuthCallback} />
-        <Route path="/dashboard">
-          {() => (
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          )}
-        </Route>
-        <Route path="/profile">
-          {() => (
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          )}
-        </Route>
-        <Route path="/teams">
-          {() => (
-            <ProtectedRoute>
-              <Teams />
-            </ProtectedRoute>
-          )}
-        </Route>
         <Route path="/privacy" component={Privacy} />
         <Route path="/terms" component={Terms} />
         <Route path="/legal" component={Legal} />

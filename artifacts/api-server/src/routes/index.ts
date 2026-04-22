@@ -8,6 +8,7 @@ import reportRouter from "./vulnguard/report.js";
 import teamsRouter from "./teams.js";
 import dashboardRouter from "./dashboard.js";
 import supportRouter from "./support.js";
+import paymentsRouter from "./payments.js";
 
 const router: IRouter = Router();
 
@@ -20,5 +21,6 @@ router.use(reportRouter);
 router.use(dashboardRouter);
 router.use(teamsRouter);
 router.use(supportRouter);
+router.use("/payments", paymentsRouter);
 
 export default router;
