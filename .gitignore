@@ -23,6 +23,7 @@ testem.log
 *.launch
 .settings/
 *.sublime-workspace
+*.agents/
 
 # VS Code (allow shared workspace config)
 .vscode/*
