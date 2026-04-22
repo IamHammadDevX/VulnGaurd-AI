@@ -151,10 +151,10 @@ export default function Pricing() {
                       void handleCheckout(plan.planType);
                     }
                   }}
-                  disabled={checkingoutPlan === plan.planType}
+                  disabled={plan.planType !== null && checkingoutPlan === plan.planType}
                   className="mt-6 w-full rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background transition-transform hover:scale-[1.02] disabled:scale-100 disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  {checkingoutPlan === plan.planType ? (
+                  {plan.planType !== null && checkingoutPlan === plan.planType ? (
                     <>
                       <Loader className="h-4 w-4 animate-spin" />
                       Processing...

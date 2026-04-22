@@ -7,12 +7,7 @@ type ThemeToggleButtonProps = {
 };
 
 export function ThemeToggleButton({ className = "" }: ThemeToggleButtonProps) {
-  const [theme, setTheme] = useState<ThemeMode>("dark");
-
-  useEffect(() => {
-    const initialTheme = getStoredThemeMode();
-    setTheme(initialTheme);
-  }, []);
+  const [theme, setTheme] = useState<ThemeMode>(() => getStoredThemeMode());
 
   useEffect(() => {
     setStoredThemeMode(theme);
