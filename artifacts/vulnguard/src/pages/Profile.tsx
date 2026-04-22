@@ -73,9 +73,9 @@ export default function Profile() {
   if (!isAuthenticated) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
-        <div className="max-w-sm rounded-[32px] border border-zinc-800 bg-[linear-gradient(180deg,rgba(24,24,27,0.78),rgba(9,9,11,0.72))] p-8 text-center">
-          <User className="mx-auto h-12 w-12 text-zinc-200" />
-          <h2 className="mt-4 text-2xl font-semibold text-zinc-50">Sign in to view your profile</h2>
+        <div className="app-shell-panel max-w-sm rounded-[32px] p-8 text-center">
+          <User className="app-shell-heading mx-auto h-12 w-12" />
+          <h2 className="app-shell-heading mt-4 text-2xl font-semibold">Sign in to view your profile</h2>
           <button
             onClick={login}
             className="mt-6 rounded-full border border-emerald-500/30 bg-emerald-500/14 px-5 py-3 text-sm font-semibold text-emerald-200 transition-all hover:-translate-y-0.5"
@@ -90,68 +90,68 @@ export default function Profile() {
   return (
     <div className="space-y-6">
       <section className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-        <div className="rounded-[32px] border border-zinc-800/80 bg-[linear-gradient(180deg,rgba(24,24,27,0.78),rgba(9,9,11,0.72))] p-6 shadow-[0_32px_100px_-58px_rgba(0,0,0,1)] backdrop-blur-2xl sm:p-8">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">Identity summary</p>
+        <div className="app-shell-panel rounded-[32px] p-6 sm:p-8">
+          <p className="app-shell-muted text-[11px] font-semibold uppercase tracking-[0.24em]">Identity summary</p>
           <div className="mt-5 flex flex-col gap-5 sm:flex-row sm:items-center">
             {user?.profileImageUrl ? (
-              <img src={user.profileImageUrl} alt="" className="h-24 w-24 rounded-[28px] border border-zinc-800 object-cover" />
+              <img src={user.profileImageUrl} alt="" className="h-24 w-24 rounded-[28px] border border-border object-cover" />
             ) : (
-              <div className="grid h-24 w-24 place-items-center rounded-[28px] border border-zinc-800 bg-zinc-950 text-zinc-100">
+              <div className="app-shell-inset app-shell-heading grid h-24 w-24 place-items-center rounded-[28px]">
                 <User className="h-10 w-10" />
               </div>
             )}
             <div className="min-w-0">
-              <h1 className="text-3xl font-semibold tracking-tight text-zinc-50">
+              <h1 className="app-shell-heading text-3xl font-semibold tracking-tight">
                 {user?.firstName ?? "Security"} {user?.lastName ?? "Operator"}
               </h1>
-              <p className="mt-2 inline-flex max-w-full items-start gap-2 break-all text-sm text-zinc-400">
+              <p className="app-shell-copy mt-2 inline-flex max-w-full items-start gap-2 break-all text-sm">
                 <Mail className="h-4 w-4" />
                 {user?.email ?? "No email"}
               </p>
             </div>
           </div>
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
-            <div className="rounded-2xl border border-zinc-800 bg-white/[0.03] p-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">Scans run</p>
-              <p className="mt-2 text-2xl font-semibold text-zinc-50">{profile?.totalScans ?? 0}</p>
+            <div className="app-shell-panel-soft rounded-2xl p-4">
+              <p className="app-shell-muted text-[11px] font-semibold uppercase tracking-[0.24em]">Scans run</p>
+              <p className="app-shell-heading mt-2 text-2xl font-semibold">{profile?.totalScans ?? 0}</p>
             </div>
-            <div className="rounded-2xl border border-zinc-800 bg-white/[0.03] p-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">Member since</p>
-              <p className="mt-2 text-lg font-semibold text-zinc-100">
+            <div className="app-shell-panel-soft rounded-2xl p-4">
+              <p className="app-shell-muted text-[11px] font-semibold uppercase tracking-[0.24em]">Member since</p>
+              <p className="app-shell-heading mt-2 text-lg font-semibold">
                 {profile?.createdAt
                   ? new Date(profile.createdAt).toLocaleDateString("en-US", { month: "long", year: "numeric" })
                   : "--"}
               </p>
             </div>
-            <div className="rounded-2xl border border-zinc-800 bg-white/[0.03] p-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">Plan</p>
+            <div className="app-shell-panel-soft rounded-2xl p-4">
+              <p className="app-shell-muted text-[11px] font-semibold uppercase tracking-[0.24em]">Plan</p>
               <p className="mt-2 text-lg font-semibold text-emerald-300">Free tier</p>
             </div>
           </div>
         </div>
 
-        <div className="rounded-[32px] border border-zinc-800/80 bg-[linear-gradient(180deg,rgba(24,24,27,0.78),rgba(9,9,11,0.72))] p-6 shadow-[0_32px_100px_-58px_rgba(0,0,0,1)] backdrop-blur-2xl sm:p-8">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">Access status</p>
+        <div className="app-shell-panel rounded-[32px] p-6 sm:p-8">
+          <p className="app-shell-muted text-[11px] font-semibold uppercase tracking-[0.24em]">Access status</p>
           <div className="mt-5 space-y-4">
-            <div className="rounded-2xl border border-zinc-800 bg-white/[0.03] p-4">
+            <div className="app-shell-panel-soft rounded-2xl p-4">
               <div className="flex items-center gap-3">
-                <div className="grid h-11 w-11 place-items-center rounded-2xl border border-zinc-800 bg-zinc-950 text-emerald-300">
+                <div className="app-shell-inset grid h-11 w-11 place-items-center rounded-2xl text-emerald-300">
                   <Shield className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-base font-semibold text-zinc-50">Subscription status</p>
-                  <p className="text-sm text-zinc-400">Free plan with secure account access enabled.</p>
+                  <p className="app-shell-heading text-base font-semibold">Subscription status</p>
+                  <p className="app-shell-copy text-sm">Free plan with secure account access enabled.</p>
                 </div>
               </div>
             </div>
-            <div className="rounded-2xl border border-zinc-800 bg-white/[0.03] p-4">
+            <div className="app-shell-panel-soft rounded-2xl p-4">
               <div className="flex items-center gap-3">
-                <div className="grid h-11 w-11 place-items-center rounded-2xl border border-zinc-800 bg-zinc-950 text-zinc-100">
+                <div className="app-shell-inset app-shell-heading grid h-11 w-11 place-items-center rounded-2xl">
                   <Calendar className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-base font-semibold text-zinc-50">Account lifecycle</p>
-                  <p className="text-sm text-zinc-400">Keep email and identity data current for team invites and reports.</p>
+                  <p className="app-shell-heading text-base font-semibold">Account lifecycle</p>
+                  <p className="app-shell-copy text-sm">Keep email and identity data current for team invites and reports.</p>
                 </div>
               </div>
             </div>
@@ -166,55 +166,55 @@ export default function Profile() {
         </div>
       </section>
 
-      <section className="rounded-[32px] border border-zinc-800/80 bg-[linear-gradient(180deg,rgba(24,24,27,0.78),rgba(9,9,11,0.72))] p-6 shadow-[0_32px_100px_-58px_rgba(0,0,0,1)] backdrop-blur-2xl sm:p-8">
+      <section className="app-shell-panel rounded-[32px] p-6 sm:p-8">
         <div className="flex items-center gap-3">
-          <div className="grid h-11 w-11 place-items-center rounded-2xl border border-zinc-800 bg-zinc-950 text-zinc-100">
+          <div className="app-shell-inset app-shell-heading grid h-11 w-11 place-items-center rounded-2xl">
             <FileCode className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">Edit profile</p>
-            <h2 className="text-xl font-semibold text-zinc-50">Update account details</h2>
+            <p className="app-shell-muted text-[11px] font-semibold uppercase tracking-[0.24em]">Edit profile</p>
+            <h2 className="app-shell-heading text-xl font-semibold">Update account details</h2>
           </div>
         </div>
 
         {status && (
-          <p className="mt-5 rounded-2xl border border-zinc-800 bg-white/[0.03] px-4 py-3 text-sm text-zinc-300">
+          <p className="app-shell-panel-soft app-shell-copy mt-5 rounded-2xl px-4 py-3 text-sm">
             {status}
           </p>
         )}
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="text-xs font-medium text-zinc-400">First name</label>
+            <label className="app-shell-copy text-xs font-medium">First name</label>
             <input
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              className="mt-2 w-full rounded-2xl border border-zinc-800 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-emerald-500/30"
+              className="app-shell-input mt-2 w-full rounded-2xl px-4 py-3 text-sm outline-none transition-colors focus:border-emerald-500/30"
             />
           </div>
           <div>
-            <label className="text-xs font-medium text-zinc-400">Last name</label>
+            <label className="app-shell-copy text-xs font-medium">Last name</label>
             <input
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
-              className="mt-2 w-full rounded-2xl border border-zinc-800 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-emerald-500/30"
+              className="app-shell-input mt-2 w-full rounded-2xl px-4 py-3 text-sm outline-none transition-colors focus:border-emerald-500/30"
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="text-xs font-medium text-zinc-400">Email</label>
+            <label className="app-shell-copy text-xs font-medium">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-2 w-full rounded-2xl border border-zinc-800 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-emerald-500/30"
+              className="app-shell-input mt-2 w-full rounded-2xl px-4 py-3 text-sm outline-none transition-colors focus:border-emerald-500/30"
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="text-xs font-medium text-zinc-400">Profile image URL</label>
+            <label className="app-shell-copy text-xs font-medium">Profile image URL</label>
             <input
               value={profileImageUrl}
               onChange={(e) => setProfileImageUrl(e.target.value)}
-              className="mt-2 w-full rounded-2xl border border-zinc-800 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-emerald-500/30"
+              className="app-shell-input mt-2 w-full rounded-2xl px-4 py-3 text-sm outline-none transition-colors focus:border-emerald-500/30"
             />
           </div>
         </div>

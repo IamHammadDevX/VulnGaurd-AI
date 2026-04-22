@@ -51,20 +51,20 @@ export function TeamSwitcher() {
     <div className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 rounded-full border border-zinc-800 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-zinc-300 shadow-[0_16px_36px_-28px_rgba(0,0,0,1)] backdrop-blur-md transition-all hover:-translate-y-0.5 hover:bg-white/[0.07]"
+        className="app-shell-button flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium"
       >
         <span className="max-w-[120px] truncate">{active?.name ?? "Team"}</span>
-        <ChevronsUpDown className="h-3.5 w-3.5 text-zinc-500" />
+        <ChevronsUpDown className="app-shell-muted h-3.5 w-3.5" />
       </button>
 
       {open && (
-        <div className="absolute right-0 z-[100] mt-2 w-56 rounded-3xl border border-zinc-800/90 bg-zinc-950/96 p-2 shadow-[0_30px_90px_-44px_rgba(0,0,0,1)] backdrop-blur-xl">
+        <div className="app-shell-panel-strong absolute right-0 z-[100] mt-2 w-56 rounded-3xl p-2">
           {teams.map((team) => (
             <button
               key={team.id}
               onClick={() => selectTeam(team.id)}
               className={`w-full rounded-2xl px-3 py-2.5 text-left text-xs transition-colors ${
-                team.id === active?.id ? "bg-emerald-500/10 text-emerald-300" : "text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-100"
+                team.id === active?.id ? "bg-emerald-500/10 text-emerald-300" : "app-shell-copy hover:bg-white/[0.04]"
               }`}
             >
               <p className="truncate font-semibold">{team.name}</p>

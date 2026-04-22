@@ -273,6 +273,40 @@ select {
   background: var(--app-logo-core);
 }
 
+[data-theme="light"] [class*="text-zinc-50"],
+[data-theme="light"] [class*="text-zinc-100"],
+[data-theme="light"] [class*="text-zinc-200"],
+[data-theme="light"] [class*="text-zinc-300"] {
+  color: var(--app-text-strong) !important;
+}
+
+[data-theme="light"] [class*="text-zinc-400"],
+[data-theme="light"] [class*="text-zinc-500"],
+[data-theme="light"] [class*="text-zinc-600"],
+[data-theme="light"] [class*="text-zinc-700"] {
+  color: var(--app-text-muted) !important;
+}
+
+[data-theme="light"] [class*="border-zinc-800"],
+[data-theme="light"] [class*="border-zinc-700"] {
+  border-color: var(--app-panel-border) !important;
+}
+
+[data-theme="light"] [class*="bg-zinc-950"],
+[data-theme="light"] [class*="bg-white/[0.03]"],
+[data-theme="light"] [class*="bg-white/[0.04]"],
+[data-theme="light"] [class*="bg-white/[0.05]"],
+[data-theme="light"] [class*="bg-white/[0.06]"],
+[data-theme="light"] [class*="bg-white/[0.07]"],
+[data-theme="light"] [class*="bg-white/[0.08]"] {
+  background: var(--app-panel-soft) !important;
+}
+
+[data-theme="light"] [class*="bg-[linear-gradient(180deg,rgba(24,24,27"],
+[data-theme="light"] [class*="bg-[linear-gradient(180deg,rgba(39,39,42"] {
+  background: var(--app-panel) !important;
+}
+
 .glow-text {
   text-shadow: 0 0 26px rgba(16, 185, 129, 0.16);
 }

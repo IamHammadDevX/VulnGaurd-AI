@@ -31,7 +31,7 @@ export function DynamicIsland({
           transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
           className="pointer-events-none fixed left-1/2 top-20 z-[90] w-[min(calc(100vw-1rem),720px)] -translate-x-1/2 sm:top-4 sm:w-[min(92vw,720px)]"
         >
-          <div className="pointer-events-auto rounded-[28px] border border-zinc-800/90 bg-zinc-950/85 px-4 py-3 shadow-[0_30px_100px_-50px_rgba(0,0,0,1)] backdrop-blur-2xl">
+          <div className="app-shell-panel-strong pointer-events-auto rounded-[28px] px-4 py-3">
             <div className="flex flex-wrap items-center gap-3">
               <div
                 className={cn(
@@ -51,8 +51,8 @@ export function DynamicIsland({
               </div>
 
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-zinc-100">{stage}</p>
-                <p className="text-xs text-zinc-500">
+                <p className="app-shell-heading truncate text-sm font-medium">{stage}</p>
+                <p className="app-shell-muted text-xs">
                   {phase === "done"
                     ? `${foundCount} findings reviewed${riskScore !== null ? ` • risk ${riskScore}/100` : ""}`
                     : phase === "streaming"
@@ -65,7 +65,7 @@ export function DynamicIsland({
                 <button
                   type="button"
                   onClick={onDownload}
-                  className="inline-flex items-center gap-2 rounded-full border border-zinc-800 bg-white/[0.05] px-3 py-1.5 text-xs font-semibold text-zinc-100 transition-all hover:-translate-y-0.5 hover:bg-white/[0.08]"
+                  className="app-shell-button inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold"
                 >
                   <Download className="h-3.5 w-3.5" />
                   Report
@@ -73,7 +73,7 @@ export function DynamicIsland({
               )}
 
               {phase === "done" && (
-                <span className="inline-flex items-center gap-2 rounded-full bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-zinc-400">
+                <span className="app-shell-chip app-shell-copy inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold">
                   <CheckCircle2 className="h-3.5 w-3.5" />
                   {foundCount === 0 ? "No automated issues detected" : `${foundCount} findings surfaced`}
                 </span>

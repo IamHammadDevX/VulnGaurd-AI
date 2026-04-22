@@ -88,9 +88,9 @@ export default function Signup() {
     >
       <div className="space-y-5">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">Create account</p>
-          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-50">Launch your security workspace</h2>
-          <p className="mt-2 text-sm text-zinc-400">Use Google or create credentials with email verification.</p>
+          <p className="app-shell-muted text-[11px] font-semibold uppercase tracking-[0.24em]">Create account</p>
+          <h2 className="app-shell-heading mt-2 text-2xl font-semibold tracking-tight">Launch your security workspace</h2>
+          <p className="app-shell-copy mt-2 text-sm">Use Google or create credentials with email verification.</p>
         </div>
 
         {error && <p className="rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">{error}</p>}
@@ -99,7 +99,7 @@ export default function Signup() {
         <button
           onClick={handleGoogle}
           disabled={loading}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl border border-zinc-800 bg-white/[0.05] px-4 py-3 text-sm font-semibold text-zinc-100 transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/[0.08] disabled:opacity-60"
+          className="app-shell-button flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold duration-300 hover:-translate-y-0.5 disabled:opacity-60"
         >
           <Chrome className="h-4 w-4" />
           Sign up with Google
@@ -107,57 +107,57 @@ export default function Signup() {
 
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-zinc-800" />
+            <div className="w-full border-t border-border" />
           </div>
-          <div className="relative flex justify-center text-[10px] font-semibold uppercase tracking-[0.24em] text-zinc-500">
-            <span className="bg-zinc-950 px-3">or continue with email</span>
+          <div className="app-shell-muted relative flex justify-center text-[10px] font-semibold uppercase tracking-[0.24em]">
+            <span className="app-shell-panel-strong px-3">or continue with email</span>
           </div>
         </div>
 
         <form onSubmit={handleSignup} className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="text-xs font-medium text-zinc-400">First name</label>
+              <label className="app-shell-copy text-xs font-medium">First name</label>
               <input
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
-                className="mt-2 w-full rounded-2xl border border-zinc-800 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-emerald-500/30"
+                className="app-shell-input mt-2 w-full rounded-2xl px-4 py-3 text-sm outline-none transition-colors focus:border-emerald-500/30"
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-zinc-400">Last name</label>
+              <label className="app-shell-copy text-xs font-medium">Last name</label>
               <input
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
-                className="mt-2 w-full rounded-2xl border border-zinc-800 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-emerald-500/30"
+                className="app-shell-input mt-2 w-full rounded-2xl px-4 py-3 text-sm outline-none transition-colors focus:border-emerald-500/30"
               />
             </div>
           </div>
 
           <div>
-            <label className="text-xs font-medium text-zinc-400">Email</label>
+            <label className="app-shell-copy text-xs font-medium">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-2 w-full rounded-2xl border border-zinc-800 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-emerald-500/30"
+              className="app-shell-input mt-2 w-full rounded-2xl px-4 py-3 text-sm outline-none transition-colors focus:border-emerald-500/30"
               required
             />
           </div>
 
           <div>
-            <label className="text-xs font-medium text-zinc-400">Password</label>
+            <label className="app-shell-copy text-xs font-medium">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-2 w-full rounded-2xl border border-zinc-800 bg-white/[0.03] px-4 py-3 pr-11 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-emerald-500/30"
+                className="app-shell-input mt-2 w-full rounded-2xl px-4 py-3 pr-11 text-sm outline-none transition-colors focus:border-emerald-500/30"
                 required
               />
               <button
                 type="button"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 transition-colors hover:text-zinc-100"
+                className="app-shell-muted absolute right-3 top-1/2 -translate-y-1/2 transition-colors hover:text-foreground"
                 onClick={() => setShowPassword((value) => !value)}
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
@@ -167,18 +167,18 @@ export default function Signup() {
           </div>
 
           <div>
-            <label className="text-xs font-medium text-zinc-400">Confirm password</label>
+            <label className="app-shell-copy text-xs font-medium">Confirm password</label>
             <div className="relative">
               <input
                 type={showConfirmPassword ? "text" : "password"}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="mt-2 w-full rounded-2xl border border-zinc-800 bg-white/[0.03] px-4 py-3 pr-11 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-emerald-500/30"
+                className="app-shell-input mt-2 w-full rounded-2xl px-4 py-3 pr-11 text-sm outline-none transition-colors focus:border-emerald-500/30"
                 required
               />
               <button
                 type="button"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 transition-colors hover:text-zinc-100"
+                className="app-shell-muted absolute right-3 top-1/2 -translate-y-1/2 transition-colors hover:text-foreground"
                 onClick={() => setShowConfirmPassword((value) => !value)}
                 aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
               >
@@ -197,9 +197,9 @@ export default function Signup() {
           </button>
         </form>
 
-        <p className="text-center text-sm text-zinc-500">
+        <p className="app-shell-muted text-center text-sm">
           Already have an account?{" "}
-          <Link href="/login" className="font-medium text-zinc-100 transition-colors hover:text-emerald-300">
+          <Link href="/login" className="font-medium text-foreground transition-colors hover:text-emerald-300">
             Sign in
           </Link>
         </p>

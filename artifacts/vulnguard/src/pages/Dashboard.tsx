@@ -116,13 +116,13 @@ function MetricCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
       whileHover={{ y: -5, scale: 1.01 }}
-      className="rounded-[28px] border border-zinc-800/80 bg-[linear-gradient(180deg,rgba(24,24,27,0.78),rgba(9,9,11,0.72))] p-5 shadow-[0_30px_90px_-52px_rgba(0,0,0,1)] backdrop-blur-xl"
+      className="app-shell-panel rounded-[28px] p-5"
     >
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">{label}</p>
-          <p className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-zinc-50">{value}</p>
-          {hint && <p className="mt-2 text-sm text-zinc-500">{hint}</p>}
+          <p className="app-shell-muted text-[11px] font-semibold uppercase tracking-[0.24em]">{label}</p>
+          <p className="app-shell-heading mt-3 text-3xl font-semibold tracking-[-0.04em]">{value}</p>
+          {hint && <p className="app-shell-muted mt-2 text-sm">{hint}</p>}
         </div>
         <div className={`grid h-12 w-12 place-items-center rounded-2xl border border-current/10 ${accent}`}>
           <Icon className="h-5 w-5" />
@@ -144,13 +144,13 @@ function ChartTooltip({
   if (!active || !payload) return null;
 
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-950/95 p-3 text-xs text-zinc-100 shadow-[0_24px_80px_-48px_rgba(0,0,0,1)] backdrop-blur-xl">
-      <p className="mb-2 font-semibold text-zinc-300">{label}</p>
+    <div className="app-shell-panel-strong app-shell-heading rounded-2xl p-3 text-xs">
+      <p className="mb-2 font-semibold">{label}</p>
       {payload.map((entry) => (
         <div key={entry.name} className="flex items-center gap-2 py-0.5">
           <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
-          <span className="capitalize text-zinc-400">{entry.name}</span>
-          <span className="font-semibold text-zinc-100">{entry.value}</span>
+          <span className="app-shell-copy capitalize">{entry.name}</span>
+          <span className="font-semibold">{entry.value}</span>
         </div>
       ))}
     </div>
@@ -254,10 +254,10 @@ export default function Dashboard() {
   if (!isAuthenticated) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
-        <div className="max-w-sm rounded-[32px] border border-zinc-800 bg-[linear-gradient(180deg,rgba(24,24,27,0.78),rgba(9,9,11,0.72))] p-8 text-center">
-          <Shield className="mx-auto h-12 w-12 text-zinc-200" />
-          <h2 className="mt-4 text-2xl font-semibold text-zinc-50">Sign in to view your dashboard</h2>
-          <p className="mt-3 text-sm leading-6 text-zinc-400">
+        <div className="app-shell-panel max-w-sm rounded-[32px] p-8 text-center">
+          <Shield className="app-shell-heading mx-auto h-12 w-12" />
+          <h2 className="app-shell-heading mt-4 text-2xl font-semibold">Sign in to view your dashboard</h2>
+          <p className="app-shell-copy mt-3 text-sm leading-6">
             Track scan history, manage teams, and access your security reports.
           </p>
           <button
@@ -274,33 +274,33 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <section className="grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
-        <div className="rounded-[32px] border border-zinc-800/80 bg-[linear-gradient(180deg,rgba(24,24,27,0.78),rgba(9,9,11,0.72))] p-6 shadow-[0_32px_100px_-58px_rgba(0,0,0,1)] backdrop-blur-2xl sm:p-8">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">Executive summary</p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-50 sm:text-4xl">
+        <div className="app-shell-panel rounded-[32px] p-6 sm:p-8">
+          <p className="app-shell-muted text-[11px] font-semibold uppercase tracking-[0.24em]">Executive summary</p>
+          <h1 className="app-shell-heading mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
             Welcome back, {user?.firstName ?? "security lead"}.
           </h1>
-          <p className="mt-3 max-w-2xl text-base leading-7 text-zinc-400">
+          <p className="app-shell-copy mt-3 max-w-2xl text-base leading-7">
             Your scan command center now presents risk and activity in a calmer, more premium dashboard. Review posture at a glance and drill into scan history when needed.
           </p>
 
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
-            <div className="rounded-2xl border border-zinc-800 bg-white/[0.03] p-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">Month-to-date scans</p>
-              <p className="mt-2 text-2xl font-semibold text-zinc-50">{stats?.totalScansThisMonth ?? 0}</p>
+            <div className="app-shell-panel-soft rounded-2xl p-4">
+              <p className="app-shell-muted text-[11px] font-semibold uppercase tracking-[0.24em]">Month-to-date scans</p>
+              <p className="app-shell-heading mt-2 text-2xl font-semibold">{stats?.totalScansThisMonth ?? 0}</p>
             </div>
-            <div className="rounded-2xl border border-zinc-800 bg-white/[0.03] p-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">Average risk</p>
+            <div className="app-shell-panel-soft rounded-2xl p-4">
+              <p className="app-shell-muted text-[11px] font-semibold uppercase tracking-[0.24em]">Average risk</p>
               <p className="mt-2 text-2xl font-semibold text-amber-300">{stats?.averageRiskScore ?? 0}/100</p>
             </div>
-            <div className="rounded-2xl border border-zinc-800 bg-white/[0.03] p-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">Critical findings</p>
+            <div className="app-shell-panel-soft rounded-2xl p-4">
+              <p className="app-shell-muted text-[11px] font-semibold uppercase tracking-[0.24em]">Critical findings</p>
               <p className="mt-2 text-2xl font-semibold text-rose-300">{stats?.criticalIssues ?? 0}</p>
             </div>
           </div>
         </div>
 
-        <div className="rounded-[32px] border border-zinc-800/80 bg-[linear-gradient(180deg,rgba(24,24,27,0.78),rgba(9,9,11,0.72))] p-6 shadow-[0_32px_100px_-58px_rgba(0,0,0,1)] backdrop-blur-2xl sm:p-8">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">Quick actions</p>
+        <div className="app-shell-panel rounded-[32px] p-6 sm:p-8">
+          <p className="app-shell-muted text-[11px] font-semibold uppercase tracking-[0.24em]">Quick actions</p>
           <div className="mt-5 space-y-3">
             <Link
               href="/scanner"
@@ -311,14 +311,14 @@ export default function Dashboard() {
             </Link>
             <Link
               href="/teams"
-              className="flex items-center justify-between rounded-2xl border border-zinc-800 bg-white/[0.03] px-4 py-4 text-sm font-semibold text-zinc-100 transition-all hover:-translate-y-0.5 hover:bg-white/[0.05]"
+              className="app-shell-button flex items-center justify-between rounded-2xl px-4 py-4 text-sm font-semibold hover:-translate-y-0.5"
             >
               <span>Review team access</span>
               <Users className="h-4 w-4" />
             </Link>
             <button
               onClick={handleExport}
-              className="flex w-full items-center justify-between rounded-2xl border border-zinc-800 bg-white/[0.03] px-4 py-4 text-sm font-semibold text-zinc-100 transition-all hover:-translate-y-0.5 hover:bg-white/[0.05]"
+              className="app-shell-button flex w-full items-center justify-between rounded-2xl px-4 py-4 text-sm font-semibold hover:-translate-y-0.5"
             >
               <span>Export scan history</span>
               <Download className="h-4 w-4" />

@@ -105,9 +105,9 @@ export default function Login() {
     >
       <div className="space-y-5">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">Welcome back</p>
-          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-50">Choose your sign-in method</h2>
-          <p className="mt-2 text-sm text-zinc-400">GitHub, Google, email/password, or a one-time magic link.</p>
+          <p className="app-shell-muted text-[11px] font-semibold uppercase tracking-[0.24em]">Welcome back</p>
+          <h2 className="app-shell-heading mt-2 text-2xl font-semibold tracking-tight">Choose your sign-in method</h2>
+          <p className="app-shell-copy mt-2 text-sm">GitHub, Google, email/password, or a one-time magic link.</p>
         </div>
 
         {error && <p className="rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">{error}</p>}
@@ -117,7 +117,7 @@ export default function Login() {
           <button
             onClick={handleGitHub}
             disabled={loading}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-zinc-800 bg-white/[0.05] px-4 py-3 text-sm font-semibold text-zinc-100 transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/[0.08] disabled:opacity-60"
+            className="app-shell-button flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold duration-300 hover:-translate-y-0.5 disabled:opacity-60"
           >
             <Github className="h-4 w-4" />
             Continue with GitHub
@@ -126,7 +126,7 @@ export default function Login() {
           <button
             onClick={handleGoogle}
             disabled={loading}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-zinc-800 bg-white/[0.05] px-4 py-3 text-sm font-semibold text-zinc-100 transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/[0.08] disabled:opacity-60"
+            className="app-shell-button flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold duration-300 hover:-translate-y-0.5 disabled:opacity-60"
           >
             <Chrome className="h-4 w-4" />
             Continue with Google
@@ -135,21 +135,21 @@ export default function Login() {
 
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-zinc-800" />
+            <div className="w-full border-t border-border" />
           </div>
-          <div className="relative flex justify-center text-[10px] font-semibold uppercase tracking-[0.24em] text-zinc-500">
-            <span className="bg-zinc-950 px-3">or use email</span>
+          <div className="app-shell-muted relative flex justify-center text-[10px] font-semibold uppercase tracking-[0.24em]">
+            <span className="app-shell-panel-strong px-3">or use email</span>
           </div>
         </div>
 
         <form onSubmit={handlePasswordLogin} className="space-y-4" autoComplete="off">
           <div>
-            <label className="text-xs font-medium text-zinc-400">Email</label>
+            <label className="app-shell-copy text-xs font-medium">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-2 w-full rounded-2xl border border-zinc-800 bg-white/[0.03] px-4 py-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-emerald-500/30"
+              className="app-shell-input mt-2 w-full rounded-2xl px-4 py-3 text-sm outline-none transition-colors focus:border-emerald-500/30"
               required
               autoComplete="off"
               name="login-email"
@@ -158,8 +158,8 @@ export default function Login() {
 
           <div className="relative">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-medium text-zinc-400">Password</label>
-              <Link href="/forgot-password" className="text-xs font-medium text-zinc-300 transition-colors hover:text-zinc-50">
+              <label className="app-shell-copy text-xs font-medium">Password</label>
+              <Link href="/forgot-password" className="app-shell-copy text-xs font-medium transition-colors hover:text-foreground">
                 Forgot password?
               </Link>
             </div>
@@ -168,14 +168,14 @@ export default function Login() {
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-2 w-full rounded-2xl border border-zinc-800 bg-white/[0.03] px-4 py-3 pr-11 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-emerald-500/30"
+                className="app-shell-input mt-2 w-full rounded-2xl px-4 py-3 pr-11 text-sm outline-none transition-colors focus:border-emerald-500/30"
                 required
                 autoComplete="new-password"
                 name="login-password"
               />
               <button
                 type="button"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 transition-colors hover:text-zinc-100"
+                className="app-shell-muted absolute right-3 top-1/2 -translate-y-1/2 transition-colors hover:text-foreground"
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -196,15 +196,15 @@ export default function Login() {
         <button
           onClick={handleMagicLink}
           disabled={loading}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl border border-zinc-800 bg-white/[0.03] px-4 py-3 text-sm font-medium text-zinc-200 transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/[0.06] disabled:opacity-60"
+          className="app-shell-button flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-medium duration-300 hover:-translate-y-0.5 disabled:opacity-60"
         >
           <Mail className="h-4 w-4" />
           Send magic link
         </button>
 
-        <p className="text-center text-sm text-zinc-500">
+        <p className="app-shell-muted text-center text-sm">
           New here?{" "}
-          <Link href="/signup" className="font-medium text-zinc-100 transition-colors hover:text-emerald-300">
+          <Link href="/signup" className="font-medium text-foreground transition-colors hover:text-emerald-300">
             Create account
           </Link>
         </p>

@@ -65,11 +65,11 @@ export default function ResetPassword() {
       {!success ? (
         <div className="space-y-5">
           <div>
-            <div className="mb-4 inline-flex rounded-2xl border border-zinc-800 bg-white/[0.04] p-3 text-zinc-100">
+            <div className="app-shell-inset app-shell-heading mb-4 inline-flex rounded-2xl p-3">
               <Shield className="h-5 w-5" />
             </div>
-            <h2 className="text-2xl font-semibold tracking-tight text-zinc-50">Create a new password</h2>
-            <p className="mt-2 text-sm text-zinc-400">Make it strong enough for a high-trust security workspace.</p>
+            <h2 className="app-shell-heading text-2xl font-semibold tracking-tight">Create a new password</h2>
+            <p className="app-shell-copy mt-2 text-sm">Make it strong enough for a high-trust security workspace.</p>
           </div>
 
           {error && (
@@ -81,19 +81,19 @@ export default function ResetPassword() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="text-xs font-medium text-zinc-400">New password</label>
+              <label className="app-shell-copy text-xs font-medium">New password</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="mt-2 w-full rounded-2xl border border-zinc-800 bg-white/[0.03] px-4 py-3 pr-11 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-emerald-500/30"
+                  className="app-shell-input mt-2 w-full rounded-2xl px-4 py-3 pr-11 text-sm outline-none transition-colors focus:border-emerald-500/30"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 transition-colors hover:text-zinc-100"
+                  className="app-shell-muted absolute right-3 top-1/2 -translate-y-1/2 transition-colors hover:text-foreground"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -101,28 +101,28 @@ export default function ResetPassword() {
             </div>
 
             <div>
-              <label className="text-xs font-medium text-zinc-400">Confirm password</label>
+              <label className="app-shell-copy text-xs font-medium">Confirm password</label>
               <div className="relative">
                 <input
                   type={showConfirmPassword ? "text" : "password"}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="mt-2 w-full rounded-2xl border border-zinc-800 bg-white/[0.03] px-4 py-3 pr-11 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-emerald-500/30"
+                  className="app-shell-input mt-2 w-full rounded-2xl px-4 py-3 pr-11 text-sm outline-none transition-colors focus:border-emerald-500/30"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 transition-colors hover:text-zinc-100"
+                  className="app-shell-muted absolute right-3 top-1/2 -translate-y-1/2 transition-colors hover:text-foreground"
                 >
                   {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-zinc-800 bg-white/[0.03] p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-zinc-500">Password requirements</p>
-              <ul className="mt-3 space-y-2 text-sm text-zinc-400">
+            <div className="app-shell-panel-soft rounded-2xl p-4">
+              <p className="app-shell-muted text-xs font-semibold uppercase tracking-[0.24em]">Password requirements</p>
+              <ul className="app-shell-copy mt-3 space-y-2 text-sm">
                 <li className={password.length >= 8 ? "text-emerald-300" : ""}>At least 8 characters</li>
                 <li className={/[A-Z]/.test(password) ? "text-emerald-300" : ""}>One uppercase letter</li>
                 <li className={/[a-z]/.test(password) ? "text-emerald-300" : ""}>One lowercase letter</li>
@@ -146,8 +146,8 @@ export default function ResetPassword() {
             <CheckCircle2 className="h-8 w-8 text-emerald-300" />
           </div>
           <div>
-            <h2 className="text-2xl font-semibold tracking-tight text-zinc-50">Password updated</h2>
-            <p className="mt-2 text-sm text-zinc-400">Your credentials are ready. Redirecting to login now.</p>
+            <h2 className="app-shell-heading text-2xl font-semibold tracking-tight">Password updated</h2>
+            <p className="app-shell-copy mt-2 text-sm">Your credentials are ready. Redirecting to login now.</p>
           </div>
         </div>
       )}

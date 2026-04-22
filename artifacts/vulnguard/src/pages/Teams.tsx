@@ -149,9 +149,9 @@ export default function Teams() {
   if (!isAuthenticated) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
-        <div className="max-w-sm rounded-[32px] border border-zinc-800 bg-[linear-gradient(180deg,rgba(24,24,27,0.78),rgba(9,9,11,0.72))] p-8 text-center">
-          <Users className="mx-auto h-12 w-12 text-zinc-200" />
-          <h2 className="mt-4 text-2xl font-semibold text-zinc-50">Sign in to manage teams</h2>
+        <div className="app-shell-panel max-w-sm rounded-[32px] p-8 text-center">
+          <Users className="app-shell-heading mx-auto h-12 w-12" />
+          <h2 className="app-shell-heading mt-4 text-2xl font-semibold">Sign in to manage teams</h2>
           <button
             onClick={login}
             className="mt-6 rounded-full border border-emerald-500/30 bg-emerald-500/14 px-5 py-3 text-sm font-semibold text-emerald-200 transition-all hover:-translate-y-0.5"
@@ -165,12 +165,12 @@ export default function Teams() {
 
   return (
     <div className="space-y-6">
-      <section className="flex flex-col gap-4 rounded-[32px] border border-zinc-800/80 bg-[linear-gradient(180deg,rgba(24,24,27,0.78),rgba(9,9,11,0.72))] p-6 shadow-[0_32px_100px_-58px_rgba(0,0,0,1)] backdrop-blur-2xl sm:flex-row sm:items-center sm:justify-between sm:p-8">
+      <section className="app-shell-panel flex flex-col gap-4 rounded-[32px] p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">Governance</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-50">Manage secure collaboration</h1>
-          <p className="mt-3 max-w-2xl text-base leading-7 text-zinc-400">
-            Teams now sit inside the same premium, dark workspace aesthetic. Add members, control roles, and keep access decisions easy to review.
+          <p className="app-shell-muted text-[11px] font-semibold uppercase tracking-[0.24em]">Governance</p>
+          <h1 className="app-shell-heading mt-2 text-3xl font-semibold tracking-tight">Manage secure collaboration</h1>
+          <p className="app-shell-copy mt-3 max-w-2xl text-base leading-7">
+            Teams now sit inside the same premium workspace aesthetic. Add members, control roles, and keep access decisions easy to review.
           </p>
         </div>
         <button
@@ -183,13 +183,13 @@ export default function Teams() {
       </section>
 
       <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-        <section className="rounded-[32px] border border-zinc-800/80 bg-[linear-gradient(180deg,rgba(24,24,27,0.78),rgba(9,9,11,0.72))] p-6 shadow-[0_32px_100px_-58px_rgba(0,0,0,1)] backdrop-blur-2xl sm:p-8">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">Your teams</p>
+        <section className="app-shell-panel rounded-[32px] p-6 sm:p-8">
+          <p className="app-shell-muted text-[11px] font-semibold uppercase tracking-[0.24em]">Your teams</p>
           <div className="mt-5 space-y-3">
             {teams.length === 0 ? (
-              <div className="rounded-2xl border border-zinc-800 bg-white/[0.03] p-8 text-center">
-                <Users className="mx-auto h-8 w-8 text-zinc-600" />
-                <p className="mt-3 text-sm text-zinc-400">No teams yet</p>
+              <div className="app-shell-panel-soft rounded-2xl p-8 text-center">
+                <Users className="app-shell-muted mx-auto h-8 w-8" />
+                <p className="app-shell-copy mt-3 text-sm">No teams yet</p>
               </div>
             ) : (
               teams.map((team) => (
@@ -199,31 +199,31 @@ export default function Teams() {
                   className={`w-full rounded-[24px] border px-4 py-4 text-left transition-all ${
                     selectedTeam?.id === team.id
                       ? "border-emerald-500/25 bg-emerald-500/10"
-                      : "border-zinc-800 bg-white/[0.03] hover:-translate-y-0.5 hover:bg-white/[0.05]"
+                      : "app-shell-panel-soft hover:-translate-y-0.5 hover:bg-white/[0.05]"
                   }`}
                 >
-                  <p className="text-base font-semibold text-zinc-50">{team.name}</p>
-                  <p className="mt-1 text-sm text-zinc-500">{team.role === "admin" ? "Owner" : team.role}</p>
+                  <p className="app-shell-heading text-base font-semibold">{team.name}</p>
+                  <p className="app-shell-muted mt-1 text-sm">{team.role === "admin" ? "Owner" : team.role}</p>
                 </button>
               ))
             )}
           </div>
         </section>
 
-        <section className="rounded-[32px] border border-zinc-800/80 bg-[linear-gradient(180deg,rgba(24,24,27,0.78),rgba(9,9,11,0.72))] shadow-[0_32px_100px_-58px_rgba(0,0,0,1)] backdrop-blur-2xl">
+        <section className="app-shell-panel rounded-[32px]">
           {selectedTeam ? (
             <>
-              <div className="flex flex-col gap-4 border-b border-zinc-800 px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+              <div className="flex flex-col gap-4 border-b border-border px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">Selected workspace</p>
-                  <h2 className="mt-1 text-2xl font-semibold text-zinc-50">{selectedTeam.name}</h2>
-                  <p className="text-sm text-zinc-400">{members.length} member{members.length !== 1 ? "s" : ""}</p>
+                  <p className="app-shell-muted text-[11px] font-semibold uppercase tracking-[0.24em]">Selected workspace</p>
+                  <h2 className="app-shell-heading mt-1 text-2xl font-semibold">{selectedTeam.name}</h2>
+                  <p className="app-shell-copy text-sm">{members.length} member{members.length !== 1 ? "s" : ""}</p>
                 </div>
                 {selectedTeam.role === "admin" && (
                   <div className="flex flex-wrap gap-3">
                     <button
                       onClick={() => setShowInvite(true)}
-                      className="inline-flex items-center gap-2 rounded-full border border-zinc-800 bg-white/[0.03] px-4 py-2 text-sm font-semibold text-zinc-100 transition-all hover:-translate-y-0.5 hover:bg-white/[0.05]"
+                      className="app-shell-button inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold hover:-translate-y-0.5"
                     >
                       <UserPlus className="h-4 w-4" />
                       Invite
@@ -239,7 +239,7 @@ export default function Teams() {
                 )}
               </div>
 
-              <div className="divide-y divide-zinc-800">
+              <div className="divide-y divide-border">
                 {members.map((member, index) => {
                   const RoleIcon = ROLE_ICON[member.role] ?? Eye;
                   return (
