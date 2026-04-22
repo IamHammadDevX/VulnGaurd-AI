@@ -18,8 +18,6 @@ const NAV_LINKS = [
   { href: "/product", label: "Product" },
   { href: "/features", label: "Features" },
   { href: "/pricing", label: "Pricing" },
-  { href: "/api-docs", label: "API Docs" },
-  { href: "/support", label: "Support" },
   { href: "/contact", label: "Contact" },
 ];
 
