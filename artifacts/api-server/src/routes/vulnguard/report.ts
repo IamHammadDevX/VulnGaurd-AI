@@ -17,6 +17,21 @@ import {
   REPORT_COLORS,
   type EnhancedVulnerability,
 } from "./report-enhancements.js";
+import {
+  PROFESSIONAL_PALETTE,
+  ProfessionalReportDesigner,
+  drawProfessionalPageHeader,
+  drawProfessionalPageFooter,
+  formatDuration,
+  drawProgressBar,
+} from "./report-visual-enhancements.js";
+import {
+  drawExecutiveSummaryDashboard,
+  drawRiskAssessmentDashboard,
+  drawVulnerabilityHeatmap,
+  drawRemediationProgressDashboard,
+} from "./dashboard-pages.js";
+import { drawProfessionalCoverPage } from "./professional-cover-page.js";
 
 const router: IRouter = Router();
 
