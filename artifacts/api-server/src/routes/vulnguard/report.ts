@@ -5,6 +5,18 @@ import { reportLimiter } from "../../middlewares/rateLimitMiddleware.js";
 import { getScan } from "./store.js";
 import { db, scansTable } from "@workspace/db";
 import { desc, eq } from "drizzle-orm";
+import {
+  drawMetadataPage,
+  drawFinancialAnalysis,
+  drawDeploymentChecklist,
+  drawComplianceMapping,
+  drawGasOptimizationAnalysis,
+  calculateFinancialMetrics,
+  calculateComplianceStatus,
+  calculateDeploymentReadiness,
+  REPORT_COLORS,
+  type EnhancedVulnerability,
+} from "./report-enhancements.js";
 
 const router: IRouter = Router();
 
@@ -713,7 +725,7 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
     .restore();
 
   // ════════════════════════════════════════════════════════════════════════════
-  // PAGE 1.5 — TABLE OF CONTENTS
+  // PAGE 2 — TABLE OF CONTENTS
   // ════════════════════════════════════════════════════════════════════════════
   addPage("Table of Contents");
 
@@ -761,7 +773,61 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
     .restore();
 
   // ════════════════════════════════════════════════════════════════════════════
-  // PAGE 2 — EXECUTIVE SUMMARY WITH PIE CHART & RISK MATRIX
+  // PAGE 3 — PROFESSIONAL METADATA & DOCUMENT CONTROL
+  // ════════════════════════════════════════════════════════════════════════════
+  addPage("Document Control");
+
+  doc.save()
+    .fillColor(C.textPrimary)
+    .fontSize(18).font("Helvetica-Bold")
+    .text("Document Control & Audit Information", MARGIN, doc.y)
+    .restore();
+  doc.moveDown(0.8);
+
+  drawMetadataPage(doc, {
+    scanId,
+    timestamp: scanDate,
+    contractName: scan.contract_name,
+    classification: "CONFIDENTIAL",
+    clientName: "Client Organization",
+    auditedBy: "VulnGuard AI Security Engine",
+    riskScore: scan.risk_score,
+    version: "2.0 (Enterprise Edition)",
+  });
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // PAGE 4 — FINANCIAL IMPACT ANALYSIS
+  // ════════════════════════════════════════════════════════════════════════════
+  addPage("Financial Impact");
+
+  const financialMetrics = calculateFinancialMetrics(vulns, scan.risk_score);
+  drawFinancialAnalysis(doc, financialMetrics, scan.risk_score);
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // PAGE 5 — DEPLOYMENT READINESS
+  // ════════════════════════════════════════════════════════════════════════════
+  addPage("Deployment Readiness");
+
+  const deploymentReadiness = calculateDeploymentReadiness(vulns, scan.risk_score);
+  drawDeploymentChecklist(doc, deploymentReadiness, scan.risk_score);
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // PAGE 6 — COMPLIANCE FRAMEWORK MAPPING
+  // ════════════════════════════════════════════════════════════════════════════
+  addPage("Compliance Analysis");
+
+  const complianceStatus = calculateComplianceStatus(vulns);
+  drawComplianceMapping(doc, complianceStatus);
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // PAGE 7 — GAS OPTIMIZATION ANALYSIS
+  // ════════════════════════════════════════════════════════════════════════════
+  addPage("Gas Optimization");
+
+  drawGasOptimizationAnalysis(doc, vulns);
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // PAGE 8 — EXECUTIVE SUMMARY WITH PIE CHART & RISK MATRIX
   // ════════════════════════════════════════════════════════════════════════════
   addPage("Executive Summary");
 
