@@ -12,6 +12,27 @@ const LEMON_SQUEEZY_ENTERPRISE_PRODUCT_ID = process.env.LEMON_SQUEEZY_ENTERPRISE
 // Lemon Squeezy API Base URL
 const LEMON_SQUEEZY_API_BASE = "https://api.lemonsqueezy.com/v1";
 
+type LemonCheckoutResponse = {
+  data: {
+    attributes: {
+      url: string;
+    };
+  };
+};
+
+type LemonSubscriptionResponse = {
+  data: Array<{
+    id: string;
+    attributes: {
+      status: string;
+      product_name: string;
+      renews_at: string | null;
+      ends_at: string | null;
+      product_id: string | number;
+    };
+  }>;
+};
+
 /**
  * POST /api/payments/checkout
  * Create a checkout link for a subscription plan
@@ -84,13 +105,13 @@ router.post("/checkout", async (req: Request, res: Response) => {
       throw new Error(`Lemon Squeezy API error: ${checkoutResponse.status}`);
     }
 
-    const checkoutData = await checkoutResponse.json();
+    const checkoutData = await checkoutResponse.json() as LemonCheckoutResponse;
     const checkoutUrl = checkoutData.data.attributes.url;
 
-    res.json({ checkoutUrl });
+    return res.json({ checkoutUrl });
   } catch (error) {
     console.error("Checkout error:", error);
-    res.status(500).json({ error: "Failed to create checkout" });
+    return res.status(500).json({ error: "Failed to create checkout" });
   }
 });
 
@@ -153,10 +174,10 @@ router.post("/webhook", async (req: Request, res: Response) => {
         console.log(`Unhandled webhook event: ${eventType}`);
     }
 
-    res.json({ success: true });
+    return res.json({ success: true });
   } catch (error) {
     console.error("Webhook error:", error);
-    res.status(500).json({ error: "Webhook processing failed" });
+    return res.status(500).json({ error: "Webhook processing failed" });
   }
 });
 
@@ -187,14 +208,14 @@ router.get("/subscription/:userId", async (req: Request, res: Response) => {
       throw new Error(`Failed to fetch subscription: ${response.status}`);
     }
 
-    const data = await response.json();
+    const data = await response.json() as LemonSubscriptionResponse;
     const subscription = data.data[0];
 
     if (!subscription) {
       return res.json({ subscription: null });
     }
 
-    res.json({
+    return res.json({
       subscription: {
         id: subscription.id,
         status: subscription.attributes.status,
@@ -206,7 +227,7 @@ router.get("/subscription/:userId", async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Get subscription error:", error);
-    res.status(500).json({ error: "Failed to fetch subscription" });
+    return res.status(500).json({ error: "Failed to fetch subscription" });
   }
 });
 
@@ -249,10 +270,10 @@ router.post("/cancel-subscription", async (req: Request, res: Response) => {
       throw new Error(`Failed to cancel subscription: ${response.status}`);
     }
 
-    res.json({ success: true, message: "Subscription cancelled" });
+    return res.json({ success: true, message: "Subscription cancelled" });
   } catch (error) {
     console.error("Cancel subscription error:", error);
-    res.status(500).json({ error: "Failed to cancel subscription" });
+    return res.status(500).json({ error: "Failed to cancel subscription" });
   }
 });
 
