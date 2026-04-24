@@ -881,3 +881,285 @@ export function drawGasOptimizationAnalysis(
     });
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CODE QUALITY SCORECARD PAGE
+// ─────────────────────────────────────────────────────────────────────────────
+
+export function drawCodeQualityScorecard(
+  doc: PDFKit.PDFDocument,
+  {
+    codeQualityScore,
+    counts,
+    totalVulns,
+    analysisTime,
+    codeHash,
+  }: {
+    codeQualityScore: number;
+    counts: { CRITICAL: number; HIGH: number; MEDIUM: number; LOW: number };
+    totalVulns: number;
+    analysisTime: number;
+    codeHash: string;
+  }
+) {
+  const C = REPORT_COLORS;
+
+  doc.save()
+    .fillColor(C.textPrimary)
+    .fontSize(16).font("Helvetica-Bold")
+    .text("Code Quality Scorecard", MARGIN, doc.y)
+    .restore();
+  doc.moveDown(0.4);
+
+  doc.save()
+    .fillColor(C.textMuted).fontSize(8.5).font("Helvetica")
+    .text("Comprehensive code quality assessment based on vulnerability density, severity distribution, and security patterns.", MARGIN, doc.y, { width: CONTENT_W })
+    .restore();
+  doc.moveDown(0.8);
+
+  // Main quality score
+  const scoreY = doc.y;
+  const scoreColor = codeQualityScore >= 90 ? C.green : codeQualityScore >= 75 ? "#3b82f6" : codeQualityScore >= 60 ? C.HIGH : C.CRITICAL;
+
+  // Large score circle
+  doc.save()
+    .fillColor(scoreColor).opacity(0.15)
+    .circle(MARGIN + 60, scoreY + 60, 50).fill()
+    .opacity(1)
+    .fillColor(scoreColor)
+    .fontSize(44).font("Helvetica-Bold")
+    .text(String(codeQualityScore), MARGIN + 25, scoreY + 25, { width: 70, align: "center" })
+    .fillColor(C.textMuted)
+    .fontSize(9).font("Helvetica")
+    .text("/ 100", MARGIN + 25, scoreY + 70, { width: 70, align: "center" })
+    .restore();
+
+  // Grade
+  const grade = codeQualityScore >= 90 ? "A" : codeQualityScore >= 80 ? "B" : codeQualityScore >= 70 ? "C" : codeQualityScore >= 60 ? "D" : "F";
+  const gradeColor = grade === "A" ? C.green : grade === "B" ? "#3b82f6" : grade === "C" ? C.MEDIUM : grade === "D" ? C.HIGH : C.CRITICAL;
+
+  doc.save()
+    .fillColor(gradeColor).opacity(0.2)
+    .roundedRect(MARGIN + 150, scoreY + 30, 60, 60, 6).fill()
+    .opacity(1)
+    .fillColor(gradeColor)
+    .fontSize(32).font("Helvetica-Bold")
+    .text(grade, MARGIN + 150, scoreY + 35, { width: 60, align: "center" })
+    .restore();
+
+  // Quality metrics cards
+  const cardStartX = MARGIN + 250;
+  const cardY = scoreY;
+  const cardW = (CONTENT_W - 70) / 2;
+
+  const metrics = [
+    { label: "Vulnerability Density", value: `${((totalVulns / 100) * 100).toFixed(1)}%`, desc: "Issues per 100 lines (est.)", color: counts.CRITICAL > 0 ? C.CRITICAL : C.HIGH },
+    { label: "Critical Issues", value: String(counts.CRITICAL), desc: "Requires immediate fix", color: C.CRITICAL },
+    { label: "Test Coverage", value: "Estimated", desc: "Code coverage unknown", color: C.MEDIUM },
+    { label: "Documentation", value: "Review", desc: "Check code comments", color: C.textMuted },
+  ];
+
+  metrics.forEach((m, i) => {
+    const mX = cardStartX + (i % 2) * (cardW + 12);
+    const mY = cardY + (i > 1 ? 60 : 0);
+
+    doc.save()
+      .fillColor(m.color).opacity(0.08)
+      .roundedRect(mX, mY, cardW, 50, 4).fill()
+      .opacity(1)
+      .strokeColor(m.color).opacity(0.2).lineWidth(0.5)
+      .roundedRect(mX, mY, cardW, 50, 4).stroke()
+      .opacity(1)
+      .fillColor(C.textMuted).fontSize(7).font("Helvetica-Bold")
+      .text(m.label, mX + 8, mY + 6, { characterSpacing: 0.3 })
+      .fillColor(m.color).fontSize(13).font("Helvetica-Bold")
+      .text(m.value, mX + 8, mY + 18)
+      .fillColor(C.textMuted).fontSize(7).font("Helvetica")
+      .text(m.desc, mX + 8, mY + 34, { width: cardW - 16 })
+      .restore();
+  });
+
+  doc.y = scoreY + 130;
+  doc.moveDown(0.5);
+
+  // Severity distribution breakdown
+  doc.save()
+    .fillColor(C.textPrimary)
+    .fontSize(11).font("Helvetica-Bold")
+    .text("Severity Distribution", MARGIN, doc.y)
+    .restore();
+  doc.moveDown(0.5);
+
+  const sevCardW = (CONTENT_W - 18) / 4;
+  const sevY = doc.y;
+
+  [
+    { sev: "CRITICAL", count: counts.CRITICAL, color: C.CRITICAL },
+    { sev: "HIGH", count: counts.HIGH, color: C.HIGH },
+    { sev: "MEDIUM", count: counts.MEDIUM, color: C.MEDIUM },
+    { sev: "LOW", count: counts.LOW, color: C.LOW },
+  ].forEach((s, i) => {
+    const sx = MARGIN + i * (sevCardW + 6);
+
+    doc.save()
+      .fillColor(s.color).opacity(0.12)
+      .roundedRect(sx, sevY, sevCardW, 70, 4).fill()
+      .opacity(1)
+      .fillColor(s.color)
+      .fontSize(24).font("Helvetica-Bold")
+      .text(String(s.count), sx, sevY + 12, { width: sevCardW, align: "center" })
+      .fillColor(C.textMuted)
+      .fontSize(7.5).font("Helvetica-Bold")
+      .text(s.sev, sx, sevY + 42, { width: sevCardW, align: "center", characterSpacing: 0.3 })
+      .restore();
+  });
+
+  doc.y = sevY + 80;
+  doc.moveDown(0.3);
+
+  // Metadata
+  doc.save()
+    .fillColor(C.textMuted)
+    .fontSize(7.5).font("Helvetica")
+    .text(`Analysis Time: ${(analysisTime / 1000).toFixed(2)}s`, MARGIN, doc.y)
+    .text(`Code Hash: ${codeHash.substring(0, 32)}...`, PAGE_W - MARGIN - 200, doc.y, { width: 200, align: "right" })
+    .restore();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PROFESSIONAL APPENDIX & FOOTER PAGE
+// ─────────────────────────────────────────────────────────────────────────────
+
+export function drawProfessionalAppendix(
+  doc: PDFKit.PDFDocument,
+  { contractName, riskScore }: { contractName: string; riskScore: number }
+) {
+  const C = REPORT_COLORS;
+
+  doc.save()
+    .fillColor(C.textPrimary)
+    .fontSize(16).font("Helvetica-Bold")
+    .text("Appendix & References", MARGIN, doc.y)
+    .restore();
+  doc.moveDown(0.6);
+
+  // GLOSSARY
+  doc.save()
+    .fillColor(C.accent)
+    .fontSize(11).font("Helvetica-Bold")
+    .text("Glossary", MARGIN, doc.y)
+    .restore();
+  doc.moveDown(0.4);
+
+  const glossary = [
+    { term: "CVSS", def: "Common Vulnerability Scoring System - standardized method to rate vulnerability severity (0-10)" },
+    { term: "SWC", def: "Smart Contract Weakness - classification similar to CWE for smart contract vulnerabilities" },
+    { term: "Reentrancy", def: "Attack where contract calls external function before updating state, allowing recursive calls" },
+    { term: "CEI Pattern", def: "Checks-Effects-Interactions - best practice order to prevent reentrancy and state issues" },
+    { term: "Mainnet", def: "Production Ethereum network where real funds are at risk. Requires highest security standards" },
+    { term: "Testnet", def: "Practice network (Goerli, Sepolia) for testing smart contracts without financial risk" },
+    { term: "Gas", def: "Unit of computational effort; higher gas cost = more expensive transaction" },
+    { term: "Risk Score", def: "0-100 aggregated score indicating overall contract security risk level" },
+  ];
+
+  glossary.forEach((g) => {
+    if (doc.y > PAGE_H - MARGIN - 50) doc.addPage();
+    doc.save()
+      .fillColor(C.accent)
+      .fontSize(8).font("Helvetica-Bold")
+      .text(g.term, MARGIN + 12, doc.y)
+      .fillColor(C.textMuted)
+      .fontSize(8).font("Helvetica")
+      .text(g.def, MARGIN + 80, doc.y, { width: CONTENT_W - 92 })
+      .restore();
+    doc.moveDown(0.5);
+  });
+
+  doc.moveDown(0.5);
+
+  // RESOURCES
+  doc.save()
+    .fillColor(C.accent)
+    .fontSize(11).font("Helvetica-Bold")
+    .text("Recommended Resources", MARGIN, doc.y)
+    .restore();
+  doc.moveDown(0.4);
+
+  const resources = [
+    "Solidity Documentation: https://docs.soliditylang.org",
+    "OpenZeppelin Contracts: https://github.com/OpenZeppelin/openzeppelin-contracts",
+    "OWASP Smart Contract Top 10: https://owasp.org/www-project-smart-contract-top-10/",
+    "Trail of Bits Security Audit: https://www.trailofbits.com",
+    "Consensys Smart Contract Best Practices: https://consensys.github.io/smart-contract-best-practices/",
+    "Mythril Static Analyzer: https://github.com/Consensys/mythril",
+    "Slither Security Scanner: https://github.com/crytic/slither",
+    "Echidna Fuzzing Tool: https://github.com/crytic/echidna",
+  ];
+
+  resources.forEach((r) => {
+    if (doc.y > PAGE_H - MARGIN - 30) doc.addPage();
+    doc.save()
+      .fillColor(C.blue).fontSize(7.5).font("Helvetica")
+      .text(`• ${r}`, MARGIN + 12, doc.y, { width: CONTENT_W - 24, lineGap: 1 })
+      .restore();
+    doc.moveDown(0.4);
+  });
+
+  doc.moveDown(0.8);
+
+  // DISCLAIMER
+  doc.save()
+    .fillColor(C.CRITICAL).opacity(0.15)
+    .roundedRect(MARGIN, doc.y, CONTENT_W, 70, 6).fill()
+    .opacity(1).restore();
+
+  doc.save()
+    .fillColor(C.CRITICAL)
+    .fontSize(8).font("Helvetica-Bold")
+    .text("⚠ IMPORTANT DISCLAIMER", MARGIN + 12, doc.y + 6)
+    .fillColor(C.textPrimary)
+    .fontSize(7.5).font("Helvetica")
+    .text("This automated audit report is generated by AI and provides analysis of potential vulnerabilities. However, it should not be considered a complete security audit. This report:", MARGIN + 12, doc.y + 18, { width: CONTENT_W - 24, lineGap: 1 })
+    .restore();
+
+  const disclaimers = [
+    "• Does not replace professional manual code review by security experts",
+    "• May miss complex vulnerabilities or sophisticated attack vectors",
+    "• Should be combined with dynamic testing, fuzzing, and formal verification",
+    "• Requires review by experienced smart contract developers",
+    "• Does not guarantee zero vulnerabilities or absolute safety",
+  ];
+
+  doc.moveDown(1.5);
+  disclaimers.forEach((d) => {
+    if (doc.y > PAGE_H - MARGIN - 20) doc.addPage();
+    doc.save()
+      .fillColor(C.textMuted)
+      .fontSize(7).font("Helvetica")
+      .text(d, MARGIN + 12, doc.y, { width: CONTENT_W - 24 })
+      .restore();
+    doc.moveDown(0.35);
+  });
+
+  doc.moveDown(0.8);
+
+  // Final report info
+  doc.save()
+    .fillColor(C.textMuted).fontSize(8).font("Helvetica")
+    .text(`Contract: ${contractName}`, MARGIN, doc.y)
+    .text(`Report Generated: ${new Date().toUTCString()}`, MARGIN, doc.y + 12)
+    .text(`Final Risk Score: ${riskScore} / 100`, MARGIN, doc.y + 24)
+    .restore();
+
+  doc.moveDown(2);
+
+  // Footer
+  doc.save()
+    .fillColor(C.borderLight)
+    .rect(MARGIN, PAGE_H - 35, CONTENT_W, 0.5)
+    .fill()
+    .fillColor(C.textLight)
+    .fontSize(7).font("Helvetica")
+    .text("VulnGuard AI • Enterprise Security Audit Report • Confidential", MARGIN, PAGE_H - 28, { width: CONTENT_W, align: "center" })
+    .restore();
+}

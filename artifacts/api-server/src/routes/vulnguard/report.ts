@@ -11,6 +11,8 @@ import {
   drawDeploymentChecklist,
   drawComplianceMapping,
   drawGasOptimizationAnalysis,
+  drawCodeQualityScorecard,
+  drawProfessionalAppendix,
   calculateFinancialMetrics,
   calculateComplianceStatus,
   calculateDeploymentReadiness,
@@ -448,8 +450,8 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
       recommendation: string;
     }>).slice().sort((a, b) => (SEV_RANK[a.severity] ?? 9) - (SEV_RANK[b.severity] ?? 9));
 
-    const counts: Record<string, number> = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
-    vulns.forEach((v) => { if (v.severity in counts) counts[v.severity]++; });
+    const counts: { CRITICAL: number; HIGH: number; MEDIUM: number; LOW: number } = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
+    vulns.forEach((v) => { if (v.severity in counts) counts[v.severity as keyof typeof counts]++; });
 
     const weightedIssueScore = vulns.reduce((sum, v) => sum + severityWeight(v.severity), 0);
     const estimatedFixHours = counts.CRITICAL * 8 + counts.HIGH * 5 + counts.MEDIUM * 3 + counts.LOW * 1;
@@ -550,194 +552,21 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
   }
 
   // ════════════════════════════════════════════════════════════════════════════
-  // PAGE 1 — COVER
+  // PAGE 1 — PROFESSIONAL ENTERPRISE COVER PAGE
   // ════════════════════════════════════════════════════════════════════════════
   addPage("Cover");
 
-  // Full-bleed dark header
-  doc.save()
-    .fillColor(C.headerBg)
-    .rect(0, 0, PAGE_W, 240)
-    .fill()
-    .restore();
-
-  // Gradient accent line
-  doc.save()
-    .fillColor(C.accent)
-    .rect(0, 0, PAGE_W, 4)
-    .fill()
-    .restore();
-
-  // Logo area
-  doc.save()
-    .fillColor(C.accent)
-    .circle(MARGIN + 20, 68, 18).fill()
-    .fillColor(C.white)
-    .fontSize(16).font("Helvetica-Bold")
-    .text("V", MARGIN + 13, 59)
-    .restore();
-
-  doc.save()
-    .fillColor(C.white)
-    .fontSize(32).font("Helvetica-Bold")
-    .text("VulnGuard AI", MARGIN + 48, 54)
-    .fillColor(C.textLight)
-    .fontSize(12).font("Helvetica")
-    .text("Smart Contract Security Audit", MARGIN + 48, 90)
-    .fontSize(10)
-    .text("AI-Powered Vulnerability Detection & Analysis Report", MARGIN + 48, 106)
-    .restore();
-
-  // Horizontal rule inside header
-  doc.save()
-    .strokeColor(C.accent).opacity(0.3).lineWidth(1)
-    .moveTo(MARGIN, 130).lineTo(PAGE_W - MARGIN, 130).stroke()
-    .opacity(1).restore();
-
-  // Generated date and metadata
-  doc.save()
-    .fillColor(C.textLight)
-    .fontSize(9).font("Helvetica")
-    .text(`Generated: ${scanDate}`, MARGIN, 142)
-    .text(`Report Version: 1.0`, PAGE_W - MARGIN - 120, 142, { width: 120, align: "right" })
-    .restore();
-
-  doc.y = 160;
-
-  // Report type badge
-  doc.save()
-    .fillColor(C.accent).opacity(0.15)
-    .roundedRect(MARGIN, 160, 140, 24, 4).fill()
-    .opacity(1)
-    .fillColor(C.accent)
-    .fontSize(9).font("Helvetica-Bold")
-    .text("AUTOMATED SECURITY AUDIT", MARGIN + 8, 166)
-    .restore();
-
-  doc.y = 200;
-
-  // Contract card - professional styling
-  doc.save()
-    .fillColor(C.cardBg)
-    .roundedRect(MARGIN, 200, CONTENT_W, 130, 8).fill()
-    .strokeColor(C.borderLight).lineWidth(1)
-    .roundedRect(MARGIN, 200, CONTENT_W, 130, 8).stroke()
-    .restore();
-
-  // Left accent strip
-  doc.save()
-    .fillColor(riskColor)
-    .roundedRect(MARGIN, 200, 4, 130, 2).fill()
-    .restore();
-
-  doc.save()
-    .fillColor(C.textMuted).fontSize(8).font("Helvetica-Bold")
-    .text("CONTRACT UNDER AUDIT", MARGIN + 18, 212, { characterSpacing: 0.5 })
-    .fillColor(C.textPrimary)
-    .fontSize(20).font("Helvetica-Bold")
-    .text(scan.contract_name, MARGIN + 18, 224, { width: CONTENT_W - 120 })
-    .restore();
-
-  // Risk score circle (right side) - improved design
-  const rscX = PAGE_W - MARGIN - 65, rscY = 248;
-  doc.save()
-    .fillColor(riskColor).opacity(0.12)
-    .circle(rscX, rscY, 42).fill()
-    .opacity(1)
-    .fillColor(riskColor)
-    .fontSize(26).font("Helvetica-Bold")
-    .text(String(scan.risk_score), rscX - 26, rscY - 18, { width: 52, align: "center" })
-    .fillColor(C.textMuted)
-    .fontSize(8).font("Helvetica")
-    .text("/ 100", rscX - 26, rscY + 10, { width: 52, align: "center" })
-    .fillColor(C.textPrimary)
-    .fontSize(8).font("Helvetica-Bold")
-    .text("RISK SCORE", rscX - 26, rscY + 26, { width: 52, align: "center", characterSpacing: 0.3 })
-    .restore();
-
-  // Risk level indicator
-  const riskLevel = scan.risk_score >= 70 ? "CRITICAL" : scan.risk_score >= 40 ? "HIGH" : scan.risk_score >= 20 ? "MEDIUM" : "LOW";
-  doc.save()
-    .fillColor(riskColor).opacity(0.15)
-    .roundedRect(MARGIN + 18, 298, 65, 16, 3).fill()
-    .opacity(1)
-    .fillColor(riskColor)
-    .fontSize(9).font("Helvetica-Bold")
-    .text(riskLevel, MARGIN + 18, 300, { width: 65, align: "center" })
-    .restore();
-
-  // Scan details in card
-  doc.save()
-    .fillColor(C.textMuted)
-    .fontSize(8.5).font("Helvetica")
-    .text(`Scan ID:  ${scanId}`, MARGIN + 95, 306)
-    .text(`Code Hash:  ${scan.code_hash.substring(0, 24)}...`, PAGE_W - MARGIN - 220, 306, { width: 210 })
-    .text(`Analysis Time:  ${(scan.analysis_time_ms / 1000).toFixed(2)}s`, MARGIN + 95, 318)
-    .text(`Audit Date:  ${scanDateShort}`, PAGE_W - MARGIN - 220, 318, { width: 210 })
-    .restore();
-
-  doc.y = 334;
-
-  // ── Severity summary boxes - enhanced ────────────────────────────────────────
-  doc.save()
-    .fillColor(C.textPrimary)
-    .fontSize(14).font("Helvetica-Bold")
-    .text("Findings Overview", MARGIN, doc.y)
-    .restore();
-  doc.moveDown(0.8);
-
-  const boxW = (CONTENT_W - 18) / 4;
-  const boxY = doc.y;
-
-  SEVERITY_ORDER.forEach((sev, i) => {
-    const bx = MARGIN + i * (boxW + 6);
-    const color = C[sev];
-    const count = counts[sev];
-    const pct = scan.total_vulnerabilities > 0
-      ? Math.round((count / scan.total_vulnerabilities) * 100)
-      : 0;
-    
-    doc.save()
-      .fillColor(color).opacity(0.08)
-      .roundedRect(bx, boxY, boxW, 80, 6).fill()
-      .opacity(1)
-      .strokeColor(color).opacity(0.25).lineWidth(0.5)
-      .roundedRect(bx, boxY, boxW, 80, 6).stroke()
-      .opacity(1)
-      .fillColor(color)
-      .roundedRect(bx, boxY, boxW, 3, 3).fill()
-      .fillColor(color)
-      .fontSize(32).font("Helvetica-Bold")
-      .text(String(count), bx, boxY + 12, { width: boxW, align: "center" })
-      .fillColor(C.textMuted)
-      .fontSize(8.5).font("Helvetica-Bold")
-      .text(sev, bx, boxY + 48, { width: boxW, align: "center", characterSpacing: 0.4 })
-      .fontSize(7.5)
-      .text(`${pct}%`, bx, boxY + 60, { width: boxW, align: "center" })
-      .restore();
+  drawProfessionalCoverPage(doc, {
+    contractName: scan.contract_name,
+    riskScore: scan.risk_score,
+    scanDate: scanDate,
+    scanId: scanId,
+    clientName: "Security Audit Client",
+    auditVersion: "2.0 (Enterprise Edition)",
+    totalIssues: scan.total_vulnerabilities,
+    criticalCount: counts.CRITICAL,
+    highCount: counts.HIGH,
   });
-
-  doc.y = boxY + 96;
-
-  // ── Summary paragraph ─────────────────────────────────────────────────────
-  doc.save()
-    .fillColor(C.textMuted)
-    .fontSize(9).font("Helvetica")
-    .text(scan.summary, MARGIN, doc.y, { width: CONTENT_W, lineGap: 3 })
-    .restore();
-  doc.moveDown(1);
-
-  // ── Full contract hash ────────────────────────────────────────────────────
-  hr(doc);
-  doc.save()
-    .fillColor(C.textMuted).fontSize(7.5).font("Helvetica-Bold")
-    .text("CONTRACT CODE SHA-256", MARGIN, doc.y, { characterSpacing: 0.5 })
-    .restore();
-  doc.moveDown(0.3);
-  doc.save()
-    .fillColor(C.accent).fontSize(8.5).font("Courier")
-    .text(scan.code_hash, MARGIN, doc.y)
-    .restore();
 
   // ════════════════════════════════════════════════════════════════════════════
   // PAGE 2 — TABLE OF CONTENTS
@@ -752,12 +581,19 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
   doc.moveDown(1.2);
 
   const tocItems = [
-    { title: "Executive Summary", page: 2 },
-    { title: "Risk Assessment Matrix", page: 2 },
-    { title: "Vulnerability Details", page: 3 },
-    { title: "Remediation Strategies", page: 3 + Math.ceil(vulns.length / 1.5) },
-    { title: "Security Best Practices", page: 3 + Math.ceil(vulns.length / 1.5) + 1 },
-    { title: "References & Resources", page: 3 + Math.ceil(vulns.length / 1.5) + 2 },
+    { title: "Document Control & Metadata", page: 3 },
+    { title: "Executive Summary", page: 4 },
+    { title: "Risk Assessment Matrix", page: 5 },
+    { title: "Financial Impact Analysis", page: 6 },
+    { title: "Deployment Readiness Checklist", page: 7 },
+    { title: "Compliance Framework Mapping", page: 8 },
+    { title: "Vulnerability Heatmap", page: 9 },
+    { title: "Detailed Vulnerability Findings", page: 10 },
+    { title: "Code Quality Scorecard", page: 11 + Math.ceil(vulns.length / 2) },
+    { title: "Gas Optimization Analysis", page: 12 + Math.ceil(vulns.length / 2) },
+    { title: "Remediation Roadmap & Best Practices", page: 13 + Math.ceil(vulns.length / 2) },
+    { title: "References & Resources", page: 14 + Math.ceil(vulns.length / 2) },
+    { title: "Appendix & Glossary", page: 15 + Math.ceil(vulns.length / 2) },
   ];
 
   tocItems.forEach((item, i) => {
@@ -788,7 +624,66 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
     .restore();
 
   // ════════════════════════════════════════════════════════════════════════════
-  // PAGE 3 — PROFESSIONAL METADATA & DOCUMENT CONTROL
+  // PAGE 3 — PROFESSIONAL METADATA & DOCUMENT CONTROL (REORDERED)
+  // ════════════════════════════════════════════════════════════════════════════
+  addPage("Document Control");
+
+  doc.save()
+    .fillColor(C.textPrimary)
+    .fontSize(18).font("Helvetica-Bold")
+    .text("Document Control & Audit Information", MARGIN, doc.y)
+    .restore();
+  doc.moveDown(0.8);
+
+  drawMetadataPage(doc, {
+    scanId,
+    timestamp: scanDate,
+    contractName: scan.contract_name,
+    classification: "CONFIDENTIAL",
+    clientName: "Client Organization",
+    auditedBy: "VulnGuard AI Security Engine",
+    riskScore: scan.risk_score,
+    version: "2.0 (Enterprise Edition)",
+  });
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // PAGE 4 — EXECUTIVE SUMMARY (HIGH-LEVEL, NOT DASHBOARD)
+  // ════════════════════════════════════════════════════════════════════════════
+  addPage("Executive Summary");
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // PAGE 5 — VULNERABILITY HEATMAP (PROFESSIONAL)
+  // ════════════════════════════════════════════════════════════════════════════
+  addPage("Vulnerability Heatmap");
+  doc.y = 50;
+
+  const findingsForHeatmap = vulns.slice(0, 15).map((v, i) => ({
+    id: i + 1,
+    title: v.title,
+    type: v.type,
+    severity: v.severity,
+    cvss: cvssForSeverity(v.severity).score,
+  }));
+
+  drawVulnerabilityHeatmap(doc, findingsForHeatmap);
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // PAGE 6 — REMEDIATION PROGRESS DASHBOARD (PROFESSIONAL)
+  // ════════════════════════════════════════════════════════════════════════════
+  addPage("Remediation Progress");
+  doc.y = 50;
+
+  drawRemediationProgressDashboard(doc, {
+    currentRisk: scan.risk_score,
+    targetRisk: 85,
+    criticalRemaining: counts.CRITICAL,
+    highRemaining: counts.HIGH,
+    mediumRemaining: counts.MEDIUM,
+    estimatedCompletionDays: Math.ceil(estimatedFixHours / 8),
+  });
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // PAGE 7 — PROFESSIONAL METADATA & DOCUMENT CONTROL
   // ════════════════════════════════════════════════════════════════════════════
   addPage("Document Control");
 
@@ -1222,6 +1117,19 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
     doc.moveDown(0.5);
     hr(doc, undefined, "#cbd5e1");
     doc.moveDown(0.8);
+  });
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // PAGE N — CODE QUALITY SCORECARD (ENTERPRISE FEATURE #10)
+  // ════════════════════════════════════════════════════════════════════════════
+  addPage("Code Quality Scorecard");
+
+  drawCodeQualityScorecard(doc, {
+    codeQualityScore,
+    counts,
+    totalVulns: scan.total_vulnerabilities,
+    analysisTime: scan.analysis_time_ms,
+    codeHash: scan.code_hash,
   });
 
   // ════════════════════════════════════════════════════════════════════════════
@@ -1745,6 +1653,16 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
     .text(`Confidence Level: ${confidenceLevel}%`)
     .text("Professional Grade: YES")
     .restore();
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // PAGE N+1 — PROFESSIONAL APPENDIX & FOOTER (ENTERPRISE FEATURE #12)
+  // ════════════════════════════════════════════════════════════════════════════
+  addPage("Appendix & References");
+
+  drawProfessionalAppendix(doc, {
+    contractName: scan.contract_name,
+    riskScore: scan.risk_score,
+  });
 
   doc.end();
   } catch (err) {
