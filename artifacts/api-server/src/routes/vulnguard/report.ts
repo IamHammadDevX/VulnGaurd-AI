@@ -428,7 +428,10 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
     return;
   }
 
+  const reportScan = scan;
+
   try {
+    const scan = reportScan;
     // Sort vulnerabilities by severity
     const SEV_RANK: Record<string, number> = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3 };
     const vulns = (scan.vulnerabilities as Array<{
@@ -514,7 +517,7 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
     // PDFKit approach: collect pages, add header/footer via pageAdded event
     const totalEstPages = 5 + Math.ceil(vulns.length / 1.5);
 
-    const doc = new PDFDocument({ margin: 0, size: "A4", autoFirstPage: false });
+    const doc = new PDFDocument({ margin: 0, size: "A4", autoFirstPage: false, bufferPages: true });
     const filename = `${scan.contract_name.replace(/[^a-zA-Z0-9]/g, "_")}-audit-report.pdf`;
 
     res.setHeader("Content-Type", "application/pdf");
@@ -532,6 +535,7 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
 
   let currentPage = 0;
   let currentPageTitle = "Cover";
+  const sectionStartPages = new Map<string, number>();
 
   function addPage(title: string) {
     currentPage++;
@@ -544,6 +548,13 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
     doc.y = currentPage === 1 ? MARGIN : 50;
   }
 
+  function startSection(title: string, tocTitle = title) {
+    addPage(title);
+    if (!sectionStartPages.has(tocTitle)) {
+      sectionStartPages.set(tocTitle, currentPage);
+    }
+  }
+
   function ensureSpace(height: number, title: string) {
     if (doc.y + height > PAGE_H - MARGIN - 35) {
       addPage(title);
@@ -554,7 +565,7 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
   // ════════════════════════════════════════════════════════════════════════════
   // PAGE 1 — PROFESSIONAL ENTERPRISE COVER PAGE
   // ════════════════════════════════════════════════════════════════════════════
-  addPage("Cover");
+  startSection("Cover");
 
   drawProfessionalCoverPage(doc, {
     contractName: scan.contract_name,
@@ -567,6 +578,96 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
     criticalCount: counts.CRITICAL,
     highCount: counts.HIGH,
   });
+
+  const reportSections = [
+    { key: "Cover", label: "Cover" },
+    { key: "Table of Contents", label: "TOC" },
+    { key: "Document Control", label: "Document Control" },
+    { key: "Executive Summary", label: "Executive Summary" },
+    { key: "Risk Assessment Matrix", label: "Risk Assessment Matrix" },
+    { key: "Financial Impact", label: "Financial Impact" },
+    { key: "Deployment Readiness", label: "Deployment Readiness" },
+    { key: "Compliance Mapping", label: "Compliance Mapping" },
+    { key: "Vulnerability Heatmap", label: "Vulnerability Heatmap" },
+    { key: "Detailed Findings", label: "Detailed Findings" },
+    { key: "Code Quality Scorecard", label: "Code Quality Scorecard" },
+    { key: "Gas Optimization", label: "Gas Optimization" },
+    { key: "Security Best Practices & Roadmap", label: "Security Best Practices & Roadmap" },
+    { key: "References", label: "References" },
+    { key: "Appendix", label: "Appendix" },
+  ];
+
+  const riskMatrixData = [
+    { impact: "Complete Fund Loss", likelihood: counts.CRITICAL > 0 ? "High" : "Low", severity: "CRITICAL", recommendation: "Fix immediately before any deployment" },
+    { impact: "Partial Fund Loss", likelihood: counts.HIGH > 0 ? "Medium-High" : "Low", severity: "HIGH", recommendation: "Fix before mainnet deployment" },
+    { impact: "Contract Malfunction", likelihood: counts.MEDIUM > 0 ? "Medium" : "Low", severity: "MEDIUM", recommendation: "Fix before production or add monitoring" },
+    { impact: "Minor Issues", likelihood: counts.LOW > 0 ? "Low" : "None", severity: "LOW", recommendation: "Address in future updates" },
+  ];
+
+  const financialMetrics = calculateFinancialMetrics(vulns, scan.risk_score);
+  const deploymentReadiness = calculateDeploymentReadiness(vulns, scan.risk_score);
+  const complianceStatus = calculateComplianceStatus(vulns);
+  const findingsForHeatmap = vulns.slice(0, 15).map((v, i) => ({
+    id: i + 1,
+    title: v.title,
+    type: v.type,
+    severity: v.severity,
+    cvss: cvssForSeverity(v.severity).score,
+  }));
+
+  startSection("Table of Contents");
+  const tocPageIndex = currentPage - 1;
+
+  startSection("Document Control");
+  doc.save()
+    .fillColor(C.textPrimary)
+    .fontSize(18).font("Helvetica-Bold")
+    .text("Document Control & Audit Information", MARGIN, doc.y)
+    .restore();
+  doc.moveDown(0.8);
+  drawMetadataPage(doc, {
+    scanId,
+    timestamp: scanDate,
+    contractName: scan.contract_name,
+    classification: "CONFIDENTIAL",
+    clientName: "Client Organization",
+    auditedBy: "VulnGuard AI Security Engine",
+    riskScore: scan.risk_score,
+    version: "2.0 (Enterprise Edition)",
+  });
+
+  startSection("Executive Summary");
+  doc.y = 50;
+  drawExecutiveSummaryDashboard(doc, {
+    riskScore: scan.risk_score,
+    totalVulns: scan.total_vulnerabilities,
+    counts,
+    fundsAtRisk,
+    auditCostAvoided,
+    estimatedFixHours,
+    confidenceLevel,
+    trendLabel,
+    scanDate: scanDateShort,
+  });
+
+  startSection("Risk Assessment Matrix");
+  doc.y = 50;
+  drawRiskAssessmentDashboard(doc, riskMatrixData);
+
+  startSection("Financial Impact");
+  drawFinancialAnalysis(doc, financialMetrics, scan.risk_score);
+
+  startSection("Deployment Readiness");
+  drawDeploymentChecklist(doc, deploymentReadiness, scan.risk_score);
+
+  startSection("Compliance Mapping");
+  drawComplianceMapping(doc, complianceStatus);
+
+  startSection("Vulnerability Heatmap");
+  doc.y = 50;
+  drawVulnerabilityHeatmap(doc, findingsForHeatmap);
+
+  if (false) {
 
   // ════════════════════════════════════════════════════════════════════════════
   // PAGE 2 — TABLE OF CONTENTS
@@ -921,11 +1022,12 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
   // ════════════════════════════════════════════════════════════════════════════
   // PAGE 3+ — VULNERABILITY DETAILS
   // ════════════════════════════════════════════════════════════════════════════
-  addPage("Vulnerability Details");
+  }
+  startSection("Detailed Findings");
 
   doc.save()
     .fillColor(C.textPrimary).fontSize(18).font("Helvetica-Bold")
-    .text("Vulnerability Details", MARGIN, doc.y)
+    .text("Detailed Findings", MARGIN, doc.y)
     .restore();
   doc.moveDown(0.4);
 
@@ -950,7 +1052,7 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
 
     // If not enough space, add a new page
     if (doc.y > PAGE_H - MARGIN - 200) {
-      addPage("Vulnerability Details");
+      addPage("Detailed Findings");
       doc.y = 55;
     }
 
@@ -1019,7 +1121,7 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
     const bodyW = CONTENT_W - 24;
 
     // Description
-    if (doc.y > PAGE_H - MARGIN - 80) { addPage("Vulnerability Details"); doc.y = 55; }
+    if (doc.y > PAGE_H - MARGIN - 80) { addPage("Detailed Findings"); doc.y = 55; }
     doc.moveDown(0.4);
     sectionLabel(doc, "Description");
     doc.save()
@@ -1030,7 +1132,7 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
 
     // Impact
     if (vuln.impact) {
-      if (doc.y > PAGE_H - MARGIN - 60) { addPage("Vulnerability Details"); doc.y = 55; }
+      if (doc.y > PAGE_H - MARGIN - 60) { addPage("Detailed Findings"); doc.y = 55; }
       sectionLabel(doc, "Potential Impact");
       doc.save()
         .fillColor(sevColor).opacity(0.07)
@@ -1051,7 +1153,7 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
     }
 
     // Technical Risk
-    if (doc.y > PAGE_H - MARGIN - 60) { addPage("Vulnerability Details"); doc.y = 55; }
+    if (doc.y > PAGE_H - MARGIN - 60) { addPage("Detailed Findings"); doc.y = 55; }
     sectionLabel(doc, "Technical Risk");
     doc.save()
       .fillColor(C.textMuted).fontSize(9).font("Helvetica")
@@ -1061,11 +1163,11 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
 
     // Attack Scenario
     if (vuln.attack_scenario) {
-      if (doc.y > PAGE_H - MARGIN - 70) { addPage("Vulnerability Details"); doc.y = 55; }
+      if (doc.y > PAGE_H - MARGIN - 70) { addPage("Detailed Findings"); doc.y = 55; }
       sectionLabel(doc, "Attack Scenario");
       const steps = vuln.attack_scenario.split(/\n|\d+\.\s+/).filter(Boolean);
       steps.forEach((step, si) => {
-        if (doc.y > PAGE_H - MARGIN - 50) { addPage("Vulnerability Details"); doc.y = 55; }
+        if (doc.y > PAGE_H - MARGIN - 50) { addPage("Detailed Findings"); doc.y = 55; }
         doc.save()
           .fillColor(C.CRITICAL).opacity(0.1)
           .circle(bodyX + 7, doc.y + 5, 7).fill()
@@ -1083,7 +1185,7 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
 
     // Gas Impact
     if (vuln.gas_impact) {
-      if (doc.y > PAGE_H - MARGIN - 50) { addPage("Vulnerability Details"); doc.y = 55; }
+      if (doc.y > PAGE_H - MARGIN - 50) { addPage("Detailed Findings"); doc.y = 55; }
       sectionLabel(doc, "Gas Cost Impact");
       doc.save()
         .fillColor("#92400e").fontSize(9).font("Helvetica")
@@ -1093,7 +1195,7 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
     }
 
     // Recommendation
-    if (doc.y > PAGE_H - MARGIN - 60) { addPage("Vulnerability Details"); doc.y = 55; }
+    if (doc.y > PAGE_H - MARGIN - 60) { addPage("Detailed Findings"); doc.y = 55; }
     sectionLabel(doc, "Recommendation");
     doc.save()
       .fillColor(C.accentDark).fontSize(9).font("Helvetica-Bold")
@@ -1122,7 +1224,7 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
   // ════════════════════════════════════════════════════════════════════════════
   // PAGE N — CODE QUALITY SCORECARD (ENTERPRISE FEATURE #10)
   // ════════════════════════════════════════════════════════════════════════════
-  addPage("Code Quality Scorecard");
+  startSection("Code Quality Scorecard");
 
   drawCodeQualityScorecard(doc, {
     codeQualityScore,
@@ -1135,7 +1237,10 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
   // ════════════════════════════════════════════════════════════════════════════
   // FINAL PAGE — SECURITY RECOMMENDATIONS & REMEDIATION ROADMAP
   // ════════════════════════════════════════════════════════════════════════════
-  addPage("Security Best Practices");
+  startSection("Gas Optimization");
+  drawGasOptimizationAnalysis(doc, vulns);
+
+  startSection("Security Best Practices & Roadmap");
 
   doc.save()
     .fillColor(C.textPrimary).fontSize(18).font("Helvetica-Bold")
@@ -1225,7 +1330,7 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
   ];
 
   recommendations.forEach((rec) => {
-    if (doc.y > PAGE_H - MARGIN - 65) { addPage("Security Best Practices"); doc.y = 55; }
+    if (doc.y > PAGE_H - MARGIN - 65) { addPage("Security Best Practices & Roadmap"); doc.y = 55; }
     const ry = doc.y;
     doc.save()
       .fillColor(rec.color)
@@ -1251,7 +1356,7 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
   });
 
   // Remediation Timeline
-  if (doc.y > PAGE_H - MARGIN - 120) { addPage("Security Best Practices"); doc.y = 55; }
+  if (doc.y > PAGE_H - MARGIN - 120) { addPage("Security Best Practices & Roadmap"); doc.y = 55; }
   doc.moveDown(0.5);
   hr(doc);
 
@@ -1269,7 +1374,7 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
   ];
 
   timeline.forEach((t) => {
-    if (doc.y > PAGE_H - MARGIN - 60) { addPage("Security Best Practices"); doc.y = 55; }
+    if (doc.y > PAGE_H - MARGIN - 60) { addPage("Security Best Practices & Roadmap"); doc.y = 55; }
     
     doc.save()
       .fillColor(C.accent).fontSize(9).font("Helvetica-Bold")
@@ -1278,7 +1383,7 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
     doc.moveDown(0.5);
 
     t.items.forEach((item) => {
-      if (doc.y > PAGE_H - MARGIN - 40) { addPage("Security Best Practices"); doc.y = 55; }
+      if (doc.y > PAGE_H - MARGIN - 40) { addPage("Security Best Practices & Roadmap"); doc.y = 55; }
       
       doc.save()
         .fillColor(C.textMuted).fontSize(8).font("Helvetica")
@@ -1291,7 +1396,7 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
   });
 
   // References
-  if (doc.y > PAGE_H - MARGIN - 200) { addPage("References & Resources"); doc.y = 55; }
+  startSection("References");
   doc.moveDown(1);
   hr(doc);
   doc.save()
@@ -1354,7 +1459,7 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
   ];
 
   refCategories.forEach((category) => {
-    if (doc.y > PAGE_H - MARGIN - 80) { addPage("References & Resources"); doc.y = 55; }
+    if (doc.y > PAGE_H - MARGIN - 80) { addPage("References"); doc.y = 55; }
     
     doc.save()
       .fillColor(C.textPrimary).fontSize(10).font("Helvetica-Bold")
@@ -1363,7 +1468,7 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
     doc.moveDown(0.5);
 
     category.refs.forEach((r) => {
-      if (doc.y > PAGE_H - MARGIN - 40) { addPage("References & Resources"); doc.y = 55; }
+      if (doc.y > PAGE_H - MARGIN - 40) { addPage("References"); doc.y = 55; }
       
       doc.save()
         .fillColor(C.accent).fontSize(8.5).font("Helvetica")
@@ -1379,7 +1484,7 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
   });
 
   // Disclaimer
-  if (doc.y > PAGE_H - MARGIN - 80) { addPage("References & Resources"); doc.y = 55; }
+  if (doc.y > PAGE_H - MARGIN - 80) { addPage("References"); doc.y = 55; }
   doc.moveDown(0.5);
   hr(doc);
   doc.save()
@@ -1397,7 +1502,7 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
   // ════════════════════════════════════════════════════════════════════════════
   // ENTERPRISE ADDENDUM — 12/12 FEATURE IMPLEMENTATION
   // ════════════════════════════════════════════════════════════════════════════
-  addPage("Enterprise Addendum");
+  startSection("Appendix");
 
   doc.save()
     .fillColor(C.textPrimary).fontSize(17).font("Helvetica-Bold")
@@ -1657,12 +1762,58 @@ router.get("/report/:scanId", reportLimiter, async (req, res) => {
   // ════════════════════════════════════════════════════════════════════════════
   // PAGE N+1 — PROFESSIONAL APPENDIX & FOOTER (ENTERPRISE FEATURE #12)
   // ════════════════════════════════════════════════════════════════════════════
-  addPage("Appendix & References");
+  addPage("Appendix");
 
   drawProfessionalAppendix(doc, {
     contractName: scan.contract_name,
     riskScore: scan.risk_score,
   });
+
+  doc.switchToPage(tocPageIndex);
+
+  doc.save()
+    .fillColor(C.white)
+    .rect(0, 36, PAGE_W, PAGE_H - 72)
+    .fill()
+    .restore();
+
+  doc.save()
+    .fillColor(C.textPrimary)
+    .fontSize(18).font("Helvetica-Bold")
+    .text("Table of Contents", MARGIN, 56)
+    .restore();
+
+  doc.save()
+    .fillColor(C.textMuted)
+    .fontSize(8.5).font("Helvetica")
+    .text("Enterprise smart contract audit flow aligned to cover, navigation, executive summary, governance, and technical annex ordering.", MARGIN, 82, { width: CONTENT_W, lineGap: 2 })
+    .restore();
+
+  let tocY = 122;
+  reportSections.forEach((section, index) => {
+    const page = sectionStartPages.get(section.key) ?? 0;
+    doc.save()
+      .fillColor(C.accent).fontSize(10).font("Helvetica-Bold")
+      .text(`${index + 1}. ${section.label}`, MARGIN, tocY)
+      .fillColor(C.borderLight)
+      .fontSize(9)
+      .text("................................................................", MARGIN + 220, tocY)
+      .fillColor(C.textMuted)
+      .fontSize(9).font("Helvetica")
+      .text(String(page), PAGE_W - MARGIN - 32, tocY, { width: 32, align: "right" })
+      .restore();
+    tocY += 24;
+  });
+
+  doc.save()
+    .fillColor(C.blue).opacity(0.08)
+    .roundedRect(MARGIN, 540, CONTENT_W, 92, 6).fill()
+    .opacity(1)
+    .fillColor(C.textPrimary).fontSize(9).font("Helvetica-Bold")
+    .text("About This Audit", MARGIN + 12, 552)
+    .fillColor(C.textMuted).fontSize(8.5).font("Helvetica")
+    .text("This automated report follows enterprise audit ordering: cover, contents, executive decision pages first, operational readiness pages next, and technical annex material at the end.", MARGIN + 12, 570, { width: CONTENT_W - 24, lineGap: 2 })
+    .restore();
 
   doc.end();
   } catch (err) {
