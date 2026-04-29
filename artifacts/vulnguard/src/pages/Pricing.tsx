@@ -79,6 +79,14 @@ export default function Pricing() {
         </div>
       )}
 
+      {/* Free Tool Alert Badge */}
+      <div className="mb-6 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-amber-700 dark:text-amber-300">
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-5 w-5" />
+          <strong>Currently Free:</strong> Login and use without payment - no payment integration implemented yet
+        </div>
+      </div>
+
       <Panel title="Choose your plan" description="Every tier ships with full light and dark theme support, enterprise-grade reliability, and modern reporting.">
         {/* Billing Cycle Toggle */}
         <div className="mb-8 flex items-center justify-center gap-4">
