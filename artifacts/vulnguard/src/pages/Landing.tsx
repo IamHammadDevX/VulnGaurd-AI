@@ -45,17 +45,32 @@ const LIVE_FINDINGS = [
   { type: "Unchecked Return", severity: "Medium", accent: "text-zinc-200 bg-white/[0.04] border-zinc-700", detail: "Transfer result is not verified before continuation" },
 ];
 
+const VULNERABILITY_CLASSES = [
+  "Reentrancy",
+  "Access Control",
+  "Integer Overflow/Underflow",
+  "Unchecked External Calls",
+  "Flash Loan Price Manipulation",
+  "Timestamp Dependence",
+  "Front-Running / TOD",
+  "Unprotected Self-Destruct",
+  "Denial of Service",
+  "Bad Randomness",
+  "Oracle Manipulation",
+  "Gas Limit Issues",
+];
+
 export default function Landing() {
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [runDemo, setRunDemo] = useState(false);
 
   useEffect(() => {
-    document.title = "Smart Contract Vulnerability Scanner | VulnGuard AI";
+    document.title = "AI Solidity Vulnerability Scanner | VulnGuard AI";
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
       metaDescription.setAttribute(
         "content",
-        "VulnGuard AI is an AI-powered smart contract vulnerability scanner for Solidity. Detect 36+ vulnerability types, get AI fix suggestions, and generate audit reports in minutes.",
+        "VulnGuard AI is an AI-powered Solidity smart contract vulnerability scanner. Detect reentrancy, access control, integer overflow, and 36+ other vulnerability classes in under 60 seconds, then get AI-generated fixes and an audit-ready PDF report.",
       );
     }
 
@@ -65,7 +80,7 @@ export default function Landing() {
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
       name: "VulnGuard AI",
-      description: "AI-powered smart contract vulnerability scanner for Solidity smart contract security analysis and Web3 blockchain security.",
+      description: "AI-powered Solidity smart contract vulnerability scanner combining deterministic SWC-registry pattern analysis with AI reasoning to detect reentrancy, access control, integer overflow, oracle manipulation, and other DeFi security risks.",
       applicationCategory: "DeveloperApplication",
       url: "https://thevulnguardai.tech",
       aggregateRating: {
@@ -80,11 +95,11 @@ export default function Landing() {
       },
       softwareVersion: "1.0",
       featureList: [
-        "Detect 36+ vulnerability types",
-        "AI-powered fix suggestions",
+        "Detect 36+ vulnerability classes mapped to the SWC registry",
+        "AI-generated fix suggestions with plain-English explanations",
         "PDF audit report generation",
-        "GitHub CI/CD integration",
-        "Team collaboration tools",
+        "Real-time scan streaming via SSE",
+        "Team workspaces with role-based access",
       ],
     });
     document.head.appendChild(script);
@@ -98,12 +113,10 @@ export default function Landing() {
 
   return (
     <MarketingShell
-      eyebrow="Web3 Security Platform"
-      title="Deep-security UX for smart contract teams that ship under pressure"
-      subtitle="VulnGuard AI combines deterministic analysis, AI reasoning, and enterprise-grade reporting in a single security workspace designed like a premium product."
+      eyebrow="AI Smart Contract Security Scanner"
+      title="AI-powered vulnerability scanning for Solidity smart contracts"
+      subtitle="Smart contract exploits are still the leading cause of losses in Web3 — and plenty of those contracts had already passed a manual review. VulnGuard AI pairs deterministic SWC-registry checks with AI reasoning to catch reentrancy, access-control, and logic bugs that audits and single-purpose scanners miss, then hands you a fix and an audit-ready report in under 60 seconds — no audit queue required."
     >
-      <h1 className="sr-only">Smart Contract Vulnerability Scanner - AI-Powered Web3 Security Tool</h1>
-
       <StatsStrip
         stats={[
           { label: "Vulnerabilities surfaced", value: "2M+" },
@@ -123,13 +136,13 @@ export default function Landing() {
           <div className="grid gap-8 lg:grid-cols-[1fr_0.9fr]">
             <div className="space-y-5">
               <span className="inline-flex rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-emerald-300">
-                Skiper-style command surface
+                Live AI scan engine
               </span>
               <h2 className="text-3xl font-semibold tracking-tight text-zinc-50 sm:text-4xl">
-                Turn raw contract code into an executive security signal.
+                From pasted Solidity to a prioritized vulnerability report — in under 60 seconds.
               </h2>
               <p className="text-base leading-7 text-zinc-400">
-                The landing experience now mirrors the product: dark, deliberate, and built around clear vulnerability signal. Show teams risk, remediation, and proof of velocity in one screen.
+                Paste your contract or drag in a .sol file. VulnGuard AI runs deterministic SWC pattern checks alongside an AI model that reasons about business logic, then returns a CRITICAL → LOW ranked list with exploit context and ready-to-use fixed code.
               </p>
               <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <Link
@@ -148,9 +161,9 @@ export default function Landing() {
               </div>
               <div className="grid gap-3 sm:grid-cols-3">
                 {[
-                  { label: "Signal clarity", value: "Agency-grade" },
-                  { label: "Scan delivery", value: "Live streamed" },
-                  { label: "Report export", value: "Audit ready" },
+                  { label: "Detection coverage", value: "36+ SWC classes" },
+                  { label: "Scan speed", value: "< 60 seconds" },
+                  { label: "Report output", value: "PDF + AI fixes" },
                 ].map((item) => (
                   <div key={item.label} className="rounded-2xl border border-zinc-800 bg-white/[0.03] p-4">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">{item.label}</p>
@@ -229,14 +242,14 @@ export default function Landing() {
         </motion.div>
 
         <Panel
-          title="Security leadership signal, not just scan output"
-          description="Every surface is now optimized to present risk with more confidence, less clutter, and clearer next actions."
+          title="Built to close the gap manual audits leave open"
+          description="A scanner can't replace a full audit — but it can give you continuous coverage between them, instead of shipping blind for weeks at a time."
         >
           <div className="space-y-4">
             {[
-              { icon: <ShieldAlert className="h-5 w-5 text-rose-300" />, title: "Critical-first prioritization", text: "Rose, amber, and emerald accents establish immediate vulnerability hierarchy." },
-              { icon: <Workflow className="h-5 w-5 text-emerald-300" />, title: "Consistent motion system", text: "Entrance animations and elastic hovers make the product feel premium without becoming noisy." },
-              { icon: <FileCheck2 className="h-5 w-5 text-zinc-100" />, title: "Report-friendly clarity", text: "Cards, metrics, and summaries are arranged to read like a polished security narrative." },
+              { icon: <ShieldAlert className="h-5 w-5 text-rose-300" />, title: "Seconds, not an audit queue", text: "Get a full vulnerability breakdown the moment you paste your contract — no booking a slot and waiting weeks for a manual review to start." },
+              { icon: <Workflow className="h-5 w-5 text-emerald-300" />, title: "AI reasoning, not just pattern-matching", text: "Deterministic SWC checks catch known issue patterns. AI reasoning on top of that catches business-logic and cross-function bugs single-purpose static analyzers typically miss." },
+              { icon: <FileCheck2 className="h-5 w-5 text-zinc-100" />, title: "One workspace, not five tools", text: "Scanning, AI fix generation, severity scoring, and audit-ready PDF export live in one place — not stitched together from separate tools and spreadsheets." },
             ].map((item) => (
               <div key={item.title} className="rounded-2xl border border-zinc-800 bg-white/[0.03] p-4">
                 <div className="mb-3 inline-flex rounded-2xl border border-zinc-800 bg-zinc-950 p-2">{item.icon}</div>
@@ -248,15 +261,35 @@ export default function Landing() {
         </Panel>
       </section>
 
+      <div className="mt-8 overflow-hidden rounded-[28px] border border-zinc-800/80 bg-white/[0.03] py-5">
+        <p className="px-6 text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">
+          36+ vulnerability classes detected, mapped to the SWC registry
+        </p>
+        <motion.div
+          className="mt-4 flex w-max gap-3 px-6"
+          animate={{ x: ["0%", "-50%"] }}
+          transition={{ duration: 32, repeat: Infinity, ease: "linear" }}
+        >
+          {[...VULNERABILITY_CLASSES, ...VULNERABILITY_CLASSES].map((label, index) => (
+            <span
+              key={`${label}-${index}`}
+              className="shrink-0 rounded-full border border-zinc-800 bg-zinc-950/80 px-4 py-2 text-sm font-medium text-zinc-300"
+            >
+              {label}
+            </span>
+          ))}
+        </motion.div>
+      </div>
+
       <div className="mt-8">
         <FeatureGrid
           features={[
-            { title: "AI fix intelligence", description: "Generate clear remediation suggestions with higher-trust structure and better readability for engineers.", icon: <Bot className="h-5 w-5" /> },
-            { title: "Security dashboards", description: "Translate complex posture data into animated cards and trend surfaces your team can act on quickly.", icon: <TrendingUp className="h-5 w-5" /> },
-            { title: "Team governance", description: "Move from solo scans to team operations without losing the speed and clarity of the product surface.", icon: <Building2 className="h-5 w-5" /> },
-            { title: "Rapid scan loops", description: "Keep scan initiation, progress, and results inside one responsive interface with clear status states.", icon: <TimerReset className="h-5 w-5" /> },
-            { title: "Policy-ready reporting", description: "Give stakeholders exportable evidence and structured summaries without leaving the platform.", icon: <FileCheck2 className="h-5 w-5" /> },
-            { title: "Always-on motion polish", description: "Skiper-inspired transitions make the entire experience feel intentional instead of template-driven.", icon: <Sparkles className="h-5 w-5" /> },
+            { title: "AI fix intelligence", description: "For every finding, get AI-generated remediation code and a plain-English explanation of the exploit — not just a line number and a severity tag.", icon: <Bot className="h-5 w-5" /> },
+            { title: "Security dashboards", description: "Track risk score, scan history, and vulnerability trends across every contract your team has scanned, in one place.", icon: <TrendingUp className="h-5 w-5" /> },
+            { title: "Team governance", description: "Invite your team with admin, editor, or viewer roles, and share scan history across one workspace instead of local results.", icon: <Building2 className="h-5 w-5" /> },
+            { title: "Rapid scan loops", description: "Re-scan after every fix with live streaming results — built for teams shipping between release windows, not annual audit cycles.", icon: <TimerReset className="h-5 w-5" /> },
+            { title: "Policy-ready reporting", description: "Export a polished PDF audit report with severity breakdown and per-finding detail your stakeholders can read without translation.", icon: <FileCheck2 className="h-5 w-5" /> },
+            { title: "Drag-and-drop contract upload", description: "Drop in a .sol file or paste code directly into the Monaco-powered editor with full Solidity syntax highlighting.", icon: <Sparkles className="h-5 w-5" /> },
           ]}
         />
       </div>
@@ -268,10 +301,10 @@ export default function Landing() {
         >
           <div className="space-y-4">
             {[
-              { step: "01", title: "Upload or paste your contract", text: "Start with a clean editor surface that prioritizes focus and code readability." },
-              { step: "02", title: "Watch scan progress live", text: "Dynamic status states communicate analysis, risk scoring, and issue discovery in real time." },
-              { step: "03", title: "Review fix-ready findings", text: "Each vulnerability is grouped into high-signal cards with better emphasis on severity and impact." },
-              { step: "04", title: "Export and share", text: "Move from detection to audit evidence with reporting that looks polished enough for stakeholders." },
+              { step: "01", title: "Upload or paste your contract", text: "Paste Solidity directly or drag in a .sol file — the Monaco-powered editor highlights syntax as you go." },
+              { step: "02", title: "Watch scan progress live", text: "Deterministic SWC checks and AI reasoning run together, streaming status updates in real time." },
+              { step: "03", title: "Review fix-ready findings", text: "Each vulnerability is ranked CRITICAL to LOW with exploit context, vulnerable code, and an AI-generated fix side by side." },
+              { step: "04", title: "Export and share", text: "Download a polished PDF audit report, or keep results in your team dashboard for the next release." },
             ].map((item) => (
               <div key={item.step} className="flex flex-col gap-4 rounded-2xl border border-zinc-800 bg-white/[0.03] p-4 sm:flex-row">
                 <div className="grid h-12 w-12 place-items-center rounded-2xl border border-zinc-800 bg-zinc-950 text-sm font-semibold text-zinc-100">
@@ -287,15 +320,15 @@ export default function Landing() {
         </Panel>
 
         <Panel
-          title="Built for teams operating in release windows"
-          description="The aesthetic is calmer, but the product signal is sharper. Risk, progress, and action paths stay visible at every step."
+          title="Built for teams that ship between audits"
+          description="Most teams can't get a manual audit slot before every release. VulnGuard AI gives you continuous coverage in between, without replacing the rigor of a full audit when you need one."
         >
           <div className="grid gap-4 sm:grid-cols-2">
             {[
-              { icon: <Activity className="h-5 w-5 text-emerald-300" />, title: "Live vulnerability telemetry" },
-              { icon: <Workflow className="h-5 w-5 text-zinc-100" />, title: "Team-friendly navigation" },
-              { icon: <Zap className="h-5 w-5 text-amber-300" />, title: "Rapid scan launch loops" },
-              { icon: <ShieldCheck className="h-5 w-5 text-emerald-300" />, title: "Calm, trusted dark theme" },
+              { icon: <Activity className="h-5 w-5 text-emerald-300" />, title: "Real-time scan streaming" },
+              { icon: <Workflow className="h-5 w-5 text-zinc-100" />, title: "Shared team workspace" },
+              { icon: <Zap className="h-5 w-5 text-amber-300" />, title: "Re-scan in seconds" },
+              { icon: <ShieldCheck className="h-5 w-5 text-emerald-300" />, title: "Free scans to start" },
             ].map((item) => (
               <div key={item.title} className="rounded-2xl border border-zinc-800 bg-white/[0.03] p-5">
                 <div className="mb-3 inline-flex rounded-2xl border border-zinc-800 bg-zinc-950 p-2">{item.icon}</div>
@@ -308,8 +341,8 @@ export default function Landing() {
 
       <div className="mt-8">
         <Panel
-          title="Trusted by fast-moving builders who still care about polish"
-          description="The product story now feels as premium as the scanning capability behind it."
+          title="What builders say after adding VulnGuard AI to their workflow"
+          description="Real feedback from teams running VulnGuard AI alongside their usual security process."
         >
           <div className="rounded-[28px] border border-zinc-800 bg-white/[0.03] p-5">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -356,19 +389,19 @@ export default function Landing() {
 
       <div className="mt-8">
         <Panel
-          title="Upgrade the way your security product feels"
-          description="The scanner, dashboard, auth, and support experiences now share one dark visual language with stronger motion, better hierarchy, and more credible polish."
+          title="Stop shipping blind between audit cycles."
+          description="Run your first AI-powered Solidity vulnerability scan free — get a prioritized, fix-ready report in under 60 seconds."
         >
           <div className="flex flex-col gap-4 rounded-[28px] border border-zinc-800 bg-white/[0.03] p-6 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
-              <p className="text-xl font-semibold text-zinc-50">Run your first scan in the redesigned workspace.</p>
-              <p className="mt-2 text-sm leading-6 text-zinc-400">See the new dashboard, live status island, animated cards, and unified navigation system in action.</p>
+              <p className="text-xl font-semibold text-zinc-50">See your first vulnerability report in under 60 seconds.</p>
+              <p className="mt-2 text-sm leading-6 text-zinc-400">Paste a contract, watch the AI and SWC checks run live, and export an audit-ready PDF — free to start.</p>
             </div>
             <Link
               href="/signup"
               className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/14 px-5 py-3 text-sm font-semibold text-emerald-200 transition-all duration-300 hover:-translate-y-0.5 hover:bg-emerald-500/18 sm:w-auto"
             >
-              Start free
+              Start free scan
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
